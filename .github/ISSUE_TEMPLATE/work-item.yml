@@ -1,0 +1,20 @@
+name: Work item
+description: Capture a bug, improvement, or research question worth keeping.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or question
+      description: Include reproduction steps or an example when useful.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Useful outcome
+      description: What observable result would count as done?
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and constraints
+      description: Relevant tests, references, tradeoffs, or limits.
