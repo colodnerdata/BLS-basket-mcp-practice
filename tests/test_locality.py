@@ -4,7 +4,6 @@ from bls_escalation_mcp.exceptions import CalculationError
 from bls_escalation_mcp.models.locality import LaborLocalityInput
 from bls_escalation_mcp.services.locality import LocalityService
 
-
 service = LocalityService()
 
 

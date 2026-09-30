@@ -10,8 +10,16 @@ def test_json_serialization_round_trip() -> None:
     spec = EscalationIndexSpec(
         id="spec-1",
         name="Test spec",
-        base_period=EconomicPeriod(year=2024, month=1, periodicity=Periodicity.MONTHLY),
-        target_period=EconomicPeriod(year=2025, month=1, periodicity=Periodicity.MONTHLY),
+        base_period=EconomicPeriod(
+            year=2024,
+            month=1,
+            periodicity=Periodicity.MONTHLY,
+        ),
+        target_period=EconomicPeriod(
+            year=2025,
+            month=1,
+            periodicity=Periodicity.MONTHLY,
+        ),
         components=[
             EscalationComponent(
                 id="component-1",

@@ -1,11 +1,8 @@
-import pytest
-
 from bls_escalation_mcp.models.basket import EscalationComponent
-from bls_escalation_mcp.models.enums import ComponentType, Periodicity, ValidationSeverity, WeightSource
+from bls_escalation_mcp.models.enums import ComponentType, Periodicity
 from bls_escalation_mcp.models.periods import EconomicPeriod
 from bls_escalation_mcp.models.specifications import EscalationIndexSpec
 from bls_escalation_mcp.services.validation import ValidationService
-
 
 service = ValidationService()
 
@@ -14,8 +11,16 @@ def _spec() -> EscalationIndexSpec:
     return EscalationIndexSpec(
         id="spec-1",
         name="Valid basket",
-        base_period=EconomicPeriod(year=2024, month=1, periodicity=Periodicity.MONTHLY),
-        target_period=EconomicPeriod(year=2025, month=1, periodicity=Periodicity.MONTHLY),
+        base_period=EconomicPeriod(
+            year=2024,
+            month=1,
+            periodicity=Periodicity.MONTHLY,
+        ),
+        target_period=EconomicPeriod(
+            year=2025,
+            month=1,
+            periodicity=Periodicity.MONTHLY,
+        ),
         components=[
             EscalationComponent(
                 id="labour",
@@ -80,4 +85,6 @@ def test_material_component_locality_warning() -> None:
     spec = _spec()
     spec.components[1].locality_adjustment_enabled = True
     result = service.validate_spec(spec)
-    assert any(f.code == "LOCALITY_ON_MATERIAL_OR_EQUIPMENT" for f in result.findings)
+    assert any(
+        f.code == "LOCALITY_ON_MATERIAL_OR_EQUIPMENT" for f in result.findings
+    )
