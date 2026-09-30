@@ -1,0 +1,57 @@
+from __future__ import annotations
+
+from enum import StrEnum
+
+
+class BLSProgram(StrEnum):
+    PPI = "PPI"
+    ECI = "ECI"
+    OEWS = "OEWS"
+
+
+class ComponentType(StrEnum):
+    MATERIAL = "MATERIAL"
+    EQUIPMENT = "EQUIPMENT"
+    LABOR = "LABOR"
+    SERVICE = "SERVICE"
+    SUBCONTRACT = "SUBCONTRACT"
+    ENERGY = "ENERGY"
+    TRANSPORTATION = "TRANSPORTATION"
+    FIXED_UNINDEXED = "FIXED_UNINDEXED"
+    OTHER = "OTHER"
+
+
+class Periodicity(StrEnum):
+    MONTHLY = "MONTHLY"
+    QUARTERLY = "QUARTERLY"
+    ANNUAL = "ANNUAL"
+    ANNUAL_AVERAGE = "ANNUAL_AVERAGE"
+
+
+class ValidationSeverity(StrEnum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+
+class MatchType(StrEnum):
+    DIRECT = "DIRECT"
+    PROXY = "PROXY"
+    UNKNOWN = "UNKNOWN"
+
+
+class WeightSource(StrEnum):
+    USER_PROVIDED = "USER_PROVIDED"
+    ESTIMATE_BREAKDOWN = "ESTIMATE_BREAKDOWN"
+    HISTORICAL_PROJECT = "HISTORICAL_PROJECT"
+    EXTERNAL_BENCHMARK = "EXTERNAL_BENCHMARK"
+    MODEL_ESTIMATED = "MODEL_ESTIMATED"
+    EQUAL_WEIGHT_ASSUMPTION = "EQUAL_WEIGHT_ASSUMPTION"
+    UNKNOWN = "UNKNOWN"
+
+
+class ObservationPolicy(StrEnum):
+    EXACT = "EXACT"
+    PREVIOUS_AVAILABLE = "PREVIOUS_AVAILABLE"
+    LATEST_AVAILABLE = "LATEST_AVAILABLE"
+    FINAL_ONLY = "FINAL_ONLY"
