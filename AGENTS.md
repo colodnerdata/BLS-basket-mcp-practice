@@ -28,6 +28,11 @@ Tool-specific entry points should reference it instead of copying its rules.
 - Add tests for changed behavior and regression risks. Prefer invariants,
   small explicit cases, and independent expected results to implementation
   snapshots. Formatting-only or prose edits do not need new tests.
+- Whenever a test is added, removed, or its intent changes, update
+  `docs/TESTING.md` in the same change. It is the single human-readable
+  record of what each test guards against, and of evals status, for anyone
+  who isn't reading the test code. Group trivial/parametrized variants under
+  one entry instead of listing every case.
 - For generated deliverables, rebuild first and inspect the newly generated
   output. A check of an old artifact is not evidence about the new code.
 - Report exactly what ran, what passed, and what could not run. Mocks and
