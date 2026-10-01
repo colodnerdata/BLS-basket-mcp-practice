@@ -9,10 +9,14 @@ from bls_escalation_mcp.models.calculations import (
     EscalationCalculationResult,
 )
 from bls_escalation_mcp.models.enums import ComponentType
+from bls_escalation_mcp.models.specifications import EscalationIndexSpec
 
 
 class EscalationCalculationService:
     """Deterministic calculation service for fixed-weight index."""
+
+    def __init__(self, weight_tolerance: float = 1e-4) -> None:
+        self.weight_tolerance = weight_tolerance
 
     def calculate_component(
         self,
@@ -56,7 +60,7 @@ class EscalationCalculationService:
 
     def calculate_composite(
         self,
-        spec,
+        spec: EscalationIndexSpec,
         component_values: list[ComponentCalculation],
     ) -> EscalationCalculationResult:
         if not component_values:
@@ -66,7 +70,7 @@ class EscalationCalculationService:
             )
 
         total_weight = sum(item.weight for item in component_values)
-        tolerance = 1e-4
+        tolerance = self.weight_tolerance
         if abs(total_weight - 1.0) > tolerance:
             raise InvalidWeightsError(
                 "Component weights must sum to 1 within tolerance; "

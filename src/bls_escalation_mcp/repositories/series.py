@@ -76,7 +76,7 @@ class SeriesRepository:
                     units, first_period, latest_period, active, source_url,
                     payload
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )
                 ON CONFLICT(series_id) DO UPDATE SET
                     program = excluded.program,

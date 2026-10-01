@@ -79,7 +79,34 @@ class EconomicPeriod(BaseModel):
             and self.quarter is not None
         ):
             return f"{self.year}-Q{self.quarter}"
+        if self.periodicity == Periodicity.ANNUAL_AVERAGE:
+            return f"{self.year}-M13"
         return str(self.year)
+
+    @classmethod
+    def from_storage(cls, value: str) -> EconomicPeriod:
+        """Decode stored periods, preserving their month/quarter identity."""
+        parts = value.split("-")
+        if len(parts) == 1:
+            return cls(year=int(value), periodicity=Periodicity.ANNUAL)
+        if len(parts) != 2:
+            raise ValueError(f"Invalid stored period: {value}")
+        year, code = parts
+        if code == "M13":
+            return cls(year=int(year), periodicity=Periodicity.ANNUAL_AVERAGE)
+        if code.startswith("M"):
+            return cls(
+                year=int(year),
+                month=int(code[1:]),
+                periodicity=Periodicity.MONTHLY,
+            )
+        if code.startswith("Q"):
+            return cls(
+                year=int(year),
+                quarter=int(code[1:]),
+                periodicity=Periodicity.QUARTERLY,
+            )
+        raise ValueError(f"Invalid stored period: {value}")
 
     def __lt__(self, other: object) -> bool:
         if not isinstance(other, EconomicPeriod):

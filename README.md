@@ -60,7 +60,9 @@ Implemented for this scaffold:
 - SQLite-backed series repository and simple catalogue search
 - minimal BLS client for known series IDs
 - FastMCP server exposing implemented discovery, validation, calculation, locality, specification, and observation tools
-- documentation and example tests
+- client integration tests for all tools/resources, JSON schemas, and lifecycle
+- mypy, lint, formatting, and tests in the standard `poe check` task
+- documentation and deterministic fixture tests
 
 Still intentionally scaffolded or deferred:
 
@@ -82,7 +84,9 @@ uv run --locked poe check
 Run the server locally:
 
 ```bash
-uv run python -m bls_escalation_mcp.server
+uv run --locked fastmcp run fastmcp.json
+# Equivalent module launch:
+uv run --locked python -m bls_escalation_mcp.server
 ```
 
 Set environment variables such as:
@@ -99,3 +103,4 @@ The project reads settings from environment variables using pydantic-settings. S
 ## License
 
 This repository does not yet declare a project license; update before public reuse.
+

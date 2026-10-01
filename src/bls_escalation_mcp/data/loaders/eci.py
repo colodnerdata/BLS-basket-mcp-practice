@@ -14,4 +14,4 @@ class ECILoader:
         return 0
 
     def parse_metadata(self, records: list[dict]) -> list[SeriesMetadata]:
-        return [SeriesMetadata(series_id="", program=None, title="")]
+        return []

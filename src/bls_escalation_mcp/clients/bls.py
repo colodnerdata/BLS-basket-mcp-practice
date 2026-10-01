@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 import httpx
@@ -26,11 +27,6 @@ class BLSClient:
         self.timeout = timeout
         self._http_client = http_client
 
-    async def _get_client(self) -> httpx.AsyncClient:
-        if self._http_client is None:
-            self._http_client = httpx.AsyncClient(timeout=self.timeout)
-        return self._http_client
-
     async def get_series_observations(
         self,
         series_ids: list[str],
@@ -39,8 +35,25 @@ class BLSClient:
     ) -> list[Observation]:
         if not series_ids:
             return []
-        client = await self._get_client()
-        payload = {
+        if self._http_client is not None:
+            return await self._request_observations(
+                self._http_client, series_ids, start_year, end_year
+            )
+        # Standalone callers get a bounded client lifetime too.
+        # Injected clients are owned by their caller.
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            return await self._request_observations(
+                client, series_ids, start_year, end_year
+            )
+
+    async def _request_observations(
+        self,
+        client: httpx.AsyncClient,
+        series_ids: list[str],
+        start_year: int,
+        end_year: int,
+    ) -> list[Observation]:
+        payload: dict[str, Any] = {
             "seriesid": list(series_ids),
             "startyear": str(start_year),
             "endyear": str(end_year),
@@ -55,13 +68,12 @@ class BLSClient:
             )
         except httpx.HTTPError as exc:  # pragma: no cover
             raise BLSAPIError(
-                f"Error retrieving BLS series observations: {exc}"
+                "Error retrieving BLS series observations."
             ) from exc
 
         if response.status_code >= 400:
             raise BLSAPIError(
-                "BLS API request failed with status "
-                f"{response.status_code}: {response.text}"
+                f"BLS API request failed with status {response.status_code}."
             )
 
         try:
@@ -71,7 +83,7 @@ class BLSClient:
 
         if data.get("status") == "REQUEST_ERROR":
             message = data.get("message", "BLS API request error")
-            raise BLSAPIError(message)
+            raise BLSAPIError(str(message))
 
         parsed = self.parse_response(data)
         if not parsed:
@@ -115,16 +127,30 @@ class BLSClient:
                 except ValueError:
                     continue
                 value = item.get("value")
+                try:
+                    numeric_value = Decimal(str(value))
+                    if not numeric_value.is_finite():
+                        raise ValueError("non-finite value")
+                except (InvalidOperation, TypeError, ValueError) as exc:
+                    raise BLSAPIError(
+                        f"Missing or non-numeric observation for {series_id} "
+                        f"at {period}."
+                    ) from exc
+                footnotes = [
+                    note["text"]
+                    for note in (item.get("footnotes") or [])
+                    if isinstance(note, dict) and note.get("text")
+                ]
                 observations.append(
                     Observation(
                         series_id=series_id,
                         period=period,
-                        value=float(value) if value not in (None, "") else 0.0,
+                        value=numeric_value,
                         units=item.get("units", "index"),
                         retrieved_at=datetime.now(UTC),
                         source="BLS",
-                        is_preliminary=item.get("footnotes") is not None,
-                        footnotes=item.get("footnotes", []),
+                        is_preliminary=None,
+                        footnotes=footnotes,
                     )
                 )
         return observations

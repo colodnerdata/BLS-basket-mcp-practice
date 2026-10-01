@@ -18,4 +18,45 @@ design change.
 - **Why:** the tradeoff and important alternative.
 - **Revisit when:** evidence or a changed condition that would alter the choice.
 
-No project-specific decisions have been recorded yet.
+
+
+## 2026-09-30 — FastMCP 3.2 contracts and lifecycle
+
+- **Status:** accepted.
+- **Context:** The scaffold allowed FastMCP 2.14.7 despite PR #1's claimed
+  upgrade; untyped inputs and a registration-only test missed JSON boundary
+  failures and broken catalogue persistence.
+- **Decision:** Support `fastmcp>=3.2.0,<3.3`, with 3.2.4 resolved in `uv.lock`.
+  Keep explicit per-module registration functions, typed decorated adapters,
+  and the server factory. FastMCP generates contracts from Pydantic models.
+  Use its supported async-context-manager lifespan and `Context` injection
+  to create services after startup and close the shared HTTP client on exit.
+  Keep SQLite connections local to repository operations. No FastAPI layer.
+- **Why:** A minor-version bound limits unreviewed API drift while the lockfile
+  makes installation reproducible. Global services and per-handler database
+  initialization hide configuration and cleanup ownership. FastMCP context
+  keeps dependencies out of the public schema and allows isolated servers.
+- **Errors:** Expected domain failures become `ToolError`; validation findings
+  remain structured output. Unexpected errors are masked. Missing/empty or
+  non-finite BLS values raise a domain error; real zero values remain zero.
+  Preserve footnote text; preliminary status stays unknown until an
+  authoritative program-specific flag mapping is implemented.
+- **Save semantics:** Existing IDs are overwritten and `updated_at` changes;
+  hints are non-read-only, destructive, non-idempotent, closed-world.
+- **Verification:** Client tests exercise all ten tools and three resources,
+  generated schemas, JSON deserialization, hand-calculated composites,
+  save/read/overwrite, fresh database startup and shutdown after failure.
+  Mypy is included in the same `poe check` task used by CI.
+- **Revisit when:** A reviewed dependency upgrade changes contracts/lifecycle,
+  or production ingestion needs explicit retries, vintages, and migrations.
+- **Official references:** [Tools](https://gofastmcp.com/servers/tools),
+  [Lifespans](https://gofastmcp.com/servers/lifespan),
+  [Client testing](https://gofastmcp.com/servers/testing),
+  [Project configuration](https://gofastmcp.com/deployment/server-configuration).
+  APIs were also checked against installed FastMCP 3.2.4.
+
+Observation values stay Decimal internally and serialize as decimal strings
+with a plain string output schema. This preserves exact text while avoiding
+Pydantic Decimal regexes that the FastMCP 3.2.4 client cannot reconstruct.
+Series resources return explicit `ResourceResult`/`ResourceContent` with JSON
+MIME types, verified on resource reads as well as discovery.

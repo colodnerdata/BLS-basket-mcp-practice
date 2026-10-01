@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import sqlite3
-
-from bls_escalation_mcp.db.connection import get_database_path
+from bls_escalation_mcp.db.connection import db_connection
 
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS series (
@@ -24,7 +22,8 @@ CREATE TABLE IF NOT EXISTS series (
     first_period TEXT,
     latest_period TEXT,
     active INTEGER,
-    source_url TEXT
+    source_url TEXT,
+    payload TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS observations (
@@ -50,7 +49,6 @@ CREATE TABLE IF NOT EXISTS saved_index_specs (
 
 
 def initialize_schema(database_path: str | None = None) -> None:
-    path = get_database_path(database_path)
-    with sqlite3.connect(path) as conn:
+    with db_connection(database_path) as conn:
         conn.executescript(SCHEMA_SQL)
         conn.commit()

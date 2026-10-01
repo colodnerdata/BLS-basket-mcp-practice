@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from bls_escalation_mcp.models.enums import ComponentType, ValidationSeverity
+from bls_escalation_mcp.models.specifications import EscalationIndexSpec
 from bls_escalation_mcp.models.validation import (
     ValidationFinding,
     ValidationResult,
@@ -13,7 +14,7 @@ class ValidationService:
     def __init__(self, weight_tolerance: float = 1e-4) -> None:
         self.weight_tolerance = weight_tolerance
 
-    def validate_spec(self, spec) -> ValidationResult:
+    def validate_spec(self, spec: EscalationIndexSpec) -> ValidationResult:
         findings: list[ValidationFinding] = []
 
         if not spec.components:

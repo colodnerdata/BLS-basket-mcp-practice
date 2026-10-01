@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from bls_escalation_mcp.db.connection import db_connection
 from bls_escalation_mcp.models.observations import Observation
+from bls_escalation_mcp.models.periods import EconomicPeriod
 
 
 class ObservationRepository:
@@ -43,9 +44,12 @@ class ObservationRepository:
             conn.commit()
 
     def get_series_observations(
-        self, series_id: str, start_period=None, end_period=None
+        self,
+        series_id: str,
+        start_period: EconomicPeriod | None = None,
+        end_period: EconomicPeriod | None = None,
     ) -> list[Observation]:
-        # TODO: add period filtering and vintage management.
+        # TODO: add explicit vintage management.
         with db_connection(self.database_path) as conn:
             rows = conn.execute(
                 "SELECT series_id, period, value, units, "
@@ -59,15 +63,7 @@ class ObservationRepository:
             observations.append(
                 Observation(
                     series_id=row["series_id"],
-                    period=__import__(
-                        "bls_escalation_mcp.models.periods",
-                        fromlist=["EconomicPeriod"],
-                    ).EconomicPeriod.model_validate(
-                        {
-                            "year": int(str(row["period"]).split("-")[0]),
-                            "periodicity": "ANNUAL",
-                        }
-                    ),
+                    period=EconomicPeriod.from_storage(row["period"]),
                     value=row["value"],
                     units=row["units"],
                     retrieved_at=row["retrieved_at"],
@@ -80,4 +76,9 @@ class ObservationRepository:
                     else row["footnotes"].split("|"),
                 )
             )
-        return observations
+        return [
+            observation
+            for observation in observations
+            if (start_period is None or not observation.period < start_period)
+            and (end_period is None or not end_period < observation.period)
+        ]

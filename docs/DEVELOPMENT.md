@@ -11,6 +11,7 @@ source of truth. The development Python version is in `.python-version`.
 | Reproduce the environment | `uv sync --locked` |
 | Run the CI checks locally | `uv run --locked poe check` |
 | Run tests | `uv run --locked poe test` |
+| Type check | `uv run --locked poe typecheck` |
 | Lint | `uv run --locked poe lint` |
 | Apply formatting | `uv run --locked poe format` |
 | Check formatting | `uv run --locked poe format-check` |
@@ -89,3 +90,10 @@ Dependabot is configured for monthly grouped uv and Actions update PRs, with
 one open version-update PR per ecosystem. Review and test them; nothing here
 auto-merges or publishes a release. Configure GitHub security alerts separately
 where available so important notices do not wait for a monthly maintenance pass.
+
+
+MCP integration tests use `Client(create_server(...))` with a temporary SQLite
+database and mocked HTTP transport. They exercise the real MCP boundary without
+claiming live BLS or network-transport validation. The launcher configuration in
+`fastmcp.json` uses the installed locked environment; it does not duplicate the
+dependency list in a separate environment definition.
