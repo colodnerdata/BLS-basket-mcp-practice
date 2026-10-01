@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from fastmcp import Context, FastMCP
 
 from bls_escalation_mcp.mcp.adapters import get_services
