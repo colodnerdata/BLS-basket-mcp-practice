@@ -60,3 +60,20 @@ with a plain string output schema. This preserves exact text while avoiding
 Pydantic Decimal regexes that the FastMCP 3.2.4 client cannot reconstruct.
 Series resources return explicit `ResourceResult`/`ResourceContent` with JSON
 MIME types, verified on resource reads as well as discovery.
+
+
+## 2026-10-01 — Repository-owned CodeQL scanning
+
+- **Status:** accepted.
+- **Context:** PR #1 had ordinary checks and Copilot review, but no CodeQL
+  workflow or CodeQL check on the hardened commit.
+- **Decision:** Use advanced setup committed with the code, scanning Python
+  and GitHub Actions with default security queries and no path exclusions.
+  Run on pull requests, main pushes, weekly, and manual dispatch. Pin CodeQL
+  v4 to a verified upstream commit; retain least-privilege job permissions.
+- **Why:** Reviewable configuration follows the existing pinned CI practices.
+  Default setup is an alternative, not an additional scanner to enable.
+- **Revisit when:** More languages or a concrete need for extended queries
+  appears. Dependency vulnerability alerts remain separate from code scanning.
+- **References:** [GitHub advanced setup](https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/configure-code-scanning/configuring-advanced-setup-for-code-scanning),
+  [Official workflow template](https://github.com/actions/starter-workflows/blob/main/code-scanning/codeql.yml).

@@ -57,7 +57,8 @@ class ValidationService:
                 )
 
             if (
-                component.temporal_adjustment_enabled
+                component.component_type != ComponentType.FIXED_UNINDEXED
+                and component.temporal_adjustment_enabled
                 and not component.series_id
             ):
                 findings.append(

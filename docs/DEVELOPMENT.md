@@ -97,3 +97,20 @@ database and mocked HTTP transport. They exercise the real MCP boundary without
 claiming live BLS or network-transport validation. The launcher configuration in
 `fastmcp.json` uses the installed locked environment; it does not duplicate the
 dependency list in a separate environment definition.
+
+
+## Code scanning
+
+`.github/workflows/codeql.yml` scans Python and GitHub Actions on PRs to main,
+pushes to main, weekly, and by manual dispatch. Both interpreted languages use
+`build-mode: none`; scanning does not run tests or make live BLS calls.
+The default security query suites remain enabled and no paths are excluded.
+Actions are SHA-pinned and covered by the existing Dependabot Actions updates.
+Only the analysis job receives `security-events: write` to upload results.
+
+This is CodeQL advanced setup; do not also enable GitHub's default setup for
+this repository. If default setup is already enabled, disable it in repository
+Settings > Code security before using this workflow. Scheduled scanning starts
+once the workflow reaches main. See Security > Code scanning for findings and
+Actions > CodeQL for upload/configuration failures. Passing ordinary CI does
+not establish that code scanning ran or that no security findings exist.

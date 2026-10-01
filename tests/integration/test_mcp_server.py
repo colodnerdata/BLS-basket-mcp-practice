@@ -357,3 +357,46 @@ async def test_resource_first_startup_and_cleanup_on_failure(
             assert starts == [path]
             raise RuntimeError("caller failed")
     assert transport.closed
+
+
+@pytest.mark.asyncio
+async def test_fixed_component_validation_and_calculation(
+    client: Client,
+) -> None:
+    fixed = {
+        "id": "fixed",
+        "name": "Unindexed share",
+        "component_type": "FIXED_UNINDEXED",
+        "weight": 1.0,
+    }
+    created = await client.call_tool(
+        "create_index_spec", dict(spec_arguments(), components=[fixed])
+    )
+    spec = created.structured_content
+    assert spec["components"][0]["temporal_adjustment_enabled"] is True
+    validated = await client.call_tool("validate_index_spec", {"spec": spec})
+    assert validated.structured_content == {"valid": True, "findings": []}
+    calculated = await client.call_tool(
+        "calculate_component_escalation",
+        {"component": fixed, "base_value": 100, "target_value": 200},
+    )
+    assert calculated.structured_content["temporal_factor"] == 1.0
+    composite = await client.call_tool(
+        "calculate_index_spec",
+        {"spec": spec, "component_values": [calculated.structured_content]},
+    )
+    assert composite.structured_content["temporal_composite_factor"] == 1.0
+    assert composite.structured_content["temporal_percent_change"] == 0.0
+    # Fixed components still reject a series, while indexed ones require it.
+    for component, expected in (
+        (dict(fixed, series_id="TEST"), "FIXED_COMPONENT_HAS_SERIES"),
+        (dict(fixed, component_type="MATERIAL"), "MISSING_SERIES_ID"),
+    ):
+        invalid = dict(spec, components=[component])
+        result = await client.call_tool(
+            "validate_index_spec", {"spec": invalid}
+        )
+        assert result.structured_content["valid"] is False
+        assert {f["code"] for f in result.structured_content["findings"]} == {
+            expected
+        }

@@ -11,19 +11,6 @@ from bls_escalation_mcp.clients.bls import BLSClient
 async def test_bls_client_parses_mocked_payload() -> None:
     mocked_response = AsyncMock()
     mocked_response.status_code = 200
-    mocked_response.json.return_value = {
-        "Results": {
-            "series": [
-                {
-                    "seriesID": "TEST_PPI_001",
-                    "data": [
-                        {"year": "2024", "period": "M01", "value": "100.0"},
-                        {"year": "2025", "period": "M01", "value": "110.0"},
-                    ],
-                }
-            ]
-        }
-    }
     mocked_response.json = lambda: {
         "Results": {
             "series": [
