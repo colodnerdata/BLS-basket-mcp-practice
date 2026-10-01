@@ -101,16 +101,19 @@ dependency list in a separate environment definition.
 
 ## Code scanning
 
-`.github/workflows/codeql.yml` scans Python and GitHub Actions on PRs to main,
-pushes to main, weekly, and by manual dispatch. Both interpreted languages use
-`build-mode: none`; scanning does not run tests or make live BLS calls.
-The default security query suites remain enabled and no paths are excluded.
-Actions are SHA-pinned and covered by the existing Dependabot Actions updates.
-Only the analysis job receives `security-events: write` to upload results.
+`.github/workflows/codeql.yml` is CodeQL advanced setup for Python and GitHub
+Actions, `build-mode: none` (scanning does not run tests or make live BLS
+calls), default security query suites, no excluded paths, SHA-pinned actions,
+and `security-events: write` scoped to only the analysis job.
 
-This is CodeQL advanced setup; do not also enable GitHub's default setup for
-this repository. If default setup is already enabled, disable it in repository
-Settings > Code security before using this workflow. Scheduled scanning starts
-once the workflow reaches main. See Security > Code scanning for findings and
-Actions > CodeQL for upload/configuration failures. Passing ordinary CI does
-not establish that code scanning ran or that no security findings exist.
+**Automatic triggers are currently disabled** (`workflow_dispatch` only): this
+repository is private without GitHub Advanced Security enabled, so the
+analyze job's SARIF upload fails every run with "Code scanning is not enabled
+for this repository" — a repository-settings gap, not a scan finding or a
+problem in a PR's diff. See `docs/DECISIONS.md`, "CodeQL scanning disabled
+pending GitHub Advanced Security." Once a repo admin enables GitHub Advanced
+Security in Settings > Code security, restore the `push`/`pull_request`/
+`schedule` triggers (do not also enable GitHub's default code-scanning
+setup — this is the advanced setup, and running both conflicts). Until then,
+no CodeQL findings are being produced; passing ordinary CI does not establish
+that code scanning ran or that no security findings exist.

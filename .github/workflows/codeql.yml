@@ -1,12 +1,13 @@
 name: CodeQL
 
+# Automatic triggers are disabled: this is a private repository without
+# GitHub Advanced Security enabled, so the analyze job's SARIF upload fails
+# every run with "Code scanning is not enabled for this repository" (not a
+# scan finding). See docs/DECISIONS.md, "CodeQL scanning disabled pending
+# GitHub Advanced Security". Re-add push/pull_request/schedule once GHAS is
+# turned on for this repo in Settings > Code security; workflow_dispatch is
+# kept so it can still be run manually to verify that before re-enabling.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  schedule:
-    - cron: "23 5 * * 2"
   workflow_dispatch:
 
 permissions:

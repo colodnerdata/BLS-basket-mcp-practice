@@ -64,7 +64,9 @@ MIME types, verified on resource reads as well as discovery.
 
 ## 2026-10-01 — Repository-owned CodeQL scanning
 
-- **Status:** accepted.
+- **Status:** superseded by
+  [CodeQL scanning disabled pending GitHub Advanced Security](#2026-10-01--codeql-scanning-disabled-pending-github-advanced-security)
+  for automatic runs; the workflow configuration below is still accepted.
 - **Context:** PR #1 had ordinary checks and Copilot review, but no CodeQL
   workflow or CodeQL check on the hardened commit.
 - **Decision:** Use advanced setup committed with the code, scanning Python
@@ -77,6 +79,32 @@ MIME types, verified on resource reads as well as discovery.
   appears. Dependency vulnerability alerts remain separate from code scanning.
 - **References:** [GitHub advanced setup](https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/configure-code-scanning/configuring-advanced-setup-for-code-scanning),
   [Official workflow template](https://github.com/actions/starter-workflows/blob/main/code-scanning/codeql.yml).
+
+
+## 2026-10-01 — CodeQL scanning disabled pending GitHub Advanced Security
+
+- **Status:** accepted.
+- **Context:** The repository is private. Code scanning's SARIF upload
+  requires GitHub Advanced Security (GHAS) to be enabled on a private repo;
+  it is not, so every run of the `CodeQL` workflow from the prior decision
+  fails at the "Perform CodeQL analysis" step with "Code scanning is not
+  enabled for this repository," not a scan finding. This blocked PR #3 as a
+  required-looking red check with no code fix available.
+- **Decision:** Remove the `push`/`pull_request`/`schedule` triggers from
+  `.github/workflows/codeql.yml`, keeping only `workflow_dispatch`. The
+  workflow configuration itself (advanced setup, pinned CodeQL v4, Python and
+  GitHub Actions matrix, least-privilege job permissions) is unchanged and
+  stays accepted per the prior entry; only automatic triggering is disabled.
+- **Why:** The workflow cannot succeed without a repository-settings change
+  (Settings > Code security > GitHub Advanced Security) that only a repo
+  admin can make, and that is a cost/plan decision outside this change's
+  scope. A red, unfixable-by-code check on every PR trains reviewers to
+  ignore CI status. Deleting the workflow outright would lose the reviewed
+  configuration; disabling triggers keeps it ready to re-enable.
+- **Revisit when:** GitHub Advanced Security is enabled for this repository.
+  At that point, restore the `push`/`pull_request`/`schedule` triggers (or
+  run the workflow manually first to confirm GHAS is active) rather than
+  rewriting the configuration.
 
 
 ## 2026-10-01 — Local BLS access guidance and request bounds
