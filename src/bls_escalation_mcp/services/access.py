@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from bls_escalation_mcp.exceptions import BLSAPIError
 from bls_escalation_mcp.models.access import BLSAccessStatus, BLSQueryLimits
 
