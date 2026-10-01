@@ -45,3 +45,34 @@ Tool-specific entry points should reference it instead of copying its rules.
   evidence. Do not mark an unresolved concern as resolved.
 - Publishing, merging, or sending messages follows the owner's instructions.
   These repository notes are not blanket authorization for those actions.
+
+
+## FastMCP conventions
+
+- Verify APIs against the supported FastMCP version's official documentation.
+  Record version and lifecycle decisions in `docs/DECISIONS.md`; update
+  dependency metadata and the lockfile together.
+- Every exposed tool/resource has fully typed parameters, a precise return
+  type, and a client-facing description. No untyped `spec`, generic `object`,
+  or stringified JSON input contracts.
+- Let FastMCP generate schemas, deserialize inputs, serialize outputs, and
+  own the protocol. Handwritten schemas need a documented reason.
+- Register components with decorators inside `register_tools` or
+  `register_resources`; keep server assembly in `create_server`.
+- Handlers call services. Do not construct clients, initialize databases,
+  run SQL, or perform economic calculations in handlers.
+- Own shared services and external dependencies in the server lifespan.
+  Keep configuration/credentials outside client-visible arguments. SQLite
+  connections remain scoped to repository operations, never shared globally.
+- Use async handlers for network I/O. Verify blocking behavior in the pinned
+  version before adding concurrency mechanisms.
+- Domain exceptions stay independent of FastMCP. Translate expected failures
+  at the adapter boundary; return validation findings as structured results.
+  Keep unexpected error details masked.
+- Set tool annotations from actual behavior: reads and calculations are
+  read-only; saving can replace existing IDs and changes timestamps.
+  Annotations are hints, not permission enforcement.
+- Test every exposed component through FastMCP's client, including JSON input
+  and output contracts. Service tests alone do not verify MCP compatibility.
+- Preserve explicit methodology: no silent weight normalization, missing-data
+  substitution, series replacement, or locality application.
