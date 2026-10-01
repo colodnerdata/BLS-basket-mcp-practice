@@ -100,6 +100,16 @@ export BLS_DATABASE_PATH=./bls_catalogue.db
 
 The project reads settings from environment variables using pydantic-settings. See `.env.example` for the supported values.
 
+## BLS access and query limits
+
+Before live retrieval, call `get_bls_access_status` and read `setup://bls-api`.
+Configure your own key outside chat using `BLS_API_KEY`, then restart the server.
+Status is configuration-only and does not verify the key or remaining quota.
+Live retrieval requires a configured key and accepts at most 50 series and
+20 inclusive calendar years per call. Automatic batching is deferred.
+See [BLS setup, limits, and request planning](docs/bls_api.md) for registration
+and the planned design for combining requests and returning multi-query results.
+
 ## License
 
 This repository does not yet declare a project license; update before public reuse.

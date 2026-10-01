@@ -14,6 +14,7 @@ from bls_escalation_mcp.repositories.series import SeriesRepository
 from bls_escalation_mcp.repositories.specifications import (
     SpecificationRepository,
 )
+from bls_escalation_mcp.services.access import BLSAccessService
 from bls_escalation_mcp.services.calculations import (
     EscalationCalculationService,
 )
@@ -28,6 +29,7 @@ from bls_escalation_mcp.services.validation import ValidationService
 class Services:
     """Dependencies owned by one running server, never a module singleton."""
 
+    access: BLSAccessService
     catalogue: SeriesCatalogueService
     observations: ObservationService
     specifications: SpecificationService
@@ -50,7 +52,9 @@ def create_lifespan(
         async with httpx.AsyncClient(
             timeout=settings.http_timeout_seconds, transport=http_transport
         ) as http_client:
+            access = BLSAccessService(settings.bls_api_key)
             services = Services(
+                access=access,
                 catalogue=SeriesCatalogueService(
                     SeriesRepository(settings.database_path)
                 ),
@@ -58,7 +62,8 @@ def create_lifespan(
                     BLSClient(
                         api_key=settings.bls_api_key,
                         http_client=http_client,
-                    )
+                    ),
+                    access,
                 ),
                 specifications=SpecificationService(
                     SpecificationRepository(settings.database_path)

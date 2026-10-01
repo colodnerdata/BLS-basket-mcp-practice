@@ -77,3 +77,27 @@ MIME types, verified on resource reads as well as discovery.
   appears. Dependency vulnerability alerts remain separate from code scanning.
 - **References:** [GitHub advanced setup](https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/configure-code-scanning/configuring-advanced-setup-for-code-scanning),
   [Official workflow template](https://github.com/actions/starter-workflows/blob/main/code-scanning/codeql.yml).
+
+
+## 2026-10-01 — Local BLS access guidance and request bounds
+
+- **Status:** accepted.
+- **Decision:** Advertise setup through server instructions, a typed access-status
+  tool, and `setup://bls-api`. Keep keys in the local launch environment; do not
+  collect them through the model. Status is missing or configured-unverified and
+  performs no HTTP. Require a configured key for live MCP retrieval and reject
+  more than 50 series or 20 inclusive years before HTTP. No anonymous fallback.
+- **Why:** Guidance belongs in MCP, but credentials remain outside public
+  contracts. Configuration and successful data responses do not prove validity.
+  Instructions alone cannot enforce setup or request bounds.
+- **Deferred:** Explicit credential verification, hosted per-user secret storage,
+  URL elicitation, batching, retries, throttling, and quota accounting. Detailed
+  batching and consolidated-result requirements are in [bls_api.md](bls_api.md).
+- **Compatibility:** Missing-key live MCP calls now fail with setup guidance.
+  Non-network tools remain available. Low-level standalone client behavior is
+  unchanged. The observation service receives the lifespan-owned access service.
+- **References:** [BLS FAQ](https://www.bls.gov/developers/api_faqs.htm),
+  [FastMCP instructions](https://gofastmcp.com/servers/server), and
+  [MCP elicitation](https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation).
+- **Revisit when:** A deployment supports multiple users, or explicit verification
+  and multi-request retrieval are implemented and independently validated.

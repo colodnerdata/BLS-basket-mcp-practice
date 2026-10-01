@@ -34,7 +34,8 @@ class EscalationCalculationService:
         else:
             if base == 0:
                 raise CalculationError(
-                    f"Base value for component '{component.id}' cannot be zero."
+                    f"Base value for component '{component.id}' "
+                    "cannot be zero."
                 )
             temporal_factor = target / base
 

@@ -1,6 +1,10 @@
 # Next
 
-- Current goal: review and merge PR #1's hardened FastMCP scaffold.
+- Current goal: complete a source-backed observation-to-calculation workflow.
+- Access guidance: configuration-only status and setup resource are implemented;
+  live MCP calls require a key and enforce 50-series/20-inclusive-year bounds.
+  See `bls_api.md` for limits and the planned batching/result-envelope contract.
+  Explicit verification, anonymous fallback, and hosted credentials are deferred.
 - Working state: FastMCP 3.2.4, typed MCP contracts, lifespan-owned services,
   client integration tests, and automated type checking are implemented.
 - Next action: complete one source-backed fixture workflow with observation
