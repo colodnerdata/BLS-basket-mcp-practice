@@ -29,14 +29,13 @@ class EscalationCalculationService:
         target = Decimal(str(target_value))
         locality = Decimal(str(locality_factor))
 
-        if base == 0:
-            raise CalculationError(
-                f"Base value for component '{component.id}' cannot be zero."
-            )
-
         if component.component_type == ComponentType.FIXED_UNINDEXED:
             temporal_factor = Decimal("1")
         else:
+            if base == 0:
+                raise CalculationError(
+                    f"Base value for component '{component.id}' cannot be zero."
+                )
             temporal_factor = target / base
 
         combined_factor = temporal_factor * locality
