@@ -108,7 +108,7 @@ async def client(tmp_path: Path) -> AsyncIterator[Client]:
     async with Client(server) as connected:
         # Startup initializes the database before any tools are called.
         resources = await connected.list_resources()
-        assert len(resources) == 2
+        assert len(resources) == 3
         repo = SeriesRepository(path)
         repo.upsert(
             SeriesMetadata(
@@ -126,6 +126,7 @@ async def client(tmp_path: Path) -> AsyncIterator[Client]:
 async def test_discovery_and_contracts(client: Client) -> None:
     tools = {tool.name: tool for tool in await client.list_tools()}
     assert set(tools) == {
+        "get_bls_access_status",
         "search_series",
         "describe_series",
         "get_series_data",

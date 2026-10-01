@@ -5,8 +5,9 @@ from fastmcp import FastMCP
 
 from bls_escalation_mcp.config import Settings, get_settings
 from bls_escalation_mcp.lifespan import create_lifespan
-from bls_escalation_mcp.mcp.resources import methodology, series
+from bls_escalation_mcp.mcp.resources import methodology, series, setup
 from bls_escalation_mcp.mcp.tools import (
+    access,
     calculations,
     discovery,
     locality,
@@ -25,10 +26,23 @@ def create_server(
     settings = settings if settings is not None else get_settings()
     mcp = FastMCP(
         "BLS Cost Escalation",
+        instructions=(
+            "Before live BLS retrieval, call get_bls_access_status. If setup "
+            "is required, read setup://bls-api and guide the user through "
+            "registration and local configuration. Never request keys in "
+            "chat or tool arguments. Ask the user to confirm configuration, "
+            "restart/reconnect, and recheck status. Configured keys are "
+            "unverified, not authenticated. Catalogue exploration and "
+            "supplied-value calculations can continue during setup. "
+            "Retrieval supports at most 50 series and 20 inclusive calendar "
+            "years per call; automatic batching and quota tracking are "
+            "not implemented. Do not claim missing data is zero."
+        ),
         lifespan=create_lifespan(settings, http_transport),
         mask_error_details=True,
     )
     for module in (
+        access,
         discovery,
         observations,
         specifications,
@@ -39,6 +53,7 @@ def create_server(
         module.register_tools(mcp)
     series.register_resources(mcp)
     methodology.register_resources(mcp)
+    setup.register_resources(mcp)
     return mcp
 
 

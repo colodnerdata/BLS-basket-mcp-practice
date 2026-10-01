@@ -11,7 +11,11 @@ def register_tools(mcp: FastMCP) -> None:
     async def get_series_data(
         series_ids: list[str], start_year: int, end_year: int, ctx: Context
     ) -> list[Observation]:
-        """Fetch known BLS series for a year range without caching results."""
+        """Fetch up to 50 known series for at most 20 inclusive years.
+
+        Requires configured BLS_API_KEY; check get_bls_access_status first.
+        Results are not cached. Automatic batching is not implemented.
+        """
         with domain_errors():
             return await get_services(ctx).observations.fetch(
                 series_ids, start_year, end_year
