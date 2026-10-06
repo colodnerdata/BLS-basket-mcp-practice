@@ -72,6 +72,9 @@ Still intentionally scaffolded or deferred:
 - LLM calls, embeddings, and vector search
 - REST API or web app
 
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan from this scaffold to an
+MVP with test and eval harnesses.
+
 ## Development
 
 Install dependencies and run checks:

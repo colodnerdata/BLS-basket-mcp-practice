@@ -109,6 +109,7 @@ agent's judgment when driving these MCP tools under ambiguity (which series
 to pick, how to handle a basket with no explicit weights, whether to ask for
 guidance instead of exceeding a request bound).
 
+The planned design and its milestone (M5) are in [ROADMAP.md](ROADMAP.md).
 When an evals harness is built, document it here in the same shape as the
 tests above, and build it on these principles:
 
