@@ -2,6 +2,12 @@
 
 This project is an early-stage FastMCP server for constructing transparent custom cost-escalation indexes from U.S. Bureau of Labor Statistics (BLS) data.
 
+Start with [QUICKSTART.md](QUICKSTART.md) for local client connection.
+The project shell follows the [GSA MCP Hackathon template](docs/hackathon_template.md),
+with [deployment guidance](deploy/README.md), [agent evaluation status](eval/README.md),
+and [security notes](SECURITY.md). The BLS implementation and service boundaries
+remain project-specific.
+
 ## What this project is
 
 This server helps an LLM or analyst build defensible escalation indexes by keeping the workflow explicit:
@@ -88,6 +94,7 @@ Run the server locally:
 
 ```bash
 uv run --locked fastmcp run fastmcp.json
+uv run --locked python main.py
 # Equivalent module launch:
 uv run --locked python -m bls_escalation_mcp.server
 ```
@@ -101,7 +108,11 @@ export BLS_DATABASE_PATH=./bls_catalogue.db
 
 ## Configuration
 
-The project reads settings from environment variables using pydantic-settings. See `.env.example` for the supported values.
+The project reads settings from environment variables and a `.env` file in
+the working directory using pydantic-settings. Environment variables take
+precedence. See `.env.example` for supported values. The `main.py`/`app.py`
+launcher selects HTTP for platform ports or `MCP_TRANSPORT=streamable-http`;
+the existing module and `fastmcp.json` launches continue to use stdio.
 
 ## BLS access and query limits
 
@@ -116,4 +127,3 @@ and the planned design for combining requests and returning multi-query results.
 ## License
 
 This repository does not yet declare a project license; update before public reuse.
-

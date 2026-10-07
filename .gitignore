@@ -13,5 +13,8 @@ dist/
 .env
 .env.*
 !.env.example
+*.db
+*.db-*
+*.sqlite*
 .DS_Store
 Thumbs.db

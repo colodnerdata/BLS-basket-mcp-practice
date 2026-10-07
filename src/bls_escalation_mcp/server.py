@@ -15,6 +15,7 @@ from bls_escalation_mcp.mcp.tools import (
     specifications,
     validation,
 )
+from bls_escalation_mcp.routes import register_routes
 
 
 def create_server(
@@ -54,6 +55,7 @@ def create_server(
     series.register_resources(mcp)
     methodology.register_resources(mcp)
     setup.register_resources(mcp)
+    register_routes(mcp)
     return mcp
 
 

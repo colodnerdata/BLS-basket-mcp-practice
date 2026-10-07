@@ -35,6 +35,7 @@ format-check = "ruff format --check ."
 test = "pytest"
 typecheck = "mypy src"
 check = ["lint", "format-check", "typecheck", "test"]
+export-requirements = "uv export --locked --no-dev --no-emit-project --no-hashes --output-file requirements.txt"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

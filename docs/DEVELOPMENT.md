@@ -2,6 +2,12 @@
 
 ## Commands
 
+The template-style launcher is `uv run --locked python main.py`; see
+[QUICKSTART.md](../QUICKSTART.md). Regenerate buildpack dependencies with
+`uv run --locked poe export-requirements` after dependency changes. Do not
+hand-edit `requirements.txt`; the lockfile remains authoritative. Docker and
+vendor deployment validation are separate from `poe check`.
+
 The project uses uv for its environment and lockfile, Poe for commands, Ruff
 for lint and formatting, and pytest for tests. `pyproject.toml` is the command
 source of truth. The development Python version is in `.python-version`.

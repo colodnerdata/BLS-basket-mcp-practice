@@ -1,5 +1,22 @@
 # Decisions
 
+## 2026-10-07 — GSA hackathon project shell
+
+- **Status:** accepted.
+- **Decision:** Add the GSA launch/deployment/documentation shell around the
+  existing factory and lifespan. Separate transport configuration from BLS
+  settings; load local `.env` with environment precedence. Preserve existing
+  stdio entry points. Verify APIs against installed FastMCP 3.2.4.
+- **Why:** Template launch conventions and probes support platform integration
+  without replacing reviewed typed adapters, services, or persistence.
+  Prefer locked dependencies and Python 3.12 over the template's image defaults.
+- **Deferred:** License choice, registry publication, vendor account-specific
+  kits, authentication/tenant isolation, reusable prompts, and agent evals.
+  Draft metadata has no invented remote URL; cloud.gov starts with no route.
+- **Reference:** [Pinned template and mapping](hackathon_template.md).
+- **Revisit when:** A concrete approved hosted demo needs platform identity,
+  persistence, and access controls; do not infer those from shell files.
+
 Record the choices future-you or a coding assistant might otherwise repeat.
 Add an entry when a decision affects interfaces, architecture, dependencies,
 data formats, verification, or a meaningful constraint. Keep entries short.
