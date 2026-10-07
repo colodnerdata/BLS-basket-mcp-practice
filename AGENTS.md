@@ -6,7 +6,8 @@ Tool-specific entry points should reference it instead of copying its rules.
 ## Get oriented
 
 1. Read `README.md` and `docs/NEXT.md` for purpose and current work.
-2. Read `docs/DEVELOPMENT.md` for commands and verification boundaries.
+2. Read `docs/DEVELOPMENT.md` for commands and verification boundaries, and
+   `docs/hackathon_template.md` for required template conventions.
 3. Before a design change, search `docs/DECISIONS.md` by mechanism or concept.
    Preserve rejected approaches and explain any decision you supersede.
 
@@ -62,8 +63,10 @@ Tool-specific entry points should reference it instead of copying its rules.
   or stringified JSON input contracts.
 - Let FastMCP generate schemas, deserialize inputs, serialize outputs, and
   own the protocol. Handwritten schemas need a documented reason.
-- Register components with decorators inside `register_tools` or
-  `register_resources`; keep server assembly in `create_server`.
+- Register each new component with decorators inside its module's
+  `register(mcp: FastMCP) -> None`; package aggregators expose
+  `register_tools`, `register_resources`, or `register_prompts`. Keep server
+  assembly in `create_server`.
 - Handlers call services. Do not construct clients, initialize databases,
   run SQL, or perform economic calculations in handlers.
 - Own shared services and external dependencies in the server lifespan.
@@ -81,3 +84,41 @@ Tool-specific entry points should reference it instead of copying its rules.
   and output contracts. Service tests alone do not verify MCP compatibility.
 - Preserve explicit methodology: no silent weight normalization, missing-data
   substitution, series replacement, or locality application.
+
+
+## GSA MCP Hackathon template conventions
+
+- Follow the pinned template and mapping in `docs/hackathon_template.md`.
+  Template updates require a reviewed comparison; do not blindly copy upstream
+  examples, dependencies, deployment settings, or agent instructions.
+- Use **one exposed tool per Python file** under
+  `src/bls_escalation_mcp/mcp/tools/`, named for the tool's purpose. Reusable
+  logic belongs in services/adapters, not a second tool in the same file.
+- Use one exposed prompt or resource per file in the corresponding `mcp/`
+  package. Each component module exposes `register(mcp: FastMCP) -> None`;
+  its package `__init__.py` explicitly aggregates registrations. Adding or
+  removing a component must update that aggregator and client contract tests.
+  `create_server` calls the aggregators; avoid import-time registration.
+- Existing grouped modules and direct registration in `server.py` predate
+  these rules. Do not extend them with additional components. When changing
+  an existing component, extract that component to its own file and wire it
+  exactly once; preserve names, schemas, annotations, and behavior unless the
+  requested work explicitly changes them. A complete migration is separate
+  work, not assumed to have happened because these notes exist.
+- Keep `main.py` and `app.py` thin; transport selection belongs in the launcher,
+  HTTP probes in `routes.py`, and assembly/lifecycle in the existing factory.
+  Preserve stdio defaults and platform-port precedence. Do not flatten the
+  domain model/service/repository packages to mimic example filenames.
+- Add operator settings as typed configuration fields and document them in
+  `.env.example`. Keep credentials out of component arguments and responses.
+  Update quickstart/deployment instructions when launch behavior changes.
+- Keep `uv.lock` authoritative. Dependency changes update `pyproject.toml`,
+  `uv.lock`, and the generated `requirements.txt` via `poe export-requirements`.
+  Keep Docker/buildpack Python requirements compatible with the project.
+- Maintain `/health` and `/version`, deployment drafts, `server.json` identity
+  and version, security boundaries, and template mapping when affected.
+  Never turn a draft into a claimed deployment or published endpoint without
+  actual validation. Keep deterministic tests and agent evals distinct;
+  document eval status in both `eval/README.md` and `docs/TESTING.md`.
+- Document any deliberate exception in `docs/DECISIONS.md` and update the
+  template mapping in the same change, explaining scope and reason.
