@@ -123,3 +123,33 @@ Security in Settings > Code security, restore the `push`/`pull_request`/
 setup — this is the advanced setup, and running both conflicts). Until then,
 no CodeQL findings are being produced; passing ordinary CI does not establish
 that code scanning ran or that no security findings exist.
+
+
+## Adding or changing MCP components
+
+Follow [AGENTS.md](../AGENTS.md) and the [template mapping](hackathon_template.md).
+For a new tool `search_example`, create `mcp/tools/search_example.py` with one
+exposed handler registered inside `register(mcp: FastMCP) -> None`. Import that
+module in `mcp/tools/__init__.py` and call its registration from the package's
+`register_tools(mcp: FastMCP) -> None`. Use equivalent aggregators for resources
+and prompts. Wire the package aggregator into `create_server`; registration
+must happen exactly once. Keep reusable behavior in services/adapters.
+
+Existing domain-grouped modules still use `register_tools`/`register_resources`
+and are called directly by the factory. During migration, an aggregator may
+call these legacy functions as well as new per-component `register` functions.
+Remove the old factory calls when routing them through the aggregator, and
+remove an extracted handler from its original registration function. Preserve
+untouched siblings; do not accidentally drop or double-register them.
+
+Before submitting a component change:
+
+1. Verify one exposed component per new file and explicit aggregator wiring.
+2. Test discovery and invocation through FastMCP's client, including names,
+   schemas, annotations, outputs, and affected resource/prompt contracts.
+3. Update `docs/TESTING.md` for changed test intent; update methodology,
+   configuration, quickstart, deployment, or eval documentation when affected.
+4. Run `uv run --locked poe check`. If dependencies changed, regenerate
+   `requirements.txt` with `poe export-requirements` and review the lock/export.
+5. Record a deliberate template exception in `docs/DECISIONS.md` and update
+   `docs/hackathon_template.md`; do not silently weaken the canonical rules.
