@@ -16,14 +16,17 @@ the existing BLS implementation with the example server.
 | `QUICKSTART.md`, `SECURITY.md` | Project-specific connection and security guidance |
 | `deploy/` | Container/buildpack instructions and links to vendor kits |
 | `eval/` | Entry point to the existing planned M5 eval work |
-| `tools/`, `resources/`, `models.py`, `utils.py` | Existing typed MCP adapters, model package, clients/services/repositories |
+| `tools/`, `resources/`, `models.py`, `utils.py` | One component per file and explicit package aggregators required for new/touched components; existing model/service/repository packages retained |
 | `prompts/` | Deferred until a concrete reusable prompt is designed |
 | `.agents/skills/` | Not vendored; canonical instructions remain `AGENTS.md` |
 | `LICENSE` | Owner decision remains open; template MIT license is not assigned to this project |
 | CI | Existing locked lint, format, mypy, and test task retained |
 
-Keep the server factory and lifespan ownership. Group related tools by domain
-rather than splitting every handler simply to match filenames. Template
-deployment scripts and agent skills are optional starter aids, not a reason
-to replace reviewed project conventions. This mapping does not certify
+Keep the server factory and lifespan ownership. Follow one exposed tool per
+file, and the same component/registration pattern for prompts and resources.
+The canonical rules are in [AGENTS.md](../AGENTS.md); the implementation
+workflow is in [DEVELOPMENT.md](DEVELOPMENT.md). Existing grouped modules have
+not yet been fully migrated. Extract touched components without changing their
+public contracts; do not add more tools to legacy grouped files. Template
+deployment scripts and agent skills remain optional starter aids. This mapping does not certify
 hackathon eligibility, deployment readiness, or registry acceptance.
