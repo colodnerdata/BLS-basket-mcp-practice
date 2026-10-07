@@ -146,3 +146,21 @@ MIME types, verified on resource reads as well as discovery.
   [MCP elicitation](https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation).
 - **Revisit when:** A deployment supports multiple users, or explicit verification
   and multi-request retrieval are implemented and independently validated.
+
+
+## 2026-10-07 — Template component layout for future work
+
+- **Status:** accepted; supersedes the shell mapping's earlier suggestion to
+  keep grouping exposed tools by domain. The existing factory/lifespan and
+  domain-service boundaries remain accepted.
+- **Decision:** One exposed tool, prompt, or resource per file, each with a
+  typed `register(mcp)` function and explicit package aggregation. Apply this
+  to new components and extract existing components when they are changed.
+  Do not expand legacy grouped modules. Keep public contracts stable during
+  layout-only migration and register each component exactly once.
+- **Why:** The owner requested durable template compliance, including the
+  template's one-tool-per-file convention. Canonical agent rules and developer
+  instructions now agree; shared logic stays below the MCP handler layer.
+- **Migration boundary:** No existing handlers are moved in this documentation
+  change. A full layout migration remains separate work, with client contract
+  tests and `docs/TESTING.md` updates required.
