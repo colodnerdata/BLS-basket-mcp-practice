@@ -1,5 +1,7 @@
 """Dependency-free HTTP probes; these do not check BLS or database health."""
 
+from __future__ import annotations
+
 from fastmcp import FastMCP
 from starlette.requests import Request
 from starlette.responses import JSONResponse
