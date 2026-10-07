@@ -27,9 +27,6 @@
   SQLite databases with the old incomplete series schema need a deliberate
   migration or recreation; no production migration framework is introduced.
 
-- Template layout follow-up: migrate legacy grouped tools/resources and direct
-  factory registration to one exposed component per file and package
-  aggregators. Apply the rule to new/touched components immediately; a full
-  migration is separate from the current MVP milestones. Preserve names,
-  schemas, annotations, and lifecycle; verify client discovery/invocation and
-  update `TESTING.md`. See `AGENTS.md` and `hackathon_template.md`.
+- Template layout: all exposed tools/resources now live in individual files
+  and use package aggregators. Maintain this layout for future additions;
+  see `AGENTS.md` and `hackathon_template.md`.

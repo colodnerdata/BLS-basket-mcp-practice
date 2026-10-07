@@ -114,6 +114,13 @@ testing principles) — not a description of the code path.
 
 The template-aligned evaluation entry point is [eval/README.md](../eval/README.md).
 
+### `tests/test_component_layout.py` — template layout
+
+Checks every tool/resource module has exactly one decorated component inside
+its typed `register` function, named to match its filename. This prevents
+regression to grouped handlers; existing MCP client tests separately guard
+aggregate discovery, schemas, annotations, invocation and resource contents.
+
 ## Evals
 
 **Status: not implemented.** The suite above verifies deterministic code —

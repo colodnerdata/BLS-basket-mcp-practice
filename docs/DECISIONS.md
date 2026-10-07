@@ -155,12 +155,13 @@ MIME types, verified on resource reads as well as discovery.
   domain-service boundaries remain accepted.
 - **Decision:** One exposed tool, prompt, or resource per file, each with a
   typed `register(mcp)` function and explicit package aggregation. Apply this
-  to new components and extract existing components when they are changed.
-  Do not expand legacy grouped modules. Keep public contracts stable during
+  to every component; the existing grouped modules have been split.
+  Keep public contracts stable during
   layout-only migration and register each component exactly once.
 - **Why:** The owner requested durable template compliance, including the
   template's one-tool-per-file convention. Canonical agent rules and developer
   instructions now agree; shared logic stays below the MCP handler layer.
-- **Migration boundary:** No existing handlers are moved in this documentation
-  change. A full layout migration remains separate work, with client contract
-  tests and `docs/TESTING.md` updates required.
+- **Implementation:** All existing tools and resources were subsequently
+  migrated in this PR to individual modules and package aggregators. Public
+  contracts and resource contents are preserved. Layout checks and existing
+  FastMCP client tests guard the migration; no grouped adapters remain.

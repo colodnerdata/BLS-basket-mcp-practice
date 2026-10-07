@@ -7,7 +7,7 @@ from fastmcp.resources import ResourceContent, ResourceResult
 from bls_escalation_mcp.mcp.adapters import get_services
 
 
-def register_resources(mcp: FastMCP) -> None:
+def register(mcp: FastMCP) -> None:
     @mcp.resource("bls://series/{series_id}", mime_type="application/json")
     def series_resource(series_id: str, ctx: Context) -> ResourceResult:
         """Read catalogue metadata as JSON for one known series ID."""

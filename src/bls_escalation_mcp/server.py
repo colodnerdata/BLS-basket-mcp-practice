@@ -5,16 +5,8 @@ from fastmcp import FastMCP
 
 from bls_escalation_mcp.config import Settings, get_settings
 from bls_escalation_mcp.lifespan import create_lifespan
-from bls_escalation_mcp.mcp.resources import methodology, series, setup
-from bls_escalation_mcp.mcp.tools import (
-    access,
-    calculations,
-    discovery,
-    locality,
-    observations,
-    specifications,
-    validation,
-)
+from bls_escalation_mcp.mcp.resources import register_resources
+from bls_escalation_mcp.mcp.tools import register_tools
 from bls_escalation_mcp.routes import register_routes
 
 
@@ -42,19 +34,8 @@ def create_server(
         lifespan=create_lifespan(settings, http_transport),
         mask_error_details=True,
     )
-    for module in (
-        access,
-        discovery,
-        observations,
-        specifications,
-        calculations,
-        locality,
-        validation,
-    ):
-        module.register_tools(mcp)
-    series.register_resources(mcp)
-    methodology.register_resources(mcp)
-    setup.register_resources(mcp)
+    register_tools(mcp)
+    register_resources(mcp)
     register_routes(mcp)
     return mcp
 

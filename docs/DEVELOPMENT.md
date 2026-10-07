@@ -135,12 +135,9 @@ module in `mcp/tools/__init__.py` and call its registration from the package's
 and prompts. Wire the package aggregator into `create_server`; registration
 must happen exactly once. Keep reusable behavior in services/adapters.
 
-Existing domain-grouped modules still use `register_tools`/`register_resources`
-and are called directly by the factory. During migration, an aggregator may
-call these legacy functions as well as new per-component `register` functions.
-Remove the old factory calls when routing them through the aggregator, and
-remove an extracted handler from its original registration function. Preserve
-untouched siblings; do not accidentally drop or double-register them.
+All existing tools and resources use this pattern. `create_server` calls
+`register_tools` and `register_resources` once each. Do not bypass aggregators
+or register the same handler in multiple modules.
 
 Before submitting a component change:
 

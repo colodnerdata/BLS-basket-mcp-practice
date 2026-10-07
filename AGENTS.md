@@ -99,12 +99,10 @@ Tool-specific entry points should reference it instead of copying its rules.
   its package `__init__.py` explicitly aggregates registrations. Adding or
   removing a component must update that aggregator and client contract tests.
   `create_server` calls the aggregators; avoid import-time registration.
-- Existing grouped modules and direct registration in `server.py` predate
-  these rules. Do not extend them with additional components. When changing
-  an existing component, extract that component to its own file and wire it
-  exactly once; preserve names, schemas, annotations, and behavior unless the
-  requested work explicitly changes them. A complete migration is separate
-  work, not assumed to have happened because these notes exist.
+- Preserve public names, schemas, annotations, and behavior during layout
+  refactors unless the requested work explicitly changes them. Register each
+  component exactly once through its package aggregator. Do not introduce
+  grouped component modules or direct per-module wiring in `server.py`.
 - Keep `main.py` and `app.py` thin; transport selection belongs in the launcher,
   HTTP probes in `routes.py`, and assembly/lifecycle in the existing factory.
   Preserve stdio defaults and platform-port precedence. Do not flatten the
