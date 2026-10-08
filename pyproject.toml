@@ -29,6 +29,7 @@ dev = [
 packages = ["src/bls_escalation_mcp"]
 
 [tool.poe.tasks]
+smoke = { cmd = "python -m bls_escalation_mcp.smoke", help = "Check a running HTTP MCP server without Node.js or live BLS requests" }
 lint = "ruff check ."
 format = "ruff format ."
 format-check = "ruff format --check ."
