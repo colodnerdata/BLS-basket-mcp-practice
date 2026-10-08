@@ -38,10 +38,18 @@ then explain the methodology. Catalogue search needs seed metadata; this
 shell change does not populate a live BLS catalogue. Supplied-value
 calculations can run without a BLS key.
 
-For local Streamable HTTP:
+For local Streamable HTTP, set these entries in `.env` first:
+
+```dotenv
+MCP_TRANSPORT=streamable-http
+MCP_HOST=127.0.0.1
+MCP_PORT=8000
+```
+
+Launch without terminal environment injection:
 
 ```bash
-MCP_TRANSPORT=streamable-http uv run --locked python main.py
+uv run --locked poe serve
 curl http://127.0.0.1:8000/health
 curl http://127.0.0.1:8000/version
 ```
@@ -60,7 +68,7 @@ For containers and platform configuration, see [deployment](deploy/README.md).
 ## Python HTTP smoke check (no Node.js)
 
 Set `MCP_TRANSPORT=streamable-http` in the ignored local `.env`, then start
-`uv run --locked python main.py` (or `poe serve` once that task is available).
+`uv run --locked poe serve`.
 In a second terminal in the repository, run:
 
 ```bash
@@ -77,3 +85,27 @@ Configuration stays in `.env`; no terminal environment injection is needed.
 This checks the running HTTP transport, not agent performance or live BLS.
 The existing FastMCP Python client provides the connection; Node.js and
 Inspector are optional external debugging tools, not project dependencies.
+
+
+Expected successful smoke output:
+
+```text
+PASS discovery: 11 tools, 3 resources, 1 resource templates
+PASS access status (configuration only; key not verified)
+PASS setup and methodology resources
+PASS calculation: 110 / 100 = 1.1
+PASS smoke check complete; no BLS requests or specification writes
+```
+
+Discovery counts may grow as components are added. A missing key is acceptable
+for this smoke check. `SMOKE_SUPPLIED_VALUES` is a synthetic label, not a BLS
+series; the calculation uses supplied values and never retrieves that ID.
+
+If the check fails, confirm HTTP transport in `.env`, restart the server,
+check `/health`, verify the port and `/mcp` URL, and inspect the server logs.
+The smoke command accepts only local HTTP URLs (localhost, 127.0.0.1, or ::1)
+without URL credentials and bypasses system proxies for the local connection.
+Run server and smoke in the same environment, such as both inside WSL.
+In stdio mode the server waits for a client on stdin; HTTP smoke cannot connect.
+Use Ctrl+C to stop the server. A fresh catalogue may be empty, and no prompts
+or agent-eval runner are implemented yet.
