@@ -101,6 +101,26 @@ testing principles) — not a description of the code path.
 | `test_resource_first_startup_and_cleanup_on_failure` | Reading an unseeded resource before any tool call doesn't error on missing SQL state; the database initializes exactly once; the HTTP transport closes even when the caller raises after startup | Lifespan/resource-ordering bugs and HTTP client leaks on error paths |
 | `test_fixed_component_validation_and_calculation` | A `FIXED_UNINDEXED`-only spec validates and calculates to `temporal_factor`/composite `1.0` and 0% change; attaching a series to a fixed component, or omitting one from a material component, each produce the specific expected finding code | Fixed-component handling diverging between the unit-level service and the full MCP path |
 
+### `tests/test_project_shell.py` — launcher and infrastructure
+
+- Transport precedence: default stdio, explicit loopback HTTP, platform `PORT`,
+  and Databricks port precedence. A mocked server verifies launch arguments;
+  this does not test an actual network socket.
+- Invalid platform ports fail before server construction.
+- `.env` supplies transport/BLS settings; environment overrides file values.
+- `/health` and `/version` return the documented JSON through a real ASGI app
+  and its lifespan with a temporary database. These are availability probes,
+  not live BLS checks. Docker and vendor deployments need separate validation.
+
+The template-aligned evaluation entry point is [eval/README.md](../eval/README.md).
+
+### `tests/test_component_layout.py` — template layout
+
+Checks every tool/resource module has exactly one decorated component inside
+its typed `register` function, named to match its filename. This prevents
+regression to grouped handlers; existing MCP client tests separately guard
+aggregate discovery, schemas, annotations, invocation and resource contents.
+
 ## Evals
 
 **Status: not implemented.** The suite above verifies deterministic code —

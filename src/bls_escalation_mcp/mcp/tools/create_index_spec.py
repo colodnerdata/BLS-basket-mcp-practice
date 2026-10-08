@@ -8,7 +8,7 @@ from bls_escalation_mcp.models.periods import EconomicPeriod
 from bls_escalation_mcp.models.specifications import EscalationIndexSpec
 
 
-def register_tools(mcp: FastMCP) -> None:
+def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations={"readOnlyHint": True, "openWorldHint": False})
     def create_index_spec(
         *,
@@ -32,26 +32,3 @@ def register_tools(mcp: FastMCP) -> None:
                 description=description,
                 project_description=project_description,
             )
-
-    @mcp.tool(
-        annotations={
-            "readOnlyHint": False,
-            "destructiveHint": True,
-            "idempotentHint": False,
-            "openWorldHint": False,
-        }
-    )
-    def save_index_spec(
-        spec: EscalationIndexSpec, ctx: Context
-    ) -> EscalationIndexSpec:
-        """Save locally, replacing the same ID and updating its timestamp."""
-        with domain_errors():
-            return get_services(ctx).specifications.save(spec)
-
-    @mcp.tool(annotations={"readOnlyHint": True, "openWorldHint": False})
-    def get_index_spec(
-        spec_id: str, ctx: Context
-    ) -> EscalationIndexSpec | None:
-        """Read a saved specification; return null when the ID is absent."""
-        with domain_errors():
-            return get_services(ctx).specifications.get(spec_id)

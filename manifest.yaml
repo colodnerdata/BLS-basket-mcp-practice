@@ -1,0 +1,15 @@
+---
+# Choose an approved org/space and unique route before cf push.
+applications:
+  - name: bls-escalation-mcp
+    buildpacks:
+      - python_buildpack
+    command: PYTHONPATH=src python -m bls_escalation_mcp.app
+    health-check-type: http
+    health-check-http-endpoint: /health
+    env:
+      PYTHONUNBUFFERED: 1
+      BLS_DATABASE_PATH: /tmp/bls_catalogue.db
+    no-route: true
+    disk_quota: 1G
+    memory: 512M

@@ -26,3 +26,7 @@
   live BLS calls and network transports have not been validated. Pre-scaffold
   SQLite databases with the old incomplete series schema need a deliberate
   migration or recreation; no production migration framework is introduced.
+
+- Template layout: all exposed tools/resources now live in individual files
+  and use package aggregators. Maintain this layout for future additions;
+  see `AGENTS.md` and `hackathon_template.md`.

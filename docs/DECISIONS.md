@@ -1,5 +1,22 @@
 # Decisions
 
+## 2026-10-07 — GSA hackathon project shell
+
+- **Status:** accepted.
+- **Decision:** Add the GSA launch/deployment/documentation shell around the
+  existing factory and lifespan. Separate transport configuration from BLS
+  settings; load local `.env` with environment precedence. Preserve existing
+  stdio entry points. Verify APIs against installed FastMCP 3.2.4.
+- **Why:** Template launch conventions and probes support platform integration
+  without replacing reviewed typed adapters, services, or persistence.
+  Prefer locked dependencies and Python 3.12 over the template's image defaults.
+- **Deferred:** License choice, registry publication, vendor account-specific
+  kits, authentication/tenant isolation, reusable prompts, and agent evals.
+  Draft metadata has no invented remote URL; cloud.gov starts with no route.
+- **Reference:** [Pinned template and mapping](hackathon_template.md).
+- **Revisit when:** A concrete approved hosted demo needs platform identity,
+  persistence, and access controls; do not infer those from shell files.
+
 Record the choices future-you or a coding assistant might otherwise repeat.
 Add an entry when a decision affects interfaces, architecture, dependencies,
 data formats, verification, or a meaningful constraint. Keep entries short.
@@ -129,3 +146,22 @@ MIME types, verified on resource reads as well as discovery.
   [MCP elicitation](https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation).
 - **Revisit when:** A deployment supports multiple users, or explicit verification
   and multi-request retrieval are implemented and independently validated.
+
+
+## 2026-10-07 — Template component layout for future work
+
+- **Status:** accepted; supersedes the shell mapping's earlier suggestion to
+  keep grouping exposed tools by domain. The existing factory/lifespan and
+  domain-service boundaries remain accepted.
+- **Decision:** One exposed tool, prompt, or resource per file, each with a
+  typed `register(mcp)` function and explicit package aggregation. Apply this
+  to every component; the existing grouped modules have been split.
+  Keep public contracts stable during
+  layout-only migration and register each component exactly once.
+- **Why:** The owner requested durable template compliance, including the
+  template's one-tool-per-file convention. Canonical agent rules and developer
+  instructions now agree; shared logic stays below the MCP handler layer.
+- **Implementation:** All existing tools and resources were subsequently
+  migrated in this PR to individual modules and package aggregators. Public
+  contracts and resource contents are preserved. Layout checks and existing
+  FastMCP client tests guard the migration; no grouped adapters remain.
