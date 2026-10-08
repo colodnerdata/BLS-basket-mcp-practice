@@ -150,3 +150,25 @@ Before submitting a component change:
    `requirements.txt` with `poe export-requirements` and review the lock/export.
 5. Record a deliberate template exception in `docs/DECISIONS.md` and update
    `docs/hackathon_template.md`; do not silently weaken the canonical rules.
+
+
+## Python HTTP smoke check (no Node.js)
+
+Set `MCP_TRANSPORT=streamable-http` in the ignored local `.env`, then start
+`uv run --locked python main.py` (or `poe serve` once that task is available).
+In a second terminal in the repository, run:
+
+```bash
+uv run --locked poe smoke
+# For a different port:
+uv run --locked poe smoke --url http://127.0.0.1:8123/mcp
+```
+
+The command prints PASS checks for MCP discovery, access status, guidance
+resources, and a supplied-value calculation (110 / 100 = 1.1). It makes no
+live BLS requests and does not save specifications. It exits nonzero on any
+failure and has a 30-second total timeout (`--timeout` overrides it).
+Configuration stays in `.env`; no terminal environment injection is needed.
+This checks the running HTTP transport, not agent performance or live BLS.
+The existing FastMCP Python client provides the connection; Node.js and
+Inspector are optional external debugging tools, not project dependencies.
