@@ -166,7 +166,7 @@ to suppress Poe's task announcement on protocol stdout.
 ## Python HTTP smoke check (no Node.js)
 
 Set `MCP_TRANSPORT=streamable-http` in the ignored local `.env`, then start
-`uv run --locked python main.py` (or `poe serve` once that task is available).
+`uv run --locked poe serve`.
 In a second terminal in the repository, run:
 
 ```bash
@@ -183,3 +183,9 @@ Configuration stays in `.env`; no terminal environment injection is needed.
 This checks the running HTTP transport, not agent performance or live BLS.
 The existing FastMCP Python client provides the connection; Node.js and
 Inspector are optional external debugging tools, not project dependencies.
+
+The complete two-terminal workflow and expected PASS output are in
+[QUICKSTART.md](../QUICKSTART.md). `serve` and `smoke` are independent tasks:
+smoke does not start a server. Local configuration belongs in `.env`;
+Node.js is not required. `smoke` is restricted to loopback HTTP and bypasses
+system proxies. It does not persist results or execute agent evaluations.
