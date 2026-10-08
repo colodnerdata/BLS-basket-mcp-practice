@@ -143,3 +143,13 @@ tests above, and build it on these principles:
   returned provenance, the computed numbers) rather than by LLM judgment.
 - Re-run whenever a tool description, schema, or model changes; nothing in
   the code "breaks" when behavior drifts, so only the evals catch it.
+
+
+## Python smoke command
+
+`tests/test_smoke_mcp.py` runs the command's workflow through the real in-memory
+FastMCP client without a BLS key, verifies no upstream requests occur, and
+checks that an unrelated server fails discovery. `poe smoke` separately targets
+a running HTTP server and checks discovery, status, guidance resources and
+an independent 110/100=1.1 calculation. It does not establish live BLS access
+or agent performance and does not write specifications.
