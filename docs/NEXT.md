@@ -23,10 +23,16 @@
   Configured retry count remains a deferred seam; no retry behavior is claimed.
   The parser items are milestone M2 in `ROADMAP.md`.
 - Verification boundary: in-memory MCP and mocked HTTP integration are covered;
-  live BLS calls and network transports have not been validated. Pre-scaffold
+  a local loopback HTTP smoke workflow has been validated with mocked BLS.
+  Live BLS calls, remote deployment, and real stdio hosts remain unvalidated. Pre-scaffold
   SQLite databases with the old incomplete series schema need a deliberate
   migration or recreation; no production migration framework is introduced.
 
 - Template layout: all exposed tools/resources now live in individual files
   and use package aggregators. Maintain this layout for future additions;
   see `AGENTS.md` and `hackathon_template.md`.
+
+- Local workflow: `poe serve` launches the existing app; `poe smoke` checks
+  running loopback HTTP with no Node.js, BLS requests, or specification writes.
+  Configure `.env` without terminal environment injection. See `QUICKSTART.md`.
+  Agent evals remain unimplemented; the smoke command is not an eval runner.
