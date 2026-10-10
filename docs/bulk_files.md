@@ -82,8 +82,8 @@ files themselves use tabs).
     `begin_year`. A header-name `DictReader` would misread `begin_year` as the
     blank column and shift the rest. The loader must handle this explicitly
     (and fail loudly if the shape changes). PD `bench_date` is `YYMM`.
-  - PD has **no series title**. Names come from `pd.industry` (and `pd.product`,
-    not yet sampled). PC titles are in `pc.series`.
+  - PD has **no series title**. Names come from `pd.industry` and `pd.product` (see
+    "Product mapping" below). PC titles are in `pc.series`.
 - **Data file sample** (`sample_data/pd.data.20.FabricatedMetal.head`, first 40
   lines of the full file; the full file is 208,929 rows, 10.4 MB, and was
   profiled but not committed). Profile of the full PD partition:
