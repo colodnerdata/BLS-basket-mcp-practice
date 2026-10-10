@@ -28,9 +28,10 @@
   migration or recreation; no production migration framework is introduced.
 
 - Flat-file cache: plan drafted in `bulk_files.md` (PC, PD, ECI, later OEWS;
-  release-aligned conditional refresh). Next action: complete its "Verify
-  first" checklist from `download.bls.gov` (unreachable from the drafting
-  session), then record the decision in `DECISIONS.md`.
+  release-aligned conditional refresh). PC/PD file formats are now
+  confirmed from `docs/sample_data/`. Next action: add `pc.product`,
+  `pd.product`, data-file head samples and `curl -I` headers (see the
+  unchecked items in its "Verify first"), then decide on `wp`.
 
 - Template layout: all exposed tools/resources now live in individual files
   and use package aggregators. Maintain this layout for future additions;
