@@ -35,11 +35,33 @@ One directory per survey (two-letter code). Each holds:
 | PPI industry, discontinued (SIC) | `pd` | **Yes (requested), static** | Frozen history: 17,439 series, latest end year 2003 in the sample. Useful for pre-2004 SIC history, not for current escalation |
 | ECI | `ci` | **Yes — baseline labor (owner decision 2026-10-10)** | Labor escalation for the vertical-construction archetype; quarterly program; format research and parser land in M2' |
 | OEWS | `oe` | **Yes, later** | Locality wage ratios; already a project data source; annual, large |
-| PPI commodities | `wp` | **Undecided (owner: unknown)** | `overview.txt` lists `WP` (commodities) separately from `PC`/`PD`. Materials and equipment escalation may need it. `WD`/`ND` are its/NAICS discontinued sets |
+| PPI commodities | `wp` | **Yes — the materials layer (2026-10-10)** | Commodity price of the material itself, organized by end use/material composition — the basket's unit of account. All series are price indexes (no percent-change families). Partitions include Lumber (08), Metals (10/10x + steel-mill indexes), Nonmetallic minerals (13), Construction services (80), Inputs to construction industries (80i/IP23). Hazard: discontinued series migrate WP → WD |
 | CPI | `cu` | Optional | Only if baskets need consumer-price components; not in current scope |
 
 Start with `pc` and `pd`; `ci` follows for MVP labor (owner decision
-2026-10-10). `wp` is undecided. `oe` (locality) is the deferred program.
+2026-10-10). `wp` is the materials layer (2026-10-10). `oe` (locality) is
+the deferred program.
+
+## Confirmed file facts (WP — PPI commodities, from wp.txt 2026-10-10)
+
+`wp.txt` reviewed; `wp.series`/`wp.item`/data bytes are **pending fetch** —
+the padding/byte-level claims below are from the doc, to be re-verified
+against real files before parsing (the PC/PD/CI pattern).
+
+- `wp.series`: 10 columns (`series_id`, `group_code`, `item_code`,
+  `seasonal`, `YYMM` base_date, `series_title` (real titles),
+  begin/end year+period). Series id = `WP` + seasonal + group + item.
+- Data files share the 5-column shape; monthly periods plus `M13` annual
+  averages; §3 notes `Q05`/`S03` as annual-average codes for quarterly and
+  semiannual series (matters for other programs, not WP itself).
+- Mappings: `wp.group` (group→text), `wp.item` (group+item→text),
+  `wp.period`, `wp.footnote`, `wp.contacts`.
+- Revisions: `P` preliminary, values revise for four months after first
+  publication (same as PC/PD). Data scale change mid-2021 matches PC
+  (one decimal before, three after).
+- **WP → WD migration:** discontinued commodity series leave the WP
+  database for WD between releases; refresh and basket validation must
+  treat a series ending as explicit information, never silent absence.
 
 ## What to fetch per program
 
@@ -271,5 +293,8 @@ establish numerical or format correctness.
       loaded of 2,471 rows, skips recorded in the manifest).
       `ci.data.0.Current` (latest quarter, all series) remains to fetch
       when observation downloads start.
-- [ ] `wp` undecided; `oe` (locality) deferred past the MVP. Sample their
-      `xx.txt` and `xx.series` only when scheduled.
+- [ ] `wp` (decided 2026-10-10: it is the materials layer): `wp.txt`
+      reviewed; fetch `wp.series`, `wp.group`, `wp.item`, `wp.footnote`,
+      `wp.period`, `wp.contacts` before the parser, and re-verify the
+      doc-stated layout against the bytes.
+- [ ] `oe` (locality) deferred past the MVP.

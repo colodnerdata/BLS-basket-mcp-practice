@@ -157,7 +157,10 @@ rebuild the database from checked-in slices with zero network access.
   annual-average period code, and periodicity `I`/`Q`/`A` marks index vs
   percent change — a parser accepts only `I` series and must refuse the
   percent-change ones. Its parser and fixtures follow the PC/PD pattern.
-  `wp` (PPI commodities) remains undecided for raw materials.
+  `wp` (PPI commodities) is decided as the materials layer (2026-10-10;
+  evidence and the WP→WD discontinuation hazard in DECISIONS.md and
+  `bulk_files.md`), with its parser pending the fetched series/mapping
+  files.
 - Cut parser fixture slices from the checked-in `docs/sample_data/` files
   into `tests/fixtures/bls/`, with the source file and retrieval date
   recorded alongside. They are the parser's offline ground truth (replacing
@@ -434,7 +437,7 @@ nothing in the code breaks when behavior drifts.
 | 1 | Credential seam | Resolved 2026-10-10: no user key — the MVP serves a snapshot. `Depends` + `os.environ` (old M1 design, spike-verified) stays on the shelf for the optional server-side live path | Snapshot by default | Resolved |
 | 2 | Calculation surface | (a) one server-side tool that resolves and calculates; (b) the model relays values; (c) cache, then calculate | (a): (b) routes hundreds of numbers through model context as floats and loses provenance; (c) waits for a vintage policy | M3 |
 | 3 | Mixed periodicity | (a) one periodicity per spec; (b) align to quarter-end month; (c) quarterly mean of months; (d) annual average | (a) for the MVP, then design (c) or (d) with every constituent observation in the ledger | M3 |
-| 4 | Seed selection | catalog comes from real `pc`/`pd` series ingestion per `bulk_files.md`; owner archetypes decide which partitions are ingested first | Owner supplies archetypes | M2' |
+| 4 | Seed selection | catalog comes from real `pc`/`pd`/`ci` series ingestion per `bulk_files.md`, with `wp` as the materials layer; owner archetypes decide which partitions are ingested first | Owner supplies archetypes | M2' |
 | 5 | CI for live and eval runs | Not needed while the live path is deferred; local/manual only | Defer with the live path | Post-MVP |
 | 6 | Eval runner | Messages API loop, or a host harness via the Agent SDK | Messages API loop when the harness returns post-MVP; revisit host fidelity | Post-MVP |
 | 7 | Eval spend and credentials | Per-run cap, default model, who supplies Anthropic credentials | Cap per run; `claude-sonnet-5-5` while iterating | Post-MVP |

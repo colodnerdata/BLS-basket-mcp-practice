@@ -32,8 +32,13 @@
   materials through labor. Candidate partitions: 10.Wood, 13.PetroleumCoal
   (asphalt), 16.NonmetallicMineral (cement/aggregate), 17.PrimaryMetal,
   18.FabricatedMetal, 19.Machinery (HVAC), 21.ElectricalMachinery,
-  75.Construction. Caveats: raw materials may map better to the `wp`
-  commodity program (owner decision still open). Labor enters the MVP via
+  75.Construction. Materials mapping settled 2026-10-10: the `wp`
+  commodity program is the materials layer (end-use/material-composition
+  organization; all price indexes; Lumber/Metals/Nonmetallic minerals +
+  construction-inputs partitions) — evidence and the WP→WD discontinuation
+  hazard are recorded in DECISIONS.md and `bulk_files.md`. Caveat: WP
+  bytes are still unverified; fetch `wp.series`/`wp.group`/`wp.item`/
+  `wp.footnote`/`wp.period`/`wp.contacts` (owner-run) before its parser. Labor enters the MVP via
   ECI (`ci`) per the 2026-10-10 scope decision; its parser landed with the
   remaining mappings and **506 current-dollar index series are ingested**
   (quarterly `Q01`-`Q04`; percent-change/rate series refused and recorded).

@@ -275,6 +275,24 @@ MIME types, verified on resource reads as well as discovery.
   explicit, user-supplied values only — the methodology rule (never
   inferred, locality and temporal factors reported separately) is
   unchanged.
+- **WP resolution (2026-10-10, owner-requested evidence review):** `wp`
+  **joins the MVP data scope as the materials layer.** `wp.txt` §1
+  documents that the commodity structure organizes products "by similarity
+  of end use or material composition, regardless of industry of origin" —
+  the basket's unit of account; `pc` industry series (producer revenue by
+  NAICS) remain ingested as background. WP series are all price indexes
+  (ratio scale; no percent-change families), monthly with `M13` annual
+  averages and per-series `YYMM` base dates, with dedicated partitions for
+  Lumber (08), Metals (10/10x incl. steel-mill special indexes),
+  Nonmetallic minerals (13), Construction services (80) and Inputs to
+  construction industries (80i/IP23). Known hazard, recorded: discontinued
+  commodity series migrate from WP to the separate WD database between
+  releases, so a basket series may legitimately end — under the
+  missing-data rule that is an explicit error, and refresh tooling must
+  watch for it (a discontinued basket component is a methodology decision,
+  never silent substitution). Byte-level verification of `wp.series`
+  padding/columns is pending its fetch; the parser follows once the files
+  land.
 - **Consequences:** ECI is quarterly and PPI is monthly, and the MVP keeps
   the one-periodicity-per-specification rule (open decision 3 (a)), so a
   single basket mixing monthly materials and quarterly labor is still
