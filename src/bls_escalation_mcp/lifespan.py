@@ -20,7 +20,7 @@ from bls_escalation_mcp.services.calculations import (
 )
 from bls_escalation_mcp.services.locality import LocalityService
 from bls_escalation_mcp.services.observations import ObservationService
-from bls_escalation_mcp.services.series_catalogue import SeriesCatalogueService
+from bls_escalation_mcp.services.series_catalog import SeriescatalogService
 from bls_escalation_mcp.services.specifications import SpecificationService
 from bls_escalation_mcp.services.validation import ValidationService
 
@@ -30,7 +30,7 @@ class Services:
     """Dependencies owned by one running server, never a module singleton."""
 
     access: BLSAccessService
-    catalogue: SeriesCatalogueService
+    catalog: SeriescatalogService
     observations: ObservationService
     specifications: SpecificationService
     calculations: EscalationCalculationService
@@ -55,7 +55,7 @@ def create_lifespan(
             access = BLSAccessService(settings.bls_api_key)
             services = Services(
                 access=access,
-                catalogue=SeriesCatalogueService(
+                catalog=SeriescatalogService(
                     SeriesRepository(settings.database_path)
                 ),
                 observations=ObservationService(

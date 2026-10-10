@@ -45,6 +45,30 @@ CREATE TABLE IF NOT EXISTS saved_index_specs (
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+
+-- The database-side receipt of ingestion; data/manifest.json (in git) is
+-- the authoritative record. See docs/DECISIONS.md (2026-10-10).
+CREATE TABLE IF NOT EXISTS ingestion_log (
+    file_id TEXT PRIMARY KEY,
+    program TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    source_url TEXT,
+    path_in_repo TEXT,
+    downloaded_at TEXT,
+    bls_last_modified TEXT,
+    size_bytes INTEGER NOT NULL,
+    sha256 TEXT NOT NULL,
+    ingested_at TEXT NOT NULL,
+    ingested_by TEXT NOT NULL,
+    rows_parsed INTEGER NOT NULL,
+    series_loaded INTEGER NOT NULL,
+    observations_loaded INTEGER NOT NULL,
+    missing_rows INTEGER NOT NULL DEFAULT 0,
+    skipped_rows TEXT NOT NULL DEFAULT '{}',
+    period_warnings TEXT NOT NULL,
+    skipped_series TEXT NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL
+);
 """
 
 

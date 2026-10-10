@@ -25,7 +25,7 @@ def create_server(
             "registration and local configuration. Never request keys in "
             "chat or tool arguments. Ask the user to confirm configuration, "
             "restart/reconnect, and recheck status. Configured keys are "
-            "unverified, not authenticated. Catalogue exploration and "
+            "unverified, not authenticated. catalog exploration and "
             "supplied-value calculations can continue during setup. "
             "Retrieval supports at most 50 series and 20 inclusive calendar "
             "years per call; automatic batching and quota tracking are "

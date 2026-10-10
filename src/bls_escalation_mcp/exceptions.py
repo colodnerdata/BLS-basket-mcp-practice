@@ -33,8 +33,8 @@ class UnsupportedLocalityError(BLSEscalationError):
     """Raised when locality logic is requested for unsupported scope."""
 
 
-class CatalogueError(BLSEscalationError):
-    """Raised when catalogue lookup or persistence fails."""
+class catalogError(BLSEscalationError):
+    """Raised when catalog lookup or persistence fails."""
 
 
 class RepositoryError(BLSEscalationError):

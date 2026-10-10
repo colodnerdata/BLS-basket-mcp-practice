@@ -42,7 +42,7 @@ design change.
 - **Status:** accepted.
 - **Context:** The scaffold allowed FastMCP 2.14.7 despite PR #1's claimed
   upgrade; untyped inputs and a registration-only test missed JSON boundary
-  failures and broken catalogue persistence.
+  failures and broken catalog persistence.
 - **Decision:** Support `fastmcp>=3.2.0,<3.3`, with 3.2.4 resolved in `uv.lock`.
   Keep explicit per-module registration functions, typed decorated adapters,
   and the server factory. FastMCP generates contracts from Pydantic models.
@@ -178,7 +178,7 @@ MIME types, verified on resource reads as well as discovery.
 - **Decision:** Plan to cache `download.bls.gov/pub/time.series` flat files
   (PC, PD first; then ECI, OEWS; evaluate WP) with release-aligned conditional refresh,
   run outside MCP handlers. The API path stays for ad hoc lookups.
-- **Why:** No per-call quota or key for bulk reads, a real series catalogue,
+- **Why:** No per-call quota or key for bulk reads, a real series catalog,
   and reproducible provenance (file validators and hashes).
 - **Correction (2026-10-10, after reading the saved BLS docs):** PD is the
   discontinued SIC-based PPI, not commodity data; it is static (updated each
@@ -187,6 +187,9 @@ MIME types, verified on resource reads as well as discovery.
 - **Open:** Unverified facts are listed in `bulk_files.md` ("Verify first").
   Vintage policy for revised PPI values is required before observations are
   served from cache.
+- **Update (2026-10-10):** the "ECI after the MVP" ordering below is revised
+  by the MVP data-scope entry at the end of this document: ECI is the MVP's
+  baseline labor source; OEWS localization is the deferred piece.
 - **Revisit when:** The verify-first checklist is done.
 
 ## 2026-10-10 — Hackathon MVP: flat-file snapshot, build-from-Git deployment, and an ingestion manifest
@@ -253,3 +256,68 @@ MIME types, verified on resource reads as well as discovery.
   outgrows comfortable size (then reconsider release assets or LFS); BLS
   publishes a flat-file usage policy; or non-public or multi-tenant
   features require authentication and per-user state.
+
+
+## 2026-10-10 — MVP data scope: materials and baseline labor in, OEWS localization out
+
+- **Status:** accepted. Revises the ECI ordering in the flat-file mirror
+  proposal above ("ECI after the MVP") and the matching sentences in
+  `bulk_files.md`.
+- **Context:** The first basket archetype is vertical construction "from
+  the materials to the labor" (owner, 2026-10-10). Labor escalation
+  therefore cannot wait past the MVP; geographic localization can.
+- **Decision:** MVP data scope is PPI materials (the `pc`/`pd` ingestion
+  already landed; whether raw materials map better to the `wp` commodity
+  program stays an open owner decision) **plus** the ECI program (`ci`) as
+  the baseline labor source, ingested in M2' once its formats are sampled
+  and verified. OEWS (`oe`) locality mapping and any automated wage-ratio
+  application stay deferred to after the MVP. Locality factors remain
+  explicit, user-supplied values only — the methodology rule (never
+  inferred, locality and temporal factors reported separately) is
+  unchanged.
+- **WP resolution (2026-10-10, owner-requested evidence review):** `wp`
+  **joins the MVP data scope as the materials layer.** `wp.txt` §1
+  documents that the commodity structure organizes products "by similarity
+  of end use or material composition, regardless of industry of origin" —
+  the basket's unit of account; `pc` industry series (producer revenue by
+  NAICS) remain ingested as background. WP series are all price indexes
+  (ratio scale; no percent-change families), monthly with `M13` annual
+  averages and per-series `YYMM` base dates, with dedicated partitions for
+  Lumber (08), Metals (10/10x incl. steel-mill special indexes),
+  Nonmetallic minerals (13), Construction services (80) and Inputs to
+  construction industries (80i/IP23). Known hazard, recorded: discontinued
+  commodity series migrate from WP to the separate WD database between
+  releases, so a basket series may legitimately end — under the
+  missing-data rule that is an explicit error, and refresh tooling must
+  watch for it (a discontinued basket component is a methodology decision,
+  never silent substitution). Byte-level verification of `wp.series`
+  padding/columns is pending its fetch; the parser follows once the files
+  land.
+- **Consequences:** ECI is quarterly and PPI is monthly, and the MVP keeps
+  the one-periodicity-per-specification rule (open decision 3 (a)), so a
+  single basket mixing monthly materials and quarterly labor is still
+  refused. Composition paths — an annual-average basket (PPI `M13` with
+  ECI's annual-average code) or separate same-periodicity specifications —
+  are decided once ECI's period encodings (`Q01`-`Q05`, any `S01`/`A01`)
+  are verified against real `ci` files; they are unverified as of this
+  decision. The owner fetches the small `ci` documentation/series/mapping
+  files per `docs/bls_etiquette.md` and commits them to
+  `docs/sample_data/`; ECI parsing and ingestion then follow the same
+  verified-format, fixture-tested pattern as PC/PD.
+- **Verified the same day:** `ci.txt` and `ci.series` settle the pending
+  items (see the CI section of `bulk_files.md`): data periods are
+  `Q01`—`Q04` only, with **no** annual-average period code, and ECI's
+  `periodicity_code` (`I` index / `Q` 3-month / `A` 12-month percent
+  change) decides eligibility — only index (`I`) series are escalation
+  inputs. Consequence: monthly PPI materials and quarterly ECI labor still
+  cannot share one specification, and an annual-average basket has no ECI
+  counterpart, so the MVP composition path is **parallel same-periodicity
+  specifications** (e.g. a quarterly labor spec alongside a monthly or
+  annual-average materials spec) until open decision 3 is revisited.
+  Confirmed on first real data ingestion: ECI files contain explicit
+  missing-value rows (`-`, footnote `A`) and rows for ineligible series —
+  both are skipped and counted in the manifest (`missing_rows`,
+  `skipped_rows`), never stored or fabricated; the "missing is an error"
+  rule governs calculation-time resolution, not ingestion.
+- **Revisit when:** ECI period codes and value semantics are verified, or
+  the hackathon concludes and OEWS localization returns to the plan.

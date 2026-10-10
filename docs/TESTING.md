@@ -48,6 +48,50 @@ Guarantees, and what enforces them:
 
 ## Unit tests
 
+### `tests/test_flat_file.py` — BLS flat-file parsers (PC/PD)
+
+Expected values are hand-checked against the fixture slices in
+`tests/fixtures/bls/flatfile/` (bytes cut from the real files in
+`docs/sample_data/`).
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_pc_series_padding_and_fields` | `"PCU1133--1133--"` with padding stripped, title/base/periods as in the file | Space-padded fields leaking into stored IDs or metadata |
+| `test_pd_series_blank_extra_column` / `test_pd_series_shape_drift_fails_loudly` | PD's undocumented blank 6th column skipped; any other shape → `FlatFileFormatError` | The header/row field-count mismatch silently shifting PD columns (known real quirk) |
+| `test_data_file_period_identity_and_precision` | `M13` → `month=None` with exact value `99.0`; `234.780` keeps its 3-decimal scale; `P` footnote captured | Annual averages misfiling as a 13th month; float rounding of index values |
+| `test_data_file_unknown_period_is_warned_not_dropped` | Unknown `Q05` row skipped with `warnings["Q05"] == 1` | Silent data loss — skips are always counted into the manifest |
+| `test_data_file_header_only_partition_is_empty_not_error` | Header-only partition → 0 rows, no error | Empty partitions (they exist: 72 bytes) failing ingestion |
+| `test_data_file_field_drift_fails_loudly` | `FlatFileFormatError` on a 6-field data row | Column-count drift parsing into wrong positions |
+| `test_pd_product_quirk_name_in_last_field` / `test_simple_mappings` | `"Secondary products"` read from the last field of a 6-field row; code+name mappings exact | Fixed-position name parsing misreading real mapping rows |
+| `test_ci_series_file_parse` | The 4 fixture rows parse with owner/industry/periodicity/estimate codes and quarterly begin/end (construction wages series: 2001-Q1 → 2026-Q2), padding stripped | ECI's 15-column layout misread |
+| `test_ci_index_eligibility_gate` | The 3 `I` series are eligible and the `Q` percent-change twin is not | Percent-change or response-rate series leaking into the catalog as escalation inputs |
+| `test_ci_mappings` | `I` → "Current dollar index number", `01` → "Total compensation", `2` → "Private industry workers" | CI's name-in-column-2 layout (trailing display metadata) being misparsed as the last field |
+| `test_data_file_quarterly_periods` | `Q01` → quarter=1, month=None; out-of-range `Q05` skipped with a counted warning | Quarterly periods misfiled or silently dropped |
+| `test_data_file_missing_dash_is_recorded` | A `-` row (footnote `A`) is skipped with `missing_rows == 1` and a parallel fabricated-value row (`abc`) raises `FlatFileFormatError` | The missing-data sentinel ever becoming a stored observation, or hard failures that would make real released files un-ingestible |
+| `test_classify_file*` (parametrized) | Filenames map to `(program, kind, canonical upstream name)`, stripping `.txt`/`.sample`/`.head`/`.slice`; docs/probe/README files rejected | Misrouting a support file into a parser, or recording a sample's name as a canonical URL |
+
+### `tests/test_manifest.py` — manifest and `verify-ingest`
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_ingest_records_dual_provenance` | Manifest records all 13 fixture files with sha256/counts/repo paths, including the ECI eligibility skips (`skipped_series`) on `ci.series`; saving is byte-stable | Provenance drift, silent eligibility skips, or non-deterministic manifest writes |
+| `test_verify_passes_on_consistent_records` | No mismatches after a clean fixture ingestion | False positives in the agreement check |
+| `test_verify_catches_tampered_counts_and_hash` | Tampered size/hash/count in a copy → each reported | `verify-ingest` failing to detect a changed input file |
+| `test_verify_catches_missing_file_and_log_drift` / `test_verify_flags_unlogged_manifest_entries` | Missing checkout file listed by path; manifest/log disagreements (counts; unlogged entries) each reported | The git record and the database receipt drifting apart |
+
+### `tests/integration/test_flatfile_ingest.py` — replay of the real samples (offline)
+
+Ingests `docs/sample_data/` (owner-saved real BLS files) into a scratch
+database. This is the recorded-replay layer: no network is involved.
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_series_catalog_counts_match_files` | Exactly 4,510 + 17,439 PPI series (verified file row counts), and ECI rows loaded equal the manifest's recorded eligible count with all skips accounted for | Series rows lost, double-counted at scale, or eligibility skips without a record |
+| `test_eci_series_metadata_and_eligibility` | `CIS2022300000000I` (construction wages, private industry) is quarterly ECI with units "index (base Dec 2005=100)", 2001-Q1→2026-Q2, active, and searchable; its `Q`/`A` twins are absent | The percent-change families leaking into the catalog, or ECI metadata (base, periodicity, active) mis-set |
+| `test_pc_series_metadata` / `test_pd_series_metadata` / `test_search_finds_real_series` | Hand-read values from the files (`PCU1133--1133--` base 198112, first `1981-M12`, active; `PDU1011#` SIC, inactive, ends `2003-M13` with a synthesized title; "Logging" searchable) | Mis-mapping real series-file fields into catalog metadata |
+| `test_pc_observations_exact_and_preliminary` / `test_m13_is_a_distinct_annual_average` | `Decimal("234.780")` exact; `2026-M05` preliminary with footnote text and series-derived units; `1969-M13` is `ANNUAL_AVERAGE` distinct from `M12` and holds `35.0` | Value precision loss, preliminary-state confusion, and annual-average/month conflation through the full ingest path |
+| `test_manifest_and_log_agree_after_ingest` / `test_verify_cli_passes` | Manifest and `ingestion_log` agree; `verify` exits 0 | The dual-record contract breaking end-to-end |
+
 ### `tests/test_calculations.py` — `EscalationCalculationService`
 
 | Test | Expected | Guards against |

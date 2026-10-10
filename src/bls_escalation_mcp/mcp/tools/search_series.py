@@ -14,6 +14,6 @@ def register(mcp: FastMCP) -> None:
     def search_series(
         request: SeriesSearchRequest, ctx: Context
     ) -> list[SeriesSearchResult]:
-        """Search the local catalogue by text and explicit program filters."""
+        """Search the local catalog by text and explicit program filters."""
         with domain_errors():
-            return get_services(ctx).catalogue.search(request)
+            return get_services(ctx).catalog.search(request)

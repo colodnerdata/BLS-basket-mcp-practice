@@ -34,8 +34,8 @@ Restart the server after changing configuration. Existing launches through
 `fastmcp.json` and `python -m bls_escalation_mcp.server` remain stdio.
 
 Try asking the client to inspect access status and read `setup://bls-api`,
-then explain the methodology. Catalogue search needs seed metadata; this
-shell change does not populate a live BLS catalogue. Supplied-value
+then explain the methodology. catalog search needs seed metadata; this
+shell change does not populate a live BLS catalog. Supplied-value
 calculations can run without a BLS key.
 
 For local Streamable HTTP:

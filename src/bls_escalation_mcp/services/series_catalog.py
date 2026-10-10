@@ -8,7 +8,7 @@ from bls_escalation_mcp.models.series import (
 from bls_escalation_mcp.repositories.series import SeriesRepository
 
 
-class SeriesCatalogueService:
+class SeriescatalogService:
     """Small metadata search service for BLS series."""
 
     def __init__(self, repository: SeriesRepository) -> None:

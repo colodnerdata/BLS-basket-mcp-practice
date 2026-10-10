@@ -11,7 +11,7 @@ against the BLS files the owner saved in [`sample_data/`](sample_data/)
 The BLS API v2 is capped at 50 series and 20 years per call and needs a key
 (see [bls_api.md](bls_api.md)). The flat files at
 <https://download.bls.gov/pub/time.series/> carry the same series with no key
-and no per-call quota, and they also give the full series catalogue and code
+and no per-call quota, and they also give the full series catalog and code
 mappings that `search_series` needs. A local mirror makes calculations
 reproducible: every result can cite the exact file, its retrieval time and its
 validators (`ETag` / `Last-Modified` / hash).
@@ -33,12 +33,35 @@ One directory per survey (two-letter code). Each holds:
 | --- | --- | --- | --- |
 | PPI industry, current (NAICS) | `pc` | **Yes (requested)** | Live monthly series: 4,510 series, 3,454 ending 2026-M08. `pc.data.0.Current` ~64 MB (search snippet, unverified) |
 | PPI industry, discontinued (SIC) | `pd` | **Yes (requested), static** | Frozen history: 17,439 series, latest end year 2003 in the sample. Useful for pre-2004 SIC history, not for current escalation |
-| ECI | `ci` | **After the MVP (kept in plan)** | Labor escalation; already a project data source (`data_sources.md`). Owner decision: deal with it after the MVP |
+| ECI | `ci` | **Yes — baseline labor (owner decision 2026-10-10)** | Labor escalation for the vertical-construction archetype; quarterly program; format research and parser land in M2' |
 | OEWS | `oe` | **Yes, later** | Locality wage ratios; already a project data source; annual, large |
-| PPI commodities | `wp` | **Undecided (owner: unknown)** | `overview.txt` lists `WP` (commodities) separately from `PC`/`PD`. Materials and equipment escalation may need it. `WD`/`ND` are its/NAICS discontinued sets |
+| PPI commodities | `wp` | **Yes — the materials layer (2026-10-10)** | Commodity price of the material itself, organized by end use/material composition — the basket's unit of account. All series are price indexes (no percent-change families). Partitions include Lumber (08), Metals (10/10x + steel-mill indexes), Nonmetallic minerals (13), Construction services (80), Inputs to construction industries (80i/IP23). Hazard: discontinued series migrate WP → WD |
 | CPI | `cu` | Optional | Only if baskets need consumer-price components; not in current scope |
 
-Start with `pc` and `pd`; `ci` comes after the MVP; `wp` is undecided. Add `oe` when locality mapping is scheduled.
+Start with `pc` and `pd`; `ci` follows for MVP labor (owner decision
+2026-10-10). `wp` is the materials layer (2026-10-10). `oe` (locality) is
+the deferred program.
+
+## Confirmed file facts (WP — PPI commodities, from wp.txt 2026-10-10)
+
+`wp.txt` reviewed; `wp.series`/`wp.item`/data bytes are **pending fetch** —
+the padding/byte-level claims below are from the doc, to be re-verified
+against real files before parsing (the PC/PD/CI pattern).
+
+- `wp.series`: 10 columns (`series_id`, `group_code`, `item_code`,
+  `seasonal`, `YYMM` base_date, `series_title` (real titles),
+  begin/end year+period). Series id = `WP` + seasonal + group + item.
+- Data files share the 5-column shape; monthly periods plus `M13` annual
+  averages; §3 notes `Q05`/`S03` as annual-average codes for quarterly and
+  semiannual series (matters for other programs, not WP itself).
+- Mappings: `wp.group` (group→text), `wp.item` (group+item→text),
+  `wp.period`, `wp.footnote`, `wp.contacts`.
+- Revisions: `P` preliminary, values revise for four months after first
+  publication (same as PC/PD). Data scale change mid-2021 matches PC
+  (one decimal before, three after).
+- **WP → WD migration:** discontinued commodity series leave the WP
+  database for WD between releases; refresh and basket validation must
+  treat a series ending as explicit information, never silent absence.
 
 ## What to fetch per program
 
@@ -149,6 +172,54 @@ files themselves use tabs).
   month is an error under the roadmap's missing-data rule, not something to
   fill.
 
+## Confirmed file facts (CI — ECI, verified 2026-10-10)
+
+From the owner-saved `ci.txt` (the authoritative file list) and the checked-in
+`ci.series`, `ci.industry`, `ci.subcell`, `ci.footnote`, `ci.seasonal`.
+
+- **Files that exist:** `ci.series`, `ci.data.0.Current`, `ci.data.1.AllData`,
+  `ci.aspect`, mappings `ci.area`/`ci.estimate`/`ci.footnote`/`ci.industry`/
+  `ci.occupation`/`ci.owner`/`ci.periodicity`/`ci.seasonal`/`ci.subcell`,
+  plus `ci.contacts`, `ci.txt`. **`ci.period` and `ci.datatype` do *not*
+  exist** (an earlier guess fetched 404 pages — deleted, not committed).
+- **Periods:** data-period codes are `Q01`-`Q04` only (reference months
+  Mar/Jun/Sep/Dec, ci.txt §1). There is **no annual-average period code** —
+  no `Q05` or `S01` in these files.
+- **periodicity_code picks the measure, and it is the `series_id`'s final
+  character:** `I` = index (levels; every current index shares base
+  *December 2005 = 100*, ci.txt §1), `Q` = 3-month percent change, `A` =
+  12-month percent change. **Only `I` series are valid temporal-factor
+  inputs;** `Q`/`A` are percent changes and must be refused per the M3
+  units rule. Example pair proving the encoding: `CIS...00I` ("current
+  dollar index") vs `CIS...00Q` ("3-month percent change").
+- **estimate_code** selects the cost concept (total compensation, wages and
+  salaries, total benefits) — needed for basket selection; its mapping
+  (`ci.estimate`) was not yet fetched.
+- **Series layout:** TSV, padded fields, 15 columns, real `series_title`
+  (`CIS1010000000000I` = "Total compensation for all civilian workers,
+  current dollar index"), begin/end year+period; 2,471 series in this
+  snapshot. Construction industry code is `230000` (`ci.industry`).
+- **CI mapping files keep the name in the *second* column** followed by
+  display metadata (`display_level`, `selectable`, `sort_sequence`) — so
+  the generic last-field rule would grab `sort_sequence`; CI mappings use
+  `name_column=1` in `parse_code_mapping`. (Found during implementation,
+  2026-10-10; applies to `ci.industry`, `ci.occupation`, `ci.area`,
+  `ci.estimate`, `ci.owner`, `ci.periodicity`, `ci.subcell`.)
+- **Data layout:** `ci.data.0.Current`/`AllData` share the PC/PD 5-column
+  shape. `ci.aspect` is standard errors with an extra `aspect_type` column —
+  **never ingest it as observations.**
+- **Missing data:** footnote `A` = "Dashes indicate data not available":
+  data rows may carry `-` as the value. Real example (found on ingestion
+  2026-10-10): `CIU1010000000000R` 2022-Q03. Such rows carry **no
+  observation** — they are skipped and counted in the manifest as
+  `missing_rows`, never stored, fabricated, or zeroed; a calculation over
+  that period still errors as missing downstream. Likewise, data rows for
+  series the catalog refused (percent-change/rate families) are skipped
+  and counted as `skipped_rows["series_not_loaded"]`.
+- **Verified live counts (2026-10-10, `ci.data.0.Current`):** 100,074
+  rows parsed, 2 missing, 79,106 skipped (rows of ineligible series),
+  20,968 observations loaded.
+
 ## Etiquette and safety
 
 - Send a descriptive `User-Agent` with a contact address; BLS has rejected
@@ -191,7 +262,7 @@ files themselves use tabs).
 1. Verify-first checklist (below); record outcomes in `DECISIONS.md`.
 2. Fetcher plus manifest with mocked-HTTP tests (conditional GET, partial
    download, 304, 403 backoff).
-3. `pc`/`pd` series + mapping ingestion into the catalogue (replaces the
+3. `pc`/`pd` series + mapping ingestion into the catalog (replaces the
    curated seed, ROADMAP M4 successor), with the PD column-shape handling
    and fixture tests built from `sample_data/` rows.
 4. `pc.data.0.Current` and `pd.data.0.Current` into the observation store with
@@ -207,15 +278,32 @@ establish numerical or format correctness.
 - [x] `pd` is the discontinued SIC set, **not** commodity data (earlier draft of
       this plan was wrong); `wp` is the commodities program.
 - [x] Period codes (`M13` annual average) and footnote codes (`P`, `C`) for PC/PD.
-- [ ] **Unverified:** whether the server returns `ETag`/`Last-Modified` and
-      honors conditional requests; BLS's current User-Agent and rate rules.
-      Run `scripts/probe_bls_headers.py pc --user-agent "<name email>"` from a
-      networked machine (HEAD only, sequential, 1 s delay) and commit its
-      `--out` JSON under `sample_data/`.
+- [x] **Verified 2026-10-10**, owner-run per `docs/bls_etiquette.md`
+      (HEAD-only, sequential, 1 s delay, 160 requests, no failures;
+      results in `sample_data/pc_headers_probe.json`): every `pc/` file
+      returns `Content-Length`, `Last-Modified`, `ETag`, and answers
+      conditional requests (`If-None-Match`/`If-Modified-Since`) with
+      `304`. Caveats: the ETag is a per-release timestamp stamp shared by
+      all files of a release — not per-file content identity — so
+      `Last-Modified`/`Content-Length` are the cheap change signals and
+      the manifest sha256 is the revision detector; and header-only
+      partitions exist (`pc.data.61.EducationalServices`, 72 bytes).
 - [x] `pc.product` / `pd.product` join one-to-one to their series files (above).
 - [x] PD data-file layout and value format (one partition profiled).
 - [x] PC data layout, 3-decimal values and `P` footnotes (one partition profiled).
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
-      directory listings.
-- [ ] `wp` undecided; `ci` and `oe` deferred past the MVP. Sample their
-      `xx.txt` and `xx.series` only when scheduled.
+      directory listings — superseded for `pc/` by the 2026-10-10 probe
+      JSON; repeat for `pd/` when its download is scheduled.
+- [x] `ci` (ECI, in MVP scope since 2026-10-10): sampled, verified, and
+      ingested 2026-10-10 — formats above; quarterly `Q01`-`Q04` only, no
+      annual-average period code; `I`/`Q`/`A` periodicity encodes index vs
+      percent change (only `I` is escalation-eligible; 506 index series
+      loaded of 2,471 rows, skips recorded in the manifest);
+      `ci.data.0.Current` fetched and ingested (21,041 CI observations; the
+      missing/skipped row semantics are listed under "Confirmed file
+      facts (CI)").
+- [ ] `wp` (decided 2026-10-10: it is the materials layer): `wp.txt`
+      reviewed; fetch `wp.series`, `wp.group`, `wp.item`, `wp.footnote`,
+      `wp.period`, `wp.contacts` before the parser, and re-verify the
+      doc-stated layout against the bytes.
+- [ ] `oe` (locality) deferred past the MVP.
