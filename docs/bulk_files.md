@@ -207,15 +207,21 @@ establish numerical or format correctness.
 - [x] `pd` is the discontinued SIC set, **not** commodity data (earlier draft of
       this plan was wrong); `wp` is the commodities program.
 - [x] Period codes (`M13` annual average) and footnote codes (`P`, `C`) for PC/PD.
-- [ ] **Unverified:** whether the server returns `ETag`/`Last-Modified` and
-      honors conditional requests; BLS's current User-Agent and rate rules.
-      Run `scripts/probe_bls_headers.py pc --user-agent "<name email>"` from a
-      networked machine (HEAD only, sequential, 1 s delay) and commit its
-      `--out` JSON under `sample_data/`.
+- [x] **Verified 2026-10-10**, owner-run per `docs/bls_etiquette.md`
+      (HEAD-only, sequential, 1 s delay, 160 requests, no failures;
+      results in `sample_data/pc_headers_probe.json`): every `pc/` file
+      returns `Content-Length`, `Last-Modified`, `ETag`, and answers
+      conditional requests (`If-None-Match`/`If-Modified-Since`) with
+      `304`. Caveats: the ETag is a per-release timestamp stamp shared by
+      all files of a release — not per-file content identity — so
+      `Last-Modified`/`Content-Length` are the cheap change signals and
+      the manifest sha256 is the revision detector; and header-only
+      partitions exist (`pc.data.61.EducationalServices`, 72 bytes).
 - [x] `pc.product` / `pd.product` join one-to-one to their series files (above).
 - [x] PD data-file layout and value format (one partition profiled).
 - [x] PC data layout, 3-decimal values and `P` footnotes (one partition profiled).
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
-      directory listings.
+      directory listings — superseded for `pc/` by the 2026-10-10 probe
+      JSON; repeat for `pd/` when its download is scheduled.
 - [ ] `wp` undecided; `ci` and `oe` deferred past the MVP. Sample their
       `xx.txt` and `xx.series` only when scheduled.

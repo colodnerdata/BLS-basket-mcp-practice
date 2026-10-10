@@ -37,7 +37,10 @@ test = "pytest"
 test-live = "pytest -m live"
 test-cov = "pytest --cov=bls_escalation_mcp --cov-report=term-missing"
 typecheck = "mypy src"
-check = ["lint", "format-check", "typecheck", "test"]
+ingest = "python -m bls_escalation_mcp.data.ingest"
+build-catalogue = { cmd = "python -m bls_escalation_mcp.data.ingest --dir docs/sample_data --notes \"Owner-saved pre-manifest snapshot; retrieval date unknown. Last-Modified from the 2026-10-10 header probe.\"", help = "Ingest the checked-in BLS sample files into the local catalogue" }
+verify-ingest = "python -m bls_escalation_mcp.data.verify"
+check = ["lint", "format-check", "typecheck", "verify-ingest", "test"]
 export-requirements = "uv export --locked --no-dev --no-emit-project --no-hashes --output-file requirements.txt"
 
 [tool.pytest.ini_options]

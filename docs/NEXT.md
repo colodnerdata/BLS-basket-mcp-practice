@@ -16,20 +16,27 @@
   and the fetcher/loader design live in `bulk_files.md`.
 - Working state: FastMCP 3.2.4, typed MCP contracts, lifespan-owned
   services, client integration tests, and automated type checking are
-  implemented; `poe check` passes. The template-aligned shell landed on
-  main: one exposed component per file with package aggregators,
+  implemented; `poe check` passes (including `verify-ingest`). The
+  template-aligned shell landed on main (one component per file,
   `main.py`/`app.py`/`routes.py`, Dockerfile, `manifest.yaml`,
-  `server.json`, QUICKSTART.md, and `eval/`. M0 (test-harness foundation)
-  lands in PR #11: environment key isolation in `tests/conftest.py`, the
-  shared canned-payload harness in `tests/harness.py`, the `live` marker
-  with opt-in `poe test-live`, and the `poe test-cov` diagnostic.
-- Next action: M2' flat-file ingestion. The mapping research is largely
-  done in `bulk_files.md`: PC/PD file formats are confirmed from the
-  checked-in `docs/sample_data/` files; remaining verification is a header
-  probe from a networked machine (`scripts/probe_bls_headers.py pc`). ECI
-  is deferred past the MVP; `wp` (PPI commodities) is undecided. Then M3
-  (local observation resolution), M4' (deterministic eval-evidence pack),
-  M5' (remaining submission readiness + Code Engine spike).
+  `server.json`, QUICKSTART.md, `eval/`). M0 landed in PR #11. M2'
+  groundwork landed in PR #12: PC/PD parsers, `ingestion_log` +
+  `data/manifest.json` dual provenance, `poe build-catalogue` /
+  `poe verify-ingest`, and a catalogue of all 21,949 PC/PD series
+  ingested offline from the checked-in samples.
+- Next action: M2' remainder — the conditional-GET fetcher (verified by
+  the 2026-10-10 header probe: all `pc/` files honor 304; ETag is a
+  per-release stamp, so the manifest sha256 is the revision signal) and one
+  owner-invoked live download of the basket-relevant data partitions.
+  First archetype is **vertical construction** (owner, 2026-10-10):
+  materials through labor. Candidate partitions: 10.Wood, 13.PetroleumCoal
+  (asphalt), 16.NonmetallicMineral (cement/aggregate), 17.PrimaryMetal,
+  18.FabricatedMetal, 19.Machinery (HVAC), 21.ElectricalMachinery,
+  75.Construction. Caveats: raw materials may map better to the `wp`
+  commodity program (owner decision still open), and labor escalation
+  needs ECI, which is deferred past the MVP — labor components stay
+  fixed/supplied-value until then. Then M3 (observation resolution over the
+  snapshot), M4' (eval evidence pack), M5' (Code Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from
   2026-10-13) or mcp@gsa.gov: the submission deadline; whether an existing
   repo may adopt the template's structure or must be based on it; IBM Cloud
