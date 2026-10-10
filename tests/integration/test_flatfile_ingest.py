@@ -1,7 +1,7 @@
 """Offline ingestion of the real checked-in samples (docs/sample_data/).
 
 This is the recorded-replay layer for M2': the owner-saved PC/PD files
-parse into the catalogue and observation store with hand-verified counts
+parse into the catalog and observation store with hand-verified counts
 and identities, and the manifest/log dual record agrees afterwards.
 """
 
@@ -28,7 +28,7 @@ SAMPLES = Path("docs/sample_data")
 def ingested(tmp_path_factory):
     """Ingest docs/sample_data once per module into a scratch database."""
     tmp_path = tmp_path_factory.mktemp("ingest")
-    database = tmp_path / "catalogue.db"
+    database = tmp_path / "catalog.db"
     manifest_path = tmp_path / "manifest.json"
     initialize_schema(str(database))
     service = IngestionService(str(database), manifest_path)
@@ -40,7 +40,7 @@ def ingested(tmp_path_factory):
     }
 
 
-def test_series_catalogue_counts_match_files(ingested) -> None:
+def test_series_catalog_counts_match_files(ingested) -> None:
     repository = SeriesRepository(str(ingested["database"]))
     series = repository.list_by_program(BLSProgram.PPI)
     # Verified file counts: 4,510 PC + 17,439 PD data rows (bulk_files.md).

@@ -6,7 +6,7 @@ Checks, all offline (part of ``poe check``):
    sha256 match — a silent upstream or local revision surfaces here.
 2. Re-parsing each checked-in file reproduces the recorded row/series/
    observation counts and period-code warnings.
-3. When a database exists (default ``./bls_catalogue.db``), its
+3. When a database exists (default ``./bls_catalog.db``), its
    ``ingestion_log`` receipt must agree with the manifest on file count
    and per-file hash/counts. No database means check 3 is skipped and
    reported, not hidden: CI on a clean checkout verifies the manifest

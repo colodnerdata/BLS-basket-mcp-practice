@@ -13,4 +13,4 @@ def register(mcp: FastMCP) -> None:
     def describe_series(series_id: str, ctx: Context) -> SeriesMetadata | None:
         """Read local series metadata; return null when the ID is absent."""
         with domain_errors():
-            return get_services(ctx).catalogue.get(series_id)
+            return get_services(ctx).catalog.get(series_id)

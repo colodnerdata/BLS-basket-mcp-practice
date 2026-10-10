@@ -21,8 +21,8 @@
   `main.py`/`app.py`/`routes.py`, Dockerfile, `manifest.yaml`,
   `server.json`, QUICKSTART.md, `eval/`). M0 landed in PR #11. M2'
   groundwork landed in PR #12: PC/PD parsers, `ingestion_log` +
-  `data/manifest.json` dual provenance, `poe build-catalogue` /
-  `poe verify-ingest`, and a catalogue of all 21,949 PC/PD series
+  `data/manifest.json` dual provenance, `poe build-catalog` /
+  `poe verify-ingest`, and a catalog of all 21,949 PC/PD series
   ingested offline from the checked-in samples.
 - Next action: M2' remainder — the conditional-GET fetcher (verified by
   the 2026-10-10 header probe: all `pc/` files honor 304; ETag is a

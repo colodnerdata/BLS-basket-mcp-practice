@@ -17,7 +17,7 @@ and per-request series/year bounds before making HTTP requests.
 Live MCP retrieval requires `BLS_API_KEY`. There is no anonymous v1 fallback.
 The lower-level BLS client is a transport/parser, not an access-policy boundary;
 standalone client calls do not receive the MCP service's preflight protections.
-Catalogue searches and calculations using supplied values need no key.
+catalog searches and calculations using supplied values need no key.
 
 ## Requesting and configuring a key
 

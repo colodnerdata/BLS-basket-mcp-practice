@@ -7,7 +7,7 @@ REGISTRATION_URL = "https://data.bls.gov/registrationEngine/"
 SETUP_GUIDE = """# BLS API setup
 
 This local, single-user server requires a BLS registration key for live
-observation retrieval. Catalogue tools and supplied-value calculations work
+observation retrieval. catalog tools and supplied-value calculations work
 without one. No automatic anonymous-access fallback is implemented.
 
 1. Open https://data.bls.gov/registrationEngine/.

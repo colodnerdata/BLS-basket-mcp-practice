@@ -1,9 +1,9 @@
-"""Ingest BLS flat files into the catalogue, observations, and manifest.
+"""Ingest BLS flat files into the catalog, observations, and manifest.
 
 Owner-invoked command — deliberately **not** an MCP tool, so judges and
 clients cannot trigger ingestion (see ``docs/ROADMAP.md`` M2'):
 
-    uv run --locked poe build-catalogue
+    uv run --locked poe build-catalog
 
 ingests the checked-in ``docs/sample_data/`` directory into the configured
 database and updates ``data/manifest.json`` (git) plus the
@@ -250,7 +250,7 @@ class IngestionService:
     def _to_metadata(
         self, program: FlatFileProgram, parsed: ParsedSeries
     ) -> SeriesMetadata:
-        """Build catalogue metadata; PD titles come from mapping files."""
+        """Build catalog metadata; PD titles come from mapping files."""
         if program == "pc":
             title = parsed.title or f"PPI NAICS {parsed.industry_code}"
             classification = "NAICS"
@@ -367,7 +367,7 @@ def main() -> int:
     parser.add_argument(
         "--db",
         default=None,
-        help="Database path (default: BLS_DATABASE_PATH / ./bls_catalogue.db)",
+        help="Database path (default: BLS_DATABASE_PATH / ./bls_catalog.db)",
     )
     parser.add_argument(
         "--manifest",
@@ -412,7 +412,7 @@ def main() -> int:
         )
     manifest: IngestionManifest = load_manifest(args.manifest)
     print(
-        f"Ingested {len(entries)} files; catalogue now records "
+        f"Ingested {len(entries)} files; catalog now records "
         f"{sum(e.series_loaded for e in entries)} series rows and "
         f"{sum(e.observations_loaded for e in entries)} observations. "
         f"Manifest: {args.manifest} ({len(manifest.files)} files total). "

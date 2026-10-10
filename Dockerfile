@@ -7,7 +7,7 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
 RUN uv sync --locked --no-dev --no-editable
 RUN useradd --uid 10001 --create-home mcp && mkdir /data && chown mcp /data
-ENV BLS_DATABASE_PATH=/data/bls_catalogue.db
+ENV BLS_DATABASE_PATH=/data/bls_catalog.db
 USER mcp
 EXPOSE 8080
 CMD ["/app/.venv/bin/python", "-m", "bls_escalation_mcp.app"]

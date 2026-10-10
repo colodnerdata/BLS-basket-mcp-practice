@@ -42,7 +42,7 @@ design change.
 - **Status:** accepted.
 - **Context:** The scaffold allowed FastMCP 2.14.7 despite PR #1's claimed
   upgrade; untyped inputs and a registration-only test missed JSON boundary
-  failures and broken catalogue persistence.
+  failures and broken catalog persistence.
 - **Decision:** Support `fastmcp>=3.2.0,<3.3`, with 3.2.4 resolved in `uv.lock`.
   Keep explicit per-module registration functions, typed decorated adapters,
   and the server factory. FastMCP generates contracts from Pydantic models.
@@ -178,7 +178,7 @@ MIME types, verified on resource reads as well as discovery.
 - **Decision:** Plan to cache `download.bls.gov/pub/time.series` flat files
   (PC, PD first; then ECI, OEWS; evaluate WP) with release-aligned conditional refresh,
   run outside MCP handlers. The API path stays for ad hoc lookups.
-- **Why:** No per-call quota or key for bulk reads, a real series catalogue,
+- **Why:** No per-call quota or key for bulk reads, a real series catalog,
   and reproducible provenance (file validators and hashes).
 - **Correction (2026-10-10, after reading the saved BLS docs):** PD is the
   discontinued SIC-based PPI, not commodity data; it is static (updated each

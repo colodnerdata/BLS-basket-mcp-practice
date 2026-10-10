@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     bls_api_key: str | None = Field(default=None, alias="BLS_API_KEY")
     database_path: str = Field(
-        default="./bls_catalogue.db",
+        default="./bls_catalog.db",
         alias="BLS_DATABASE_PATH",
     )
     http_timeout_seconds: float = Field(

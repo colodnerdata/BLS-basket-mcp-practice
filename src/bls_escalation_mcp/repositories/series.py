@@ -108,7 +108,7 @@ class SeriesRepository:
         return [self._row_to_series(row) for row in rows]
 
     def upsert_many(self, series_list: list[SeriesMetadata]) -> None:
-        """Bulk upsert in one transaction (used by catalogue ingestion)."""
+        """Bulk upsert in one transaction (used by catalog ingestion)."""
         rows = [self._to_row(series) for series in series_list]
         with db_connection(self.database_path) as conn:
             conn.executemany(

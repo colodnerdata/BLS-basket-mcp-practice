@@ -11,7 +11,7 @@ against the BLS files the owner saved in [`sample_data/`](sample_data/)
 The BLS API v2 is capped at 50 series and 20 years per call and needs a key
 (see [bls_api.md](bls_api.md)). The flat files at
 <https://download.bls.gov/pub/time.series/> carry the same series with no key
-and no per-call quota, and they also give the full series catalogue and code
+and no per-call quota, and they also give the full series catalog and code
 mappings that `search_series` needs. A local mirror makes calculations
 reproducible: every result can cite the exact file, its retrieval time and its
 validators (`ETag` / `Last-Modified` / hash).
@@ -191,7 +191,7 @@ files themselves use tabs).
 1. Verify-first checklist (below); record outcomes in `DECISIONS.md`.
 2. Fetcher plus manifest with mocked-HTTP tests (conditional GET, partial
    download, 304, 403 backoff).
-3. `pc`/`pd` series + mapping ingestion into the catalogue (replaces the
+3. `pc`/`pd` series + mapping ingestion into the catalog (replaces the
    curated seed, ROADMAP M4 successor), with the PD column-shape handling
    and fixture tests built from `sample_data/` rows.
 4. `pc.data.0.Current` and `pd.data.0.Current` into the observation store with

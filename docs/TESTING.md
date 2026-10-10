@@ -81,8 +81,8 @@ database. This is the recorded-replay layer: no network is involved.
 
 | Test | Expected | Guards against |
 | --- | --- | --- |
-| `test_series_catalogue_counts_match_files` | Exactly 4,510 + 17,439 series (verified file row counts) | Series rows lost or double-counted at scale |
-| `test_pc_series_metadata` / `test_pd_series_metadata` / `test_search_finds_real_series` | Hand-read values from the files (`PCU1133--1133--` base 198112, first `1981-M12`, active; `PDU1011#` SIC, inactive, ends `2003-M13` with a synthesized title; "Logging" searchable) | Mis-mapping real series-file fields into catalogue metadata |
+| `test_series_catalog_counts_match_files` | Exactly 4,510 + 17,439 series (verified file row counts) | Series rows lost or double-counted at scale |
+| `test_pc_series_metadata` / `test_pd_series_metadata` / `test_search_finds_real_series` | Hand-read values from the files (`PCU1133--1133--` base 198112, first `1981-M12`, active; `PDU1011#` SIC, inactive, ends `2003-M13` with a synthesized title; "Logging" searchable) | Mis-mapping real series-file fields into catalog metadata |
 | `test_pc_observations_exact_and_preliminary` / `test_m13_is_a_distinct_annual_average` | `Decimal("234.780")` exact; `2026-M05` preliminary with footnote text and series-derived units; `1969-M13` is `ANNUAL_AVERAGE` distinct from `M12` and holds `35.0` | Value precision loss, preliminary-state confusion, and annual-average/month conflation through the full ingest path |
 | `test_manifest_and_log_agree_after_ingest` / `test_verify_cli_passes` | Manifest and `ingestion_log` agree; `verify` exits 0 | The dual-record contract breaking end-to-end |
 

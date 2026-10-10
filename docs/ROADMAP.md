@@ -45,7 +45,7 @@ In the MVP:
 3. A source-backed path from a basket specification to factors with
    provenance, resolving observations from the local snapshot, using exact
    periods and a single periodicity (M3).
-4. A curated catalogue of about 15-25 verified series from the PPI `pc`/`pd`
+4. A curated catalog of about 15-25 verified series from the PPI `pc`/`pd`
    flat files, selected from owner-supplied basket archetypes and verified
    against real flat files (part of M2'; supersedes old M4). ECI and OEWS
    coverage is deferred past the MVP.
@@ -82,9 +82,9 @@ the flat-file downloads this plan depends on.
 | Server | FastMCP 3.2.4; 11 tools, 3 static resources, 1 resource template; services owned by the lifespan; unexpected errors masked, `ToolError` passes through. |
 | BLS key | `Settings` reads `BLS_API_KEY` once in `create_server()`; the lifespan hands it to `BLSAccessService` and `BLSClient`. A missing key raises an error that points to `setup://bls-api` but has no client-specific steps. Irrelevant to the snapshot MVP; matters only for the deferred live path. |
 | Calculation | Deterministic and tested, but the tools take floats and nothing links observations to a result. The service never fills `ComponentCalculation.base_period`/`target_period`, and `CalculationLedger`, `SourceProvenance`, `SeriesObservations` and the spec's `observation_policy` are not consumed by any service or tool. |
-| Catalogue | The PPI/ECI/OEWS loaders are deliberate stubs that return nothing, and the only fixture is two synthetic series, so `search_series` is empty on a fresh database. M2' fills this from real flat files. |
-| BLS client | Mocked HTTP only; no live call has been made. Probed: period codes `M13` and `Q05` are dropped with no error or warning, `S01` is labelled a plain annual period (the same identity as a real annual value), and observations are labelled `units="index"` unless the payload carries a `units` field. These parser issues move to M2' against flat-file fixtures. |
-| Launch | `uv --directory <repo> run --locked fastmcp run fastmcp.json` works over stdio (probed). The streamable-HTTP/`app.py` launcher and Dockerfile for the Code Engine deployment landed on main but are unverified end-to-end (M5'). The default database path `./bls_catalogue.db` is relative to the launch directory; database files are now git-ignored, so the file the probe created in the repo root can no longer be committed by accident. |
+| catalog | The PPI/ECI/OEWS loaders are deliberate stubs that return nothing, and the only fixture is two synthetic series, so `search_series` is empty on a fresh database. M2' fills this from real flat files. |
+| BLS client | Mocked HTTP only; no live call has been made. Probed: period codes `M13` and `Q05` are dropped with no error or warning, `S01` is labeled a plain annual period (the same identity as a real annual value), and observations are labeled `units="index"` unless the payload carries a `units` field. These parser issues move to M2' against flat-file fixtures. |
+| Launch | `uv --directory <repo> run --locked fastmcp run fastmcp.json` works over stdio (probed). The streamable-HTTP/`app.py` launcher and Dockerfile for the Code Engine deployment landed on main but are unverified end-to-end (M5'). The default database path `./bls_catalog.db` is relative to the launch directory; database files are now git-ignored, so the file the probe created in the repo root can no longer be committed by accident. |
 | Tests | No `conftest.py`; client and transport scaffolding is duplicated across the integration modules; no live-test command; no coverage task. |
 | Evals | None; see [TESTING.md](TESTING.md). The hackathon judges' harness is the first external eval. |
 | CI | One offline job (Python 3.12, `poe check`). CodeQL is manual-only because GitHub Advanced Security is not enabled. |
@@ -101,7 +101,7 @@ M0 harness foundation -> M2' flat-file ingestion + manifest
 ```
 
 Mapping from the 2026-10-06 plan: M0 is unchanged. M2' supersedes M2 (live
-readiness) and M4 (seed catalogue): the parser and catalogue work now happen
+readiness) and M4 (seed catalog): the parser and catalog work now happen
 against checked-in flat-file fixtures, so the owner's BLS key leaves the
 critical path. M3's design is unchanged except that observation resolution
 reads the local snapshot instead of planning an API request. M4' is the
@@ -133,7 +133,7 @@ with `BLS_API_KEY` exported; a meta-test proves the isolation; `poe test-live`
 skips cleanly without a key. Update the TESTING.md entries for the fixtures
 and the isolation test.
 
-### M2' - Flat-file ingestion, manifest, and seed catalogue (M-L)
+### M2' - Flat-file ingestion, manifest, and seed catalog (M-L)
 
 Goal: `search_series` returns real, verified series; observations resolve
 from the local snapshot; every ingested file is recorded so any device can
@@ -156,7 +156,7 @@ rebuild the database from checked-in slices with zero network access.
   the database from the same checked-in slices.
 - Explicit period-code mapping including `M13`, `Q05`, `S01`, `A01`; unknown
   codes become typed warnings counted in the manifest — never silently
-  dropped, never mislabelled. Units come from verified catalogue metadata
+  dropped, never mislabeled. Units come from verified catalog metadata
   or stay unknown, never defaulted to `"index"`.
 - An ingestion command (plain CLI/service code, deliberately **not** an MCP
   tool — judges must not be able to trigger downloads): download
@@ -170,7 +170,7 @@ rebuild the database from checked-in slices with zero network access.
   period-code warning counts, status).
 - Add `ingestion_log` to `db/schema.py` and add `poe verify-ingest`, which
   fails on any manifest/database disagreement and runs offline in `check`.
-- Catalogue seeding through real ingestion of the `pc`/`pd` series and
+- catalog seeding through real ingestion of the `pc`/`pd` series and
   mapping files per `bulk_files.md`, replacing the stub loaders;
   owner-supplied basket archetypes decide which data partitions are
   ingested first (the `0.Current` files plus the partitions those baskets
@@ -190,7 +190,7 @@ writing the calculation code:
 
 | Concept | MVP convention | Note |
 | --- | --- | --- |
-| Temporal factor | `target / base` for one series and one periodicity, from `Decimal` observations, unrounded | Meaningful for index-level (ratio-scale) series. A series' own base year cancels, so mixed index bases are fine. Percent-change and rate series are not valid inputs and must be refused using verified catalogue units. |
+| Temporal factor | `target / base` for one series and one periodicity, from `Decimal` observations, unrounded | Meaningful for index-level (ratio-scale) series. A series' own base year cancels, so mixed index bases are fine. Percent-change and rate series are not valid inputs and must be refused using verified catalog units. |
 | Weights | Base-period cost shares summing to 1 within `BLS_WEIGHT_TOLERANCE` (1e-4); never normalized; `weight_source` kept | The server cannot verify the shares are base-period; it states the assumption. |
 | Composite | `sum(weight * factor)`; percent change `(F - 1) * 100` | Already implemented; a fixed-weight arithmetic mean of price relatives. |
 | Fixed/unindexed | Factor 1 | Already implemented. |
@@ -344,7 +344,7 @@ deterministic:
 ```
 evals/
   cases/     one file per case: prompt, world, expected assertions, tags
-  world/     canned BLS payloads + seed catalogue = the deterministic world
+  world/     canned BLS payloads + seed catalog = the deterministic world
   graders.py programmatic graders, one function per dimension
   agents/    scripted oracle, null agent, bad agent, model-backed adapter
   runner.py  drives an agent against the real create_server() via fastmcp.Client
@@ -424,7 +424,7 @@ nothing in the code breaks when behavior drifts.
 | 1 | Credential seam | Resolved 2026-10-10: no user key — the MVP serves a snapshot. `Depends` + `os.environ` (old M1 design, spike-verified) stays on the shelf for the optional server-side live path | Snapshot by default | Resolved |
 | 2 | Calculation surface | (a) one server-side tool that resolves and calculates; (b) the model relays values; (c) cache, then calculate | (a): (b) routes hundreds of numbers through model context as floats and loses provenance; (c) waits for a vintage policy | M3 |
 | 3 | Mixed periodicity | (a) one periodicity per spec; (b) align to quarter-end month; (c) quarterly mean of months; (d) annual average | (a) for the MVP, then design (c) or (d) with every constituent observation in the ledger | M3 |
-| 4 | Seed selection | Catalogue comes from real `pc`/`pd` series ingestion per `bulk_files.md`; owner archetypes decide which partitions are ingested first | Owner supplies archetypes | M2' |
+| 4 | Seed selection | catalog comes from real `pc`/`pd` series ingestion per `bulk_files.md`; owner archetypes decide which partitions are ingested first | Owner supplies archetypes | M2' |
 | 5 | CI for live and eval runs | Not needed while the live path is deferred; local/manual only | Defer with the live path | Post-MVP |
 | 6 | Eval runner | Messages API loop, or a host harness via the Agent SDK | Messages API loop when the harness returns post-MVP; revisit host fidelity | Post-MVP |
 | 7 | Eval spend and credentials | Per-run cap, default model, who supplies Anthropic credentials | Cap per run; `claude-sonnet-5-5` while iterating | Post-MVP |
