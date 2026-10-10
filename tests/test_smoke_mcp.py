@@ -30,7 +30,7 @@ async def test_smoke_workflow_has_no_upstream_calls(tmp_path, capsys):
 
 @pytest.mark.asyncio
 async def test_smoke_rejects_unrelated_server():
-    with pytest.raises(ValueError, match="tools are missing"):
+    with pytest.raises(ValueError, match="Required smoke-test tools are missing"):
         await check_server(Client(FastMCP("Unrelated server")))
 
 
