@@ -97,10 +97,28 @@ files themselves use tabs).
     in every row. Strip, then parse with `Decimal`.
   - `footnote_codes` is blank for all rows (PD history is final). The column is
     still space-padded, so a blank is `""` after stripping, not missing.
-  - Every row had exactly 5 fields. This is one PD partition only; **no PC data
-    sample has been seen yet** (the upload was PD), so PC's three-decimal
-    values after June 2021 and `P` footnotes on recent months are still
-    unverified.
+  - Every row had exactly 5 fields. This is one PD partition only; **PC behavior is in the next item.
+- **PC data sample** (`sample_data/pc.data.20.ComputerProduct.sample`: header,
+  first 14 rows and last 20 rows of the partition; the full file is 53,255 rows,
+  2.8 MB, profiled but not committed). Findings for NAICS 334:
+  - 145 series, all in `pc.series`; each series' first and last observation
+    matches `begin_year/period` and `end_year/period`; no duplicate keys; rows
+    sorted by `(series_id, year, period)`; every row has exactly 5 fields.
+  - Years 1947-2026. `M13` annual averages appear (3,933 rows) and are
+    interleaved with months, as in PD.
+  - Value precision matches `pc.txt` exactly: one decimal through 2021-M06 (46,864
+    rows), three decimals from 2021-M07 (6,391 rows). Both are present in one
+    series history, so parse as `Decimal` and never assume a fixed scale.
+  - Footnote `P` appears on 375 rows, all in 2026-M05 to 2026-M08: the latest
+    four months, which matches "revised up to four months after original
+    publication". No `C` (correction) rows in this partition. Footnote cells
+    are space-padded like the other columns.
+  - Because `P` rows are rewritten when revised, a cached observation needs the
+    file vintage and footnote at retrieval, and a later refresh must overwrite
+    (not append to) the last four months.
+  - Series IDs can end in a letter that is part of the product code
+    (`PCU334519334519S`); the seasonal code is the third character (`U`), so
+    do not read a trailing letter as the seasonal flag.
 - **Product mapping:** `pc.product` (4,510 rows) and `pd.product` (17,439) each
   join one-to-one to their series file on `(industry_code, product_code)`;
   all 4,510 PC and 17,439 PD series match. Codes are space-padded in PD
@@ -194,8 +212,7 @@ establish numerical or format correctness.
       Needs one `curl -I` per file from a networked machine.
 - [x] `pc.product` / `pd.product` join one-to-one to their series files (above).
 - [x] PD data-file layout and value format (one partition profiled).
-- [ ] **Unverified:** a **PC** data sample (`head -n 50` of `pc.data.0.Current`;
-      recent months with `P` footnotes and three-decimal values).
+- [x] PC data layout, 3-decimal values and `P` footnotes (one partition profiled).
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
       directory listings.
 - [ ] Decide on `wp` (and `ci`, `oe`) and sample their `xx.txt` and `xx.series`.
