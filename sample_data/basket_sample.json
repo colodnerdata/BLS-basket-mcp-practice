@@ -1,0 +1,58 @@
+{
+  "id": "sample-basket-001",
+  "schema_version": "1.0",
+  "name": "Sample office renovation basket",
+  "description": "A minimal weighted basket for sample calculations and demos.",
+  "project_description": "Illustrative example for testing basket validation.",
+  "base_period": {
+    "year": 2022,
+    "month": 1,
+    "periodicity": "MONTHLY"
+  },
+  "target_period": {
+    "year": 2024,
+    "month": 12,
+    "periodicity": "MONTHLY"
+  },
+  "reference_locality": "US",
+  "target_locality": "US",
+  "components": [
+    {
+      "id": "labor",
+      "name": "Labor",
+      "description": "Illustrative labor component",
+      "component_type": "LABOR",
+      "weight": 0.6,
+      "weight_source": "USER_PROVIDED",
+      "series_id": "TEST_ECI_001",
+      "series_program": "ECI",
+      "official_series_title": "Synthetic ECI labor index",
+      "match_type": "DIRECT",
+      "temporal_adjustment_enabled": true,
+      "locality_adjustment_enabled": false,
+      "notes": "Example component only."
+    },
+    {
+      "id": "materials",
+      "name": "Materials",
+      "description": "Illustrative material component",
+      "component_type": "MATERIAL",
+      "weight": 0.4,
+      "weight_source": "USER_PROVIDED",
+      "series_id": "TEST_PPI_001",
+      "series_program": "PPI",
+      "official_series_title": "Synthetic PPI material index",
+      "match_type": "DIRECT",
+      "temporal_adjustment_enabled": true,
+      "locality_adjustment_enabled": false,
+      "notes": "Example component only."
+    }
+  ],
+  "observation_policy": "EXACT",
+  "assumptions": {
+    "basis": "Synthetic sample values for documentation and local tests."
+  },
+  "methodology_notes": [
+    "Example basket intended for documentation and development use only."
+  ]
+}
