@@ -19,15 +19,17 @@
   implemented; `poe check` passes. The template-aligned shell landed on
   main: one exposed component per file with package aggregators,
   `main.py`/`app.py`/`routes.py`, Dockerfile, `manifest.yaml`,
-  `server.json`, QUICKSTART.md, and `eval/`.
+  `server.json`, QUICKSTART.md, and `eval/`. M0 (test-harness foundation)
+  lands in PR #11: environment key isolation in `tests/conftest.py`, the
+  shared canned-payload harness in `tests/harness.py`, the `live` marker
+  with opt-in `poe test-live`, and the `poe test-cov` diagnostic.
 - Next action: M2' flat-file ingestion. The mapping research is largely
   done in `bulk_files.md`: PC/PD file formats are confirmed from the
   checked-in `docs/sample_data/` files; remaining verification is a header
   probe from a networked machine (`scripts/probe_bls_headers.py pc`). ECI
   is deferred past the MVP; `wp` (PPI commodities) is undecided. Then M3
   (local observation resolution), M4' (deterministic eval-evidence pack),
-  M5' (remaining submission readiness + Code Engine spike). M0
-  (test-harness foundation) is in flight as PR #11.
+  M5' (remaining submission readiness + Code Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from
   2026-10-13) or mcp@gsa.gov: the submission deadline; whether an existing
   repo may adopt the template's structure or must be based on it; IBM Cloud

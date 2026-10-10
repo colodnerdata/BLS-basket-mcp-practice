@@ -1,13 +1,11 @@
 import json
 from pathlib import Path
+from typing import Any
 
-import httpx
 import pytest
-from fastmcp import Client
 from fastmcp.exceptions import ToolError
 
-from bls_escalation_mcp.config import Settings
-from bls_escalation_mcp.server import create_server
+from tests.harness import CannedTransport, bls_payload, server_env
 
 
 @pytest.mark.asyncio
@@ -15,41 +13,24 @@ from bls_escalation_mcp.server import create_server
 async def test_access_setup_and_preflight(
     tmp_path: Path, key: str | None
 ) -> None:
-    requests: list[httpx.Request] = []
-
-    def respond(request: httpx.Request) -> httpx.Response:
-        requests.append(request)
-        body = json.loads(request.content)
+    def check(body: dict[str, Any]) -> None:
         assert body["registrationkey"] == "test-private-key"
         assert len(body["seriesid"]) == 50
         assert body["startyear"] == "2000"
         assert body["endyear"] == "2019"
-        return httpx.Response(
-            200,
-            json={
-                "status": "REQUEST_SUCCEEDED",
-                "Results": {
-                    "series": [
-                        {
-                            "seriesID": "TEST",
-                            "data": [
-                                {
-                                    "year": "2000",
-                                    "period": "M01",
-                                    "value": "100",
-                                }
-                            ],
-                        }
-                    ],
-                },
-            },
-        )
 
-    server = create_server(
-        Settings(database_path=str(tmp_path / "access.db"), bls_api_key=key),
-        http_transport=httpx.MockTransport(respond),
+    transport = CannedTransport(
+        payload=bls_payload(
+            series_id="TEST",
+            items=[{"year": "2000", "period": "M01", "value": "100"}],
+        ),
+        check=check,
     )
-    async with Client(server) as client:
+    async with server_env(
+        tmp_path, key=key, transport=transport, db_name="access.db"
+    ) as env:
+        client = env.client
+        requests = transport.requests
         initialized = await client.initialize()
         assert "get_bls_access_status" in initialized.instructions
         status = await client.call_tool("get_bls_access_status", {})

@@ -13,6 +13,39 @@ concrete mistake it would catch. "Expected value" is the independently
 computable result the test checks against (see `docs/DEVELOPMENT.md`'s
 testing principles) — not a description of the code path.
 
+## Test harness (M0)
+
+Shared scaffolding lives in `tests/conftest.py` (guarantees) and
+`tests/harness.py` (importable helpers), with canned payloads in
+`tests/fixtures/bls/` (hand-written, not recordings — see its README).
+
+Guarantees, and what enforces them:
+
+- **No test observes a real `BLS_API_KEY`.** An autouse fixture strips it
+  before every test not marked `live`, so a key exported in a developer's
+  shell can neither change offline results nor spend quota. `live` tests
+  are exempt by design (they only run under `poe test-live`).
+- **Nothing live runs by default.** The `live` marker is registered and
+  deselected in `addopts`; `poe test-live` selects it, and a collection
+  hook skips (never fails) when no key is exported, so CI and `poe check`
+  stay offline per `docs/bls_etiquette.md`.
+- **One canned-BLS world.** `CannedTransport` records requests, optionally
+  asserts each request body, and serves a fixture payload;
+  `server_env(...)` runs the real server on a temporary database through
+  the real FastMCP client and asserts — for every consumer and on failure
+  paths too — that the factory had no persistence side effects and the
+  lifespan closed the injected transport. `bls_payload()` returns a fresh
+  copy per call so tests cannot mutate each other's data.
+- `poe test-cov` is a diagnostic only; it carries no threshold and is not
+  part of `check`.
+
+### `tests/test_harness.py` — harness self-tests
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_env_leak_from_prior_test_a` + `_b` (an ordered pair relying on in-module definition order) | `_b` never observes the sentinel key that `_a` leaks into the real process environment | A leaked or shell-exported key silently changing offline results or letting a test spend real quota |
+| `test_live_marker_seam` | Deselected in the default run; skipped (not failed) by `poe test-live` without a key; passes with one; no network call in any of these | The live seam accidentally running in `check`/CI, or failing closed instead of skipping cleanly |
+
 ## Unit tests
 
 ### `tests/test_calculations.py` — `EscalationCalculationService`
@@ -77,6 +110,11 @@ testing principles) — not a description of the code path.
 | `test_observation_decimal_text_is_exact` | A 29-digit decimal string round-trips exactly through parsing and JSON re-serialization | Float rounding/precision loss on BLS values (the reason observations are `Decimal`-as-string, per `docs/DECISIONS.md`) |
 
 ## Integration tests (real FastMCP client/server boundary)
+
+All three modules build on the shared harness above (canned transport,
+`server_env`, fixture payloads); the entries below keep their pre-M0 names
+and guards — M0 consolidated scaffolding without changing what any test
+asserts.
 
 ### `tests/integration/test_bls_client.py`
 
