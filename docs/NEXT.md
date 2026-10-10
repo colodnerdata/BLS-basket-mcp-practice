@@ -27,6 +27,11 @@
   SQLite databases with the old incomplete series schema need a deliberate
   migration or recreation; no production migration framework is introduced.
 
+- Flat-file cache: plan drafted in `bulk_files.md` (PC, PD, ECI, later OEWS;
+  release-aligned conditional refresh). Next action: complete its "Verify
+  first" checklist from `download.bls.gov` (unreachable from the drafting
+  session), then record the decision in `DECISIONS.md`.
+
 - Template layout: all exposed tools/resources now live in individual files
   and use package aggregators. Maintain this layout for future additions;
   see `AGENTS.md` and `hackathon_template.md`.

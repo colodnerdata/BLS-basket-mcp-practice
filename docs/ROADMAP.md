@@ -413,7 +413,9 @@ Not scheduled. Most are described in [bls_api.md](bls_api.md).
 
 - Request planner with rate, quota and retry handling, and merge with conflict
   detection (`ceil(S/50) * ceil(Y/20)` requests).
-- Bulk-file catalogue ingestion after authoritative mappings are confirmed.
+- Bulk-file catalogue ingestion after authoritative mappings are confirmed;
+  the flat-file mirror and refresh-cadence plan is in
+  [bulk_files.md](bulk_files.md) (PC, PD, then ECI/OEWS).
 - OEWS locality mapping and automated wage ratios.
 - Mixed-periodicity policies and other observation policies, each with explicit
   disclosure.
