@@ -21,9 +21,10 @@ on the owner's whole network, not on the agent or process that caused it.
 1. **Offline by default.** `poe check` and the test suite make no network
    calls; tests use mocked HTTP. Live access happens only when the owner
    deliberately runs a live command or a server session with a configured
-   key, and any planned live-test command stays opt-in and out of default
-   checks. An agent must never initiate live BLS calls or downloads on its
-   own — ask the owner to run them (e.g. via `! <command>`).
+   key; the live-test command (`poe test-live`) is opt-in, excluded from
+   default checks, and its tests skip without a key. An agent must never
+   initiate live BLS calls or downloads on its own — ask the owner to run
+   them (e.g. via `! <command>`).
 2. **Stay inside the published bounds (API).** The server already rejects
    over-limit requests before any HTTP. Prefer fewer, larger requests over
    many small ones. Never rotate keys, identities, or IPs to evade a limit.
