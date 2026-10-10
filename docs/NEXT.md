@@ -28,9 +28,12 @@
   migration or recreation; no production migration framework is introduced.
 
 - Flat-file cache: plan drafted in `bulk_files.md` (PC, PD, ECI, later OEWS;
-  release-aligned conditional refresh). Next action: complete its "Verify
-  first" checklist from `download.bls.gov` (unreachable from the drafting
-  session), then record the decision in `DECISIONS.md`.
+  release-aligned conditional refresh). PC/PD file formats are now
+  confirmed from `docs/sample_data/`. PD data and the product
+  mappings are also confirmed. PC data is confirmed too.
+  Next action: run `scripts/probe_bls_headers.py pc` from a networked machine
+  and commit its JSON (the remaining header check in "Verify first"). ECI is
+  deferred past the MVP but stays in the plan; `wp` is undecided.
 
 - Template layout: all exposed tools/resources now live in individual files
   and use package aggregators. Maintain this layout for future additions;

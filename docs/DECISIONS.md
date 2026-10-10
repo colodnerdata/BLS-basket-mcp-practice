@@ -170,10 +170,14 @@ MIME types, verified on resource reads as well as discovery.
 
 - **Status:** proposed; plan only, nothing implemented.
 - **Decision:** Plan to cache `download.bls.gov/pub/time.series` flat files
-  (PC, PD first; then ECI, OEWS) with release-aligned conditional refresh,
+  (PC, PD first; then ECI, OEWS; evaluate WP) with release-aligned conditional refresh,
   run outside MCP handlers. The API path stays for ad hoc lookups.
 - **Why:** No per-call quota or key for bulk reads, a real series catalogue,
   and reproducible provenance (file validators and hashes).
+- **Correction (2026-10-10, after reading the saved BLS docs):** PD is the
+  discontinued SIC-based PPI, not commodity data; it is static (updated each
+  January and July), so only PC needs monthly refresh. Commodities are `WP`.
+  `pd.series` rows have one more field than its header; see `bulk_files.md`.
 - **Open:** Unverified facts are listed in `bulk_files.md` ("Verify first").
   Vintage policy for revised PPI values is required before observations are
   served from cache.
