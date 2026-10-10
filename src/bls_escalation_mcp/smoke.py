@@ -67,7 +67,7 @@ def local_http_client(
     headers: dict[str, str] | None = None,
     timeout: httpx.Timeout | None = None,
     auth: httpx.Auth | None = None,
-    follow_redirects: bool = False,
+    follow_redirects: bool = True,
 ) -> httpx.AsyncClient:
     """Connect directly to loopback without system proxies."""
     return httpx.AsyncClient(
