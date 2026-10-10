@@ -42,8 +42,10 @@
   ECI (`ci`) per the 2026-10-10 scope decision; its parser landed with the
   remaining mappings and **506 current-dollar index series are ingested**
   (quarterly `Q01`-`Q04`; percent-change/rate series refused and recorded).
-  One more owner-run fetch completes labor data: `ci.data.0.Current` (the
-  latest-quarter partition). OEWS (`oe`) localization (mapping and
+  `ci.data.0.Current` is fetched and ingested — **21,041 ECI observations,
+  including real construction-labor index levels** (missing-value and
+  ineligible-series rows counted in the manifest, per `bulk_files.md`).
+  OEWS (`oe`) localization (mapping and
   automated wage ratios) is the deferred piece. Then M3 (observation resolution over the
   snapshot), M4' (eval evidence pack), M5' (Code Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from

@@ -29,7 +29,7 @@ def _read(flat_fixtures, name: str) -> str:
 
 def test_pc_series_padding_and_fields(flat_fixtures) -> None:
     rows, _ = parse_series_file(_read(flat_fixtures, "pc.series.slice"), "pc")
-    assert len(rows) == 2
+    assert len(rows) == 4
     first = rows[0]
     assert first.series_id == "PCU1133--1133--"  # padding stripped
     assert first.industry_code == "1133--"
@@ -193,13 +193,24 @@ def test_data_file_quarterly_periods() -> None:
     assert outcome.warnings["Q05"] == 1
 
 
-def test_data_file_missing_dash_raises() -> None:
+def test_data_file_missing_dash_is_recorded() -> None:
     text = (
         "series_id\tyear\tperiod\tvalue\tfootnote_codes\n"
         "CIS2022300000000I\t2001\tQ01\t-\tA\n"
+        "CIS2022300000000I\t2001\tQ02\t135.0\t\n"
     )
+    rows, outcome = parse_data_file(text)
+    # The dash sentinel (CI footnote A) is not an observation: skipped and
+    # counted, never fabricated; the period simply resolves as missing in
+    # any later calculation.
+    assert len(rows) == 1
+    assert outcome.missing_rows == 1
+    # A genuinely malformed value (not the sentinel) still raises.
     with pytest.raises(FlatFileFormatError, match="not a decimal"):
-        parse_data_file(text)
+        parse_data_file(
+            "series_id\tyear\tperiod\tvalue\tfootnote_codes\n"
+            "CIS2022300000000I\t2001\tQ01\tabc\t\n"
+        )
 
 
 @pytest.mark.parametrize(

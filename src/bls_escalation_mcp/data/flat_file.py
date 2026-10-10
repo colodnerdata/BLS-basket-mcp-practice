@@ -96,6 +96,7 @@ class ParseOutcome:
 
     warnings: Counter[str] = field(default_factory=Counter)
     skipped_rows: int = 0
+    missing_rows: int = 0  # dash/blank "not available" values (footnote A)
 
 
 PC_SERIES_COLUMNS = (
@@ -312,7 +313,9 @@ def parse_data_file(
     quarterly rows carry ``quarter`` with ``month=None``; any other code
     is skipped with a counted warning (surfaced to the manifest) rather
     than silently dropped. Header-only (empty) partitions are valid and
-    yield zero rows. A missing (dash) or non-decimal value raises.
+    yield zero rows. Rows whose value is the documented "not available"
+    dash (CI footnote ``A``) carry no observation: skipped and counted as
+    ``missing_rows``. Any other malformed value raises.
     """
     header, rows = _header_and_rows(text, file_label)
     expected = ("series_id", "year", "period", "value", "footnote_codes")
@@ -332,6 +335,13 @@ def parse_data_file(
         series_id, year_text, period, value_text, footnotes = (
             value.strip() for value in row
         )
+        if value_text in ("-", ""):
+            # The documented "not available" sentinel (CI footnote A): the
+            # row carries no observation. Skipped and counted — nothing is
+            # fabricated, and any calculation over that period still fails
+            # as missing downstream (missing is an error, never a zero).
+            outcome.missing_rows += 1
+            continue
         month: int | None = None
         quarter: int | None = None
         if match := _MONTHLY_CODE.match(period):

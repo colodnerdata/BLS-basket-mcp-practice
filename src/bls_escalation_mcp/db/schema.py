@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS ingestion_log (
     rows_parsed INTEGER NOT NULL,
     series_loaded INTEGER NOT NULL,
     observations_loaded INTEGER NOT NULL,
+    missing_rows INTEGER NOT NULL DEFAULT 0,
+    skipped_rows TEXT NOT NULL DEFAULT '{}',
     period_warnings TEXT NOT NULL,
     skipped_series TEXT NOT NULL DEFAULT '{}',
     status TEXT NOT NULL

@@ -67,7 +67,7 @@ Expected values are hand-checked against the fixture slices in
 | `test_ci_index_eligibility_gate` | The 3 `I` series are eligible and the `Q` percent-change twin is not | Percent-change or response-rate series leaking into the catalog as escalation inputs |
 | `test_ci_mappings` | `I` → "Current dollar index number", `01` → "Total compensation", `2` → "Private industry workers" | CI's name-in-column-2 layout (trailing display metadata) being misparsed as the last field |
 | `test_data_file_quarterly_periods` | `Q01` → quarter=1, month=None; out-of-range `Q05` skipped with a counted warning | Quarterly periods misfiled or silently dropped |
-| `test_data_file_missing_dash_raises` | A `-` value (footnote `A`) raises `FlatFileFormatError` | ECI's missing-data sentinel ever becoming a number |
+| `test_data_file_missing_dash_is_recorded` | A `-` row (footnote `A`) is skipped with `missing_rows == 1` and a parallel fabricated-value row (`abc`) raises `FlatFileFormatError` | The missing-data sentinel ever becoming a stored observation, or hard failures that would make real released files un-ingestible |
 | `test_classify_file*` (parametrized) | Filenames map to `(program, kind, canonical upstream name)`, stripping `.txt`/`.sample`/`.head`/`.slice`; docs/probe/README files rejected | Misrouting a support file into a parser, or recording a sample's name as a canonical URL |
 
 ### `tests/test_manifest.py` — manifest and `verify-ingest`

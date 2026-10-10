@@ -314,5 +314,10 @@ MIME types, verified on resource reads as well as discovery.
   counterpart, so the MVP composition path is **parallel same-periodicity
   specifications** (e.g. a quarterly labor spec alongside a monthly or
   annual-average materials spec) until open decision 3 is revisited.
+  Confirmed on first real data ingestion: ECI files contain explicit
+  missing-value rows (`-`, footnote `A`) and rows for ineligible series —
+  both are skipped and counted in the manifest (`missing_rows`,
+  `skipped_rows`), never stored or fabricated; the "missing is an error"
+  rule governs calculation-time resolution, not ingestion.
 - **Revisit when:** ECI period codes and value semantics are verified, or
   the hackathon concludes and OEWS localization returns to the plan.

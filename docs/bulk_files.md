@@ -208,9 +208,17 @@ From the owner-saved `ci.txt` (the authoritative file list) and the checked-in
 - **Data layout:** `ci.data.0.Current`/`AllData` share the PC/PD 5-column
   shape. `ci.aspect` is standard errors with an extra `aspect_type` column —
   **never ingest it as observations.**
-- **Missing data:** footnote `A` = "Dashes indicate data not available" — a
-  data row may carry `-`; missing stays an error, never zero or
-  interpolated, and `-` must not parse as a number (existing convention).
+- **Missing data:** footnote `A` = "Dashes indicate data not available":
+  data rows may carry `-` as the value. Real example (found on ingestion
+  2026-10-10): `CIU1010000000000R` 2022-Q03. Such rows carry **no
+  observation** — they are skipped and counted in the manifest as
+  `missing_rows`, never stored, fabricated, or zeroed; a calculation over
+  that period still errors as missing downstream. Likewise, data rows for
+  series the catalog refused (percent-change/rate families) are skipped
+  and counted as `skipped_rows["series_not_loaded"]`.
+- **Verified live counts (2026-10-10, `ci.data.0.Current`):** 100,074
+  rows parsed, 2 missing, 79,106 skipped (rows of ineligible series),
+  20,968 observations loaded.
 
 ## Etiquette and safety
 
@@ -290,9 +298,10 @@ establish numerical or format correctness.
       ingested 2026-10-10 — formats above; quarterly `Q01`-`Q04` only, no
       annual-average period code; `I`/`Q`/`A` periodicity encodes index vs
       percent change (only `I` is escalation-eligible; 506 index series
-      loaded of 2,471 rows, skips recorded in the manifest).
-      `ci.data.0.Current` (latest quarter, all series) remains to fetch
-      when observation downloads start.
+      loaded of 2,471 rows, skips recorded in the manifest);
+      `ci.data.0.Current` fetched and ingested (21,041 CI observations; the
+      missing/skipped row semantics are listed under "Confirmed file
+      facts (CI)").
 - [ ] `wp` (decided 2026-10-10: it is the materials layer): `wp.txt`
       reviewed; fetch `wp.series`, `wp.group`, `wp.item`, `wp.footnote`,
       `wp.period`, `wp.contacts` before the parser, and re-verify the

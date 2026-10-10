@@ -28,10 +28,10 @@ class IngestionLogRepository:
                     file_id, program, kind, source_url, path_in_repo,
                     downloaded_at, bls_last_modified, size_bytes, sha256,
                     ingested_at, ingested_by, rows_parsed, series_loaded,
-                    observations_loaded, period_warnings, skipped_series,
-                    status
+                    observations_loaded, missing_rows, skipped_rows,
+                    period_warnings, skipped_series, status
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )
                 ON CONFLICT(file_id) DO UPDATE SET
                     program = excluded.program,
@@ -47,6 +47,8 @@ class IngestionLogRepository:
                     rows_parsed = excluded.rows_parsed,
                     series_loaded = excluded.series_loaded,
                     observations_loaded = excluded.observations_loaded,
+                    missing_rows = excluded.missing_rows,
+                    skipped_rows = excluded.skipped_rows,
                     period_warnings = excluded.period_warnings,
                     skipped_series = excluded.skipped_series,
                     status = excluded.status
@@ -68,6 +70,8 @@ class IngestionLogRepository:
                     entry.rows_parsed,
                     entry.series_loaded,
                     entry.observations_loaded,
+                    entry.missing_rows,
+                    json.dumps(entry.skipped_rows, sort_keys=True),
                     json.dumps(entry.period_warnings, sort_keys=True),
                     json.dumps(entry.skipped_series, sort_keys=True),
                     entry.status,
@@ -99,6 +103,8 @@ class IngestionLogRepository:
                     rows_parsed=row["rows_parsed"],
                     series_loaded=row["series_loaded"],
                     observations_loaded=row["observations_loaded"],
+                    missing_rows=row["missing_rows"],
+                    skipped_rows=json.loads(row["skipped_rows"] or "{}"),
                     period_warnings=json.loads(row["period_warnings"]),
                     skipped_series=json.loads(row["skipped_series"] or "{}"),
                     status=row["status"],

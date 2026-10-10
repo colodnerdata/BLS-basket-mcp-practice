@@ -4,8 +4,12 @@ Checks, all offline (part of ``poe check``):
 
 1. Every manifest file with ``path_in_repo`` exists, and its size and
    sha256 match — a silent upstream or local revision surfaces here.
-2. Re-parsing each checked-in file reproduces the recorded row/series/
-   observation counts and period-code warnings.
+2. Re-parsing each checked-in file reproduces the recorded file-level
+   facts: row/series counts, missing-row counts, period-code warnings, and
+   ECI eligibility skips — all derivable from the file alone. Counts that
+   depend on catalog membership (``observations_loaded``,
+   ``skipped_rows``) are intentionally not recomputed here; they are
+   verified against the database receipt in check 3.
 3. When a database exists (default ``./bls_catalog.db``), its
    ``ingestion_log`` receipt must agree with the manifest on file count
    and per-file hash/counts. No database means check 3 is skipped and
@@ -60,6 +64,7 @@ def file_mismatches(entry: ManifestFile, repo_root: Path) -> list[str]:
 
     text = raw.decode("utf-8")
     skipped_series: dict[str, int] = {}
+    missing_rows = 0
     if entry.kind == "series":
         # The manifest only records programs whose parsers exist (pc/pd);
         # other programs cannot enter it, so this cast is safe by design.
@@ -78,7 +83,6 @@ def file_mismatches(entry: ManifestFile, repo_root: Path) -> list[str]:
             series_loaded = len(parsed_series) - sum(skipped.values())
         else:
             series_loaded = rows_parsed
-        observations_loaded = 0
         warnings: dict[str, int] = {}
     elif entry.kind == "mapping":
         key_columns = 2 if entry.file_id.endswith(".product") else 1
@@ -88,22 +92,18 @@ def file_mismatches(entry: ManifestFile, repo_root: Path) -> list[str]:
             key_columns=key_columns,
             name_column=1 if entry.program == "ci" else None,
         )
-        series_loaded = observations_loaded = 0
+        series_loaded = 0
         warnings = {}
     else:
         parsed_observations, outcome = parse_data_file(text, file_label=label)
         rows_parsed = len(parsed_observations) + outcome.skipped_rows
         series_loaded = 0
-        observations_loaded = len(parsed_observations)
+        missing_rows = outcome.missing_rows
         warnings = dict(outcome.warnings)
     for field, actual, recorded in (
         ("rows_parsed", rows_parsed, entry.rows_parsed),
         ("series_loaded", series_loaded, entry.series_loaded),
-        (
-            "observations_loaded",
-            observations_loaded,
-            entry.observations_loaded,
-        ),
+        ("missing_rows", missing_rows, entry.missing_rows),
     ):
         if actual != recorded:
             problems.append(
@@ -144,6 +144,8 @@ def log_mismatches(
             "rows_parsed",
             "series_loaded",
             "observations_loaded",
+            "missing_rows",
+            "skipped_rows",
             "skipped_series",
             "status",
         ):

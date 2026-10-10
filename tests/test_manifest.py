@@ -34,8 +34,8 @@ def test_ingest_records_dual_provenance(harness_env) -> None:
     assert len(entries) == len(manifest.files) == 13
     by_id = {entry.file_id: entry for entry in manifest.files}
     series = by_id["pc/pc.series"]
-    assert series.series_loaded == 2
-    assert series.rows_parsed == 2
+    assert series.series_loaded == 4
+    assert series.rows_parsed == 4
     assert len(series.sha256) == 64
     assert series.path_in_repo == "tests/fixtures/bls/flatfile/pc.series.slice"
     observed = by_id["pc/pc.data.20.ComputerProduct"]

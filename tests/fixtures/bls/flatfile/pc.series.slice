@@ -1,3 +1,5 @@
 series_id                     	industry_code	product_code	seasonal	base_date	series_title	footnote_codes	begin_year	begin_period	end_year	end_period
 PCU1133--1133--               	1133--	1133--	U	198112	PPI industry group data for Logging, not seasonally adjusted		1981	M12	2026	M08
 PCU11331-11331-               	11331-	11331-	U	198112	PPI industry data for Logging, not seasonally adjusted		1981	M12	2026	M08
+PCU334---334---               	334---	334---	U	200312	PPI industry sub-sector data for Computer & electronic product mfg, not seasonally adjusted		2003	M12	2026	M08
+PCU334519334519S              	334519	334519S	U	198506	PPI industry data for Other measuring and controlling device mfg-Secondary products, not seasonally adjusted		1985	M06	2026	M08

@@ -140,6 +140,8 @@ class IngestionService:
         self.names: dict[tuple[str, str], dict[str, str]] = {}
         self.footnotes: dict[str, dict[str, str]] = {}
         self.units: dict[str, str | None] = {}
+        # Known-catalog cache: avoids one DB query per data row.
+        self._known: dict[str, bool] = {}
         # Latest end period of the current series run; ECI's "active" flag
         # means "reaches the survey's latest period in this snapshot".
         self._survey_end: tuple[int, str] | None = None
@@ -161,6 +163,7 @@ class IngestionService:
         label = str(path)
         series_loaded = observations_loaded = 0
         rows_parsed = 0
+        missing_rows = 0
         warnings: dict[str, int] = {}
         skip_reasons: Counter[str] = Counter()
 
@@ -215,9 +218,19 @@ class IngestionService:
             )
             rows_parsed = len(observations_parsed) + outcome.skipped_rows
             warnings = dict(outcome.warnings)
+            missing_rows = outcome.missing_rows
+            filtered: list[ParsedObservation] = []
+            for row in observations_parsed:
+                if self._series_known(row.series_id):
+                    filtered.append(row)
+                else:
+                    # e.g. percent-change ECI rows: the catalog holds index
+                    # levels only, so their observations are skipped with a
+                    # count, never ingested.
+                    skip_reasons["series_not_loaded"] += 1
             observations = [
-                self._to_observation(program, canonical_name, parsed)
-                for parsed in observations_parsed
+                self._to_observation(program, canonical_name, row)
+                for row in filtered
             ]
             self.observation_repo.save_many(observations)
             observations_loaded = len(observations)
@@ -239,8 +252,10 @@ class IngestionService:
             rows_parsed=rows_parsed,
             series_loaded=series_loaded,
             observations_loaded=observations_loaded,
+            missing_rows=missing_rows,
+            skipped_rows=dict(skip_reasons) if kind == "data" else {},
             period_warnings=warnings,
-            skipped_series=dict(skip_reasons),
+            skipped_series=dict(skip_reasons) if kind == "series" else {},
             notes=notes,
         )
         manifest = load_manifest(self.manifest_path)
@@ -285,6 +300,15 @@ class IngestionService:
             )
             for path, program, kind, canonical in classified
         ]
+
+    def _series_known(self, series_id: str) -> bool:
+        """Catalog membership with a per-run cache (units map + repository)."""
+        if series_id not in self._known:
+            self._known[series_id] = (
+                series_id in self.units
+                or self.series_repo.get(series_id) is not None
+            )
+        return self._known[series_id]
 
     def _to_metadata(
         self, program: FlatFileProgram, parsed: ParsedSeries
