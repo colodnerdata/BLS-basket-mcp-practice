@@ -153,6 +153,8 @@ Before submitting a component change:
    `docs/hackathon_template.md`; do not silently weaken the canonical rules.
 
 
+## Launching the server
+
 The `serve` task calls the existing `bls_escalation_mcp.app` launcher. Configure
 transport, port, and BLS credentials in the repository's ignored `.env` file;
 do not inject settings through terminal environment assignments. Run from the
@@ -160,3 +162,30 @@ repository directory. The task uses stdio by default; set
 `MCP_TRANSPORT=streamable-http` in `.env` for local HTTP on port 8000.
 For a stdio MCP client's launch command, use `uv run --locked poe -q serve`
 to suppress Poe's task announcement on protocol stdout.
+
+## Python HTTP smoke check (no Node.js)
+
+Set `MCP_TRANSPORT=streamable-http` in the ignored local `.env`, then start
+`uv run --locked poe serve`.
+In a second terminal in the repository, run:
+
+```bash
+uv run --locked poe smoke
+# For a different port:
+uv run --locked poe smoke --url http://127.0.0.1:8123/mcp
+```
+
+The command prints PASS checks for MCP discovery, access status, guidance
+resources, and a supplied-value calculation (110 / 100 = 1.1). It makes no
+live BLS requests and does not save specifications. It exits nonzero on any
+failure and has a 30-second total timeout (`--timeout` overrides it).
+Configuration stays in `.env`; no terminal environment injection is needed.
+This checks the running HTTP transport, not agent performance or live BLS.
+The existing FastMCP Python client provides the connection; Node.js and
+Inspector are optional external debugging tools, not project dependencies.
+
+The complete two-terminal workflow and expected PASS output are in
+[QUICKSTART.md](../QUICKSTART.md). `serve` and `smoke` are independent tasks:
+smoke does not start a server. Local configuration belongs in `.env`;
+Node.js is not required. `smoke` is restricted to loopback HTTP and bypasses
+system proxies. It does not persist results or execute agent evaluations.

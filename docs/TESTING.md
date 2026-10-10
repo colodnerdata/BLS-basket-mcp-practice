@@ -143,3 +143,30 @@ tests above, and build it on these principles:
   returned provenance, the computed numbers) rather than by LLM judgment.
 - Re-run whenever a tool description, schema, or model changes; nothing in
   the code "breaks" when behavior drifts, so only the evals catch it.
+
+
+## Python smoke command
+
+`tests/test_smoke_mcp.py` runs the command's workflow through the real in-memory
+FastMCP client without a BLS key, verifies no upstream requests occur, checks
+that an unrelated server fails discovery, and now guards the `main()` validation
+boundary: remote/local-credential URLs and non-finite/non-positive timeouts are
+rejected before a server connection is attempted. `poe smoke` separately targets
+a running HTTP server and checks discovery, status, guidance resources and
+an independent 110/100=1.1 calculation. It does not establish live BLS access
+or agent performance and does not write specifications.
+
+
+### Local verification evidence — 2026-10-08
+
+- The Python smoke workflow passed over an actual loopback Streamable HTTP
+  connection to a temporary-database server, with BLS HTTP mocked and no key.
+  Discovery returned 11 tools, 3 static resources, and 1 resource template;
+  status/guidance reads and the 110/100=1.1 calculation passed, exit code 0.
+- After merging the `serve` task from main into the smoke branch at `ac52b90`,
+  both Poe task dry-runs resolved to their intended Python modules.
+  `uv run --locked poe check` passed: lint, formatting, mypy, and 74 tests.
+- One existing Starlette TestClient deprecation warning remains.
+- These checks establish local protocol connectivity and deterministic behavior.
+  They do not establish live BLS access, deployment readiness, stdio host
+  compatibility, or model-driven agent quality. No Node.js was required.

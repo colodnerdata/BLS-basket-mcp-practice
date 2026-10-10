@@ -81,6 +81,26 @@ Still intentionally scaffolded or deferred:
 See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan from this scaffold to an
 MVP with test and eval harnesses.
 
+## Local launch and verification
+
+Configure local settings in the ignored `.env` file; do not inject settings
+through terminal environment assignments. For HTTP testing, set
+`MCP_TRANSPORT=streamable-http`, `MCP_HOST=127.0.0.1`, and `MCP_PORT=8000`.
+
+```bash
+# Terminal 1, from the repository directory:
+uv run --locked poe serve
+# Terminal 2, from the repository directory:
+uv run --locked poe smoke
+```
+
+The smoke command uses Python/FastMCP only: no Node.js or Inspector dependency.
+It checks MCP discovery, configuration status, guidance resources, and a
+supplied-value calculation. It does not fetch BLS data or save specifications.
+See [QUICKSTART.md](QUICKSTART.md) for expected output and troubleshooting,
+[docs/TESTING.md](docs/TESTING.md) for evidence and boundaries, and
+[eval/README.md](eval/README.md) for the agent-eval status.
+
 ## Development
 
 Install dependencies and run checks:
