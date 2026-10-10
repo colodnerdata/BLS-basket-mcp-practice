@@ -28,9 +28,10 @@ class IngestionLogRepository:
                     file_id, program, kind, source_url, path_in_repo,
                     downloaded_at, bls_last_modified, size_bytes, sha256,
                     ingested_at, ingested_by, rows_parsed, series_loaded,
-                    observations_loaded, period_warnings, status
+                    observations_loaded, period_warnings, skipped_series,
+                    status
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )
                 ON CONFLICT(file_id) DO UPDATE SET
                     program = excluded.program,
@@ -47,6 +48,7 @@ class IngestionLogRepository:
                     series_loaded = excluded.series_loaded,
                     observations_loaded = excluded.observations_loaded,
                     period_warnings = excluded.period_warnings,
+                    skipped_series = excluded.skipped_series,
                     status = excluded.status
                 """,
                 (
@@ -67,6 +69,7 @@ class IngestionLogRepository:
                     entry.series_loaded,
                     entry.observations_loaded,
                     json.dumps(entry.period_warnings, sort_keys=True),
+                    json.dumps(entry.skipped_series, sort_keys=True),
                     entry.status,
                 ),
             )
@@ -97,6 +100,7 @@ class IngestionLogRepository:
                     series_loaded=row["series_loaded"],
                     observations_loaded=row["observations_loaded"],
                     period_warnings=json.loads(row["period_warnings"]),
+                    skipped_series=json.loads(row["skipped_series"] or "{}"),
                     status=row["status"],
                 )
             )

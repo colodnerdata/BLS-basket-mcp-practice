@@ -29,8 +29,9 @@ def harness_env(tmp_path: Path):
 def test_ingest_records_dual_provenance(harness_env) -> None:
     database, manifest_path, entries = harness_env
     manifest = load_manifest(manifest_path)
-    # 9 fixture files: 2 series slices, 4 mapping slices, 3 data slices.
-    assert len(entries) == len(manifest.files) == 9
+    # 13 fixture files: 3 series slices, 7 mapping slices, 2 real data
+    # slices plus the header-only (empty) data slice.
+    assert len(entries) == len(manifest.files) == 13
     by_id = {entry.file_id: entry for entry in manifest.files}
     series = by_id["pc/pc.series"]
     assert series.series_loaded == 2
@@ -39,6 +40,11 @@ def test_ingest_records_dual_provenance(harness_env) -> None:
     assert series.path_in_repo == "tests/fixtures/bls/flatfile/pc.series.slice"
     observed = by_id["pc/pc.data.20.ComputerProduct"]
     assert observed.observations_loaded == 5
+    # The ECI eligibility gate's skips are recorded, not silent.
+    ci = by_id["ci/ci.series"]
+    assert ci.rows_parsed == 4
+    assert ci.series_loaded == 3
+    assert ci.skipped_series == {"periodicity_Q": 1}
     # Round-trip stability: save twice, byte-identical.
     first_save = manifest_path.read_text("utf-8")
     save_manifest(manifest_path, manifest)

@@ -47,6 +47,7 @@ class ManifestFile(BaseModel):
     series_loaded: int = 0
     observations_loaded: int = 0
     period_warnings: dict[str, int] = Field(default_factory=dict)
+    skipped_series: dict[str, int] = Field(default_factory=dict)
     status: Literal["active"] = "active"
     notes: str | None = None
 

@@ -1,0 +1,4 @@
+owner_code	owner_text	display_level	selectable	sort_sequence
+1	Civilian workers	0	T	1
+2	Private industry workers	0	T	2
+3	State and local government workers	0	T	3

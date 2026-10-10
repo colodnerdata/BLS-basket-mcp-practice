@@ -1,0 +1,5 @@
+estimate_code	estimate_text	display_level	selectable	sort_sequence
+01	Total compensation	0	T	1
+02	Wages and salaries	1	T	2
+03	Total benefits	1	T	3
+15	Health insurance	2	T	4

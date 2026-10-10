@@ -177,6 +177,12 @@ From the owner-saved `ci.txt` (the authoritative file list) and the checked-in
   (`CIS1010000000000I` = "Total compensation for all civilian workers,
   current dollar index"), begin/end year+period; 2,471 series in this
   snapshot. Construction industry code is `230000` (`ci.industry`).
+- **CI mapping files keep the name in the *second* column** followed by
+  display metadata (`display_level`, `selectable`, `sort_sequence`) — so
+  the generic last-field rule would grab `sort_sequence`; CI mappings use
+  `name_column=1` in `parse_code_mapping`. (Found during implementation,
+  2026-10-10; applies to `ci.industry`, `ci.occupation`, `ci.area`,
+  `ci.estimate`, `ci.owner`, `ci.periodicity`, `ci.subcell`.)
 - **Data layout:** `ci.data.0.Current`/`AllData` share the PC/PD 5-column
   shape. `ci.aspect` is standard errors with an extra `aspect_type` column —
   **never ingest it as observations.**
@@ -258,11 +264,12 @@ establish numerical or format correctness.
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
       directory listings — superseded for `pc/` by the 2026-10-10 probe
       JSON; repeat for `pd/` when its download is scheduled.
-- [x] `ci` (ECI, in MVP scope since 2026-10-10): sampled and verified
-      2026-10-10 — formats above; quarterly `Q01`-`Q04` only, no
+- [x] `ci` (ECI, in MVP scope since 2026-10-10): sampled, verified, and
+      ingested 2026-10-10 — formats above; quarterly `Q01`-`Q04` only, no
       annual-average period code; `I`/`Q`/`A` periodicity encodes index vs
-      percent change (only `I` is escalation-eligible). Still small fetches
-      before parsing: `ci.periodicity`, `ci.estimate`, `ci.owner`,
-      `ci.occupation`, `ci.area`, `ci.contacts`.
+      percent change (only `I` is escalation-eligible; 506 index series
+      loaded of 2,471 rows, skips recorded in the manifest).
+      `ci.data.0.Current` (latest quarter, all series) remains to fetch
+      when observation downloads start.
 - [ ] `wp` undecided; `oe` (locality) deferred past the MVP. Sample their
       `xx.txt` and `xx.series` only when scheduled.

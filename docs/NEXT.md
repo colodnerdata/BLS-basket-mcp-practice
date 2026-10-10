@@ -34,13 +34,12 @@
   18.FabricatedMetal, 19.Machinery (HVAC), 21.ElectricalMachinery,
   75.Construction. Caveats: raw materials may map better to the `wp`
   commodity program (owner decision still open). Labor enters the MVP via
-  ECI (`ci`) per the 2026-10-10 scope decision; ECI sampling landed the
-  same day and verified its format (see the CI section of `bulk_files.md`:
-  quarterly `Q01`-`Q04` only, index-vs-percent-change via periodicity
-  `I`/`Q`/`A` — only `I` is escalation-eligible). One more owner-run fetch
-  before the ECI parser: `ci.periodicity`, `ci.estimate`, `ci.owner`,
-  `ci.occupation`, `ci.area`, `ci.contacts`. OEWS (`oe`) localization
-  (mapping and automated wage ratios) is the deferred piece. Then M3 (observation resolution over the
+  ECI (`ci`) per the 2026-10-10 scope decision; its parser landed with the
+  remaining mappings and **506 current-dollar index series are ingested**
+  (quarterly `Q01`-`Q04`; percent-change/rate series refused and recorded).
+  One more owner-run fetch completes labor data: `ci.data.0.Current` (the
+  latest-quarter partition). OEWS (`oe`) localization (mapping and
+  automated wage ratios) is the deferred piece. Then M3 (observation resolution over the
   snapshot), M4' (eval evidence pack), M5' (Code Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from
   2026-10-13) or mcp@gsa.gov: the submission deadline; whether an existing

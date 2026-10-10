@@ -18,11 +18,13 @@ from __future__ import annotations
 import argparse
 import hashlib
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import cast
 
 from bls_escalation_mcp.data.flat_file import (
     FlatFileProgram,
+    eci_is_index,
     parse_code_mapping,
     parse_data_file,
     parse_series_file,
@@ -57,18 +59,34 @@ def file_mismatches(entry: ManifestFile, repo_root: Path) -> list[str]:
         problems.append(f"{label}: sha256 {digest} != {entry.sha256}")
 
     text = raw.decode("utf-8")
+    skipped_series: dict[str, int] = {}
     if entry.kind == "series":
         # The manifest only records programs whose parsers exist (pc/pd);
         # other programs cannot enter it, so this cast is safe by design.
         program = cast(FlatFileProgram, entry.program)
         parsed_series, _ = parse_series_file(text, program, file_label=label)
-        rows_parsed = series_loaded = len(parsed_series)
+        rows_parsed = len(parsed_series)
+        if entry.program == "ci":
+            # Recompute the ECI eligibility gate so its skips are verified
+            # too, not just the survivor count.
+            skipped = Counter(
+                f"periodicity_{series.periodicity_code}"
+                for series in parsed_series
+                if not eci_is_index(series)
+            )
+            skipped_series = dict(skipped)
+            series_loaded = len(parsed_series) - sum(skipped.values())
+        else:
+            series_loaded = rows_parsed
         observations_loaded = 0
         warnings: dict[str, int] = {}
     elif entry.kind == "mapping":
         key_columns = 2 if entry.file_id.endswith(".product") else 1
         _, rows_parsed = parse_code_mapping(
-            text, file_label=label, key_columns=key_columns
+            text,
+            file_label=label,
+            key_columns=key_columns,
+            name_column=1 if entry.program == "ci" else None,
         )
         series_loaded = observations_loaded = 0
         warnings = {}
@@ -96,6 +114,11 @@ def file_mismatches(entry: ManifestFile, repo_root: Path) -> list[str]:
             f"{label}: recomputed period warnings {warnings} != recorded "
             f"{entry.period_warnings}"
         )
+    if skipped_series != entry.skipped_series:
+        problems.append(
+            f"{label}: recomputed skipped series {skipped_series} != "
+            f"recorded {entry.skipped_series}"
+        )
     return problems
 
 
@@ -121,6 +144,7 @@ def log_mismatches(
             "rows_parsed",
             "series_loaded",
             "observations_loaded",
+            "skipped_series",
             "status",
         ):
             if getattr(current, field) != getattr(receipt, field):

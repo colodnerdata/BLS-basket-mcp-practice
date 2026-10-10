@@ -63,13 +63,18 @@ Expected values are hand-checked against the fixture slices in
 | `test_data_file_header_only_partition_is_empty_not_error` | Header-only partition → 0 rows, no error | Empty partitions (they exist: 72 bytes) failing ingestion |
 | `test_data_file_field_drift_fails_loudly` | `FlatFileFormatError` on a 6-field data row | Column-count drift parsing into wrong positions |
 | `test_pd_product_quirk_name_in_last_field` / `test_simple_mappings` | `"Secondary products"` read from the last field of a 6-field row; code+name mappings exact | Fixed-position name parsing misreading real mapping rows |
+| `test_ci_series_file_parse` | The 4 fixture rows parse with owner/industry/periodicity/estimate codes and quarterly begin/end (construction wages series: 2001-Q1 → 2026-Q2), padding stripped | ECI's 15-column layout misread |
+| `test_ci_index_eligibility_gate` | The 3 `I` series are eligible and the `Q` percent-change twin is not | Percent-change or response-rate series leaking into the catalog as escalation inputs |
+| `test_ci_mappings` | `I` → "Current dollar index number", `01` → "Total compensation", `2` → "Private industry workers" | CI's name-in-column-2 layout (trailing display metadata) being misparsed as the last field |
+| `test_data_file_quarterly_periods` | `Q01` → quarter=1, month=None; out-of-range `Q05` skipped with a counted warning | Quarterly periods misfiled or silently dropped |
+| `test_data_file_missing_dash_raises` | A `-` value (footnote `A`) raises `FlatFileFormatError` | ECI's missing-data sentinel ever becoming a number |
 | `test_classify_file*` (parametrized) | Filenames map to `(program, kind, canonical upstream name)`, stripping `.txt`/`.sample`/`.head`/`.slice`; docs/probe/README files rejected | Misrouting a support file into a parser, or recording a sample's name as a canonical URL |
 
 ### `tests/test_manifest.py` — manifest and `verify-ingest`
 
 | Test | Expected | Guards against |
 | --- | --- | --- |
-| `test_ingest_records_dual_provenance` | Manifest records all 9 fixture files with sha256/counts/repo paths; saving is byte-stable | Provenance drift or non-deterministic manifest writes (diff noise) |
+| `test_ingest_records_dual_provenance` | Manifest records all 13 fixture files with sha256/counts/repo paths, including the ECI eligibility skips (`skipped_series`) on `ci.series`; saving is byte-stable | Provenance drift, silent eligibility skips, or non-deterministic manifest writes |
 | `test_verify_passes_on_consistent_records` | No mismatches after a clean fixture ingestion | False positives in the agreement check |
 | `test_verify_catches_tampered_counts_and_hash` | Tampered size/hash/count in a copy → each reported | `verify-ingest` failing to detect a changed input file |
 | `test_verify_catches_missing_file_and_log_drift` / `test_verify_flags_unlogged_manifest_entries` | Missing checkout file listed by path; manifest/log disagreements (counts; unlogged entries) each reported | The git record and the database receipt drifting apart |
@@ -81,7 +86,8 @@ database. This is the recorded-replay layer: no network is involved.
 
 | Test | Expected | Guards against |
 | --- | --- | --- |
-| `test_series_catalog_counts_match_files` | Exactly 4,510 + 17,439 series (verified file row counts) | Series rows lost or double-counted at scale |
+| `test_series_catalog_counts_match_files` | Exactly 4,510 + 17,439 PPI series (verified file row counts), and ECI rows loaded equal the manifest's recorded eligible count with all skips accounted for | Series rows lost, double-counted at scale, or eligibility skips without a record |
+| `test_eci_series_metadata_and_eligibility` | `CIS2022300000000I` (construction wages, private industry) is quarterly ECI with units "index (base Dec 2005=100)", 2001-Q1→2026-Q2, active, and searchable; its `Q`/`A` twins are absent | The percent-change families leaking into the catalog, or ECI metadata (base, periodicity, active) mis-set |
 | `test_pc_series_metadata` / `test_pd_series_metadata` / `test_search_finds_real_series` | Hand-read values from the files (`PCU1133--1133--` base 198112, first `1981-M12`, active; `PDU1011#` SIC, inactive, ends `2003-M13` with a synthesized title; "Logging" searchable) | Mis-mapping real series-file fields into catalog metadata |
 | `test_pc_observations_exact_and_preliminary` / `test_m13_is_a_distinct_annual_average` | `Decimal("234.780")` exact; `2026-M05` preliminary with footnote text and series-derived units; `1969-M13` is `ANNUAL_AVERAGE` distinct from `M12` and holds `35.0` | Value precision loss, preliminary-state confusion, and annual-average/month conflation through the full ingest path |
 | `test_manifest_and_log_agree_after_ingest` / `test_verify_cli_passes` | Manifest and `ingestion_log` agree; `verify` exits 0 | The dual-record contract breaking end-to-end |

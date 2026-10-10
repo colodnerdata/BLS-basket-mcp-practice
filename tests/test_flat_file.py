@@ -8,6 +8,7 @@ import pytest
 
 from bls_escalation_mcp.data.flat_file import (
     FlatFileFormatError,
+    eci_is_index,
     parse_code_mapping,
     parse_data_file,
     parse_series_file,
@@ -129,6 +130,78 @@ def test_simple_mappings(flat_fixtures) -> None:
     assert footnotes["P"].startswith("Preliminary")
 
 
+def test_ci_series_file_parse(flat_fixtures) -> None:
+    rows, _ = parse_series_file(_read(flat_fixtures, "ci.series.slice"), "ci")
+    assert len(rows) == 4
+    construction = rows[3]
+    assert construction.series_id == "CIS2022300000000I"
+    assert construction.owner_code == "2"  # private industry
+    assert construction.industry_code == "230000"  # construction
+    assert construction.periodicity_code == "I"
+    assert construction.estimate_code == "02"  # wages and salaries
+    assert "Wages and salaries" in (construction.title or "")
+    assert (construction.begin_year, construction.begin_period) == (
+        2001,
+        "Q01",
+    )
+    assert (construction.end_year, construction.end_period) == (2026, "Q02")
+
+
+def test_ci_index_eligibility_gate(flat_fixtures) -> None:
+    rows, _ = parse_series_file(_read(flat_fixtures, "ci.series.slice"), "ci")
+    eligible = [row.series_id for row in rows if eci_is_index(row)]
+    assert eligible == [
+        "CIS1010000000000I",
+        "CIS2012300000000I",
+        "CIS2022300000000I",
+    ]
+    # The 3-month percent-change twin must never reach the catalog.
+    assert "CIS1010000000000Q" not in eligible
+
+
+def test_ci_mappings(flat_fixtures) -> None:
+    # CI mapping files keep the name in column 2 with trailing display
+    # metadata, so callers pass name_column=1 (last-field would grab
+    # sort_sequence).
+    periodicity, _ = parse_code_mapping(
+        _read(flat_fixtures, "ci.periodicity.slice"), name_column=1
+    )
+    assert periodicity["I"] == "Current dollar index number"
+    assert periodicity["Q"].startswith("3-month percent change")
+    estimate, _ = parse_code_mapping(
+        _read(flat_fixtures, "ci.estimate.slice"), name_column=1
+    )
+    assert estimate["01"] == "Total compensation"
+    owner, _ = parse_code_mapping(
+        _read(flat_fixtures, "ci.owner.slice"), name_column=1
+    )
+    assert owner["2"] == "Private industry workers"
+
+
+def test_data_file_quarterly_periods() -> None:
+    text = (
+        "series_id\tyear\tperiod\tvalue\tfootnote_codes\n"
+        "CIS2022300000000I\t2001\tQ01\t135.0\t\n"
+        "CIS2022300000000I\t2001\tQ05\t135.0\t\n"
+    )
+    rows, outcome = parse_data_file(text)
+    assert len(rows) == 1
+    assert rows[0].quarter == 1
+    assert rows[0].month is None
+    # Q05 (and every other out-of-range code) is skipped with a count.
+    assert outcome.skipped_rows == 1
+    assert outcome.warnings["Q05"] == 1
+
+
+def test_data_file_missing_dash_raises() -> None:
+    text = (
+        "series_id\tyear\tperiod\tvalue\tfootnote_codes\n"
+        "CIS2022300000000I\t2001\tQ01\t-\tA\n"
+    )
+    with pytest.raises(FlatFileFormatError, match="not a decimal"):
+        parse_data_file(text)
+
+
 @pytest.mark.parametrize(
     "name, expected",
     [
@@ -149,6 +222,9 @@ def test_simple_mappings(flat_fixtures) -> None:
             ("pc", "data", "pc.data.20.ComputerProduct"),
         ),
         ("pd.series.slice", ("pd", "series", "pd.series")),
+        ("ci.series", ("ci", "series", "ci.series")),
+        ("ci.periodicity.slice", ("ci", "mapping", "ci.periodicity")),
+        ("ci.data.0.Current", ("ci", "data", "ci.data.0.Current")),
     ],
 )
 def test_classify_file(name: str, expected: tuple[str, str, str]) -> None:
@@ -156,7 +232,16 @@ def test_classify_file(name: str, expected: tuple[str, str, str]) -> None:
 
 
 @pytest.mark.parametrize(
-    "name", ["pc.txt", "pc.contacts", "overview.txt", "README.MD", "x.series"]
+    "name",
+    [
+        "pc.txt",
+        "pc.contacts",
+        "overview.txt",
+        "README.MD",
+        "x.series",
+        "ci.aspect",
+        "pc_headers_probe.json",
+    ],
 )
 def test_classify_file_skips_unrecognized(name: str) -> None:
     assert classify_file(name) is None

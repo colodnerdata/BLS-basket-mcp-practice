@@ -41,10 +41,49 @@ def ingested(tmp_path_factory):
 
 
 def test_series_catalog_counts_match_files(ingested) -> None:
-    repository = SeriesRepository(str(ingested["database"]))
-    series = repository.list_by_program(BLSProgram.PPI)
+    ppi = SeriesRepository(str(ingested["database"])).list_by_program(
+        BLSProgram.PPI
+    )
     # Verified file counts: 4,510 PC + 17,439 PD data rows (bulk_files.md).
-    assert len(series) == 4510 + 17439
+    assert len(ppi) == 4510 + 17439
+    eci = SeriesRepository(str(ingested["database"])).list_by_program(
+        BLSProgram.ECI
+    )
+    manifest = load_manifest(ingested["manifest_path"])
+    ci_record = {f.file_id: f for f in manifest.files}["ci/ci.series"]
+    # Every loaded ECI row is an index series; all skips are recorded.
+    assert ci_record.series_loaded == len(eci)
+    assert sum(ci_record.skipped_series.values()) == (
+        ci_record.rows_parsed - ci_record.series_loaded
+    )
+
+
+def test_eci_series_metadata_and_eligibility(ingested) -> None:
+    repository = SeriesRepository(str(ingested["database"]))
+    labor = repository.get("CIS2022300000000I")
+    assert labor is not None
+    assert labor.program == BLSProgram.ECI
+    assert labor.title == (
+        "Wages and salaries for private industry workers in the "
+        "construction industry, current dollar index"
+    )
+    assert labor.industry_code == "230000"
+    assert labor.periodicity == Periodicity.QUARTERLY
+    assert labor.units == "index (base Dec 2005=100)"
+    assert str(labor.first_period) == "2001-Q1"
+    assert str(labor.latest_period) == "2026-Q2"
+    assert labor.active is True
+    # Percent-change twins are never ingested.
+    for suffix in ("Q", "A"):
+        assert repository.get(f"CIS2022300000000{suffix}") is None
+    found = repository.search(
+        SeriesSearchRequest(
+            query="Wages and salaries for private industry workers in the "
+            "construction",
+            active_only=True,
+        )
+    )
+    assert any(s.series_id == "CIS2022300000000I" for s in found)
 
 
 def test_pc_series_metadata(ingested) -> None:

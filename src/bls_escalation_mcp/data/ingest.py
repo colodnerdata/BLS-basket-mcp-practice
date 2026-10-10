@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import re
+from collections import Counter
 from datetime import UTC, datetime
 from importlib.metadata import version as package_version
 from pathlib import Path
@@ -33,6 +34,7 @@ from bls_escalation_mcp.data.flat_file import (
     FlatFileProgram,
     ParsedObservation,
     ParsedSeries,
+    eci_is_index,
     parse_code_mapping,
     parse_data_file,
     parse_series_file,
@@ -57,11 +59,15 @@ from bls_escalation_mcp.repositories.ingestion_log import (
 from bls_escalation_mcp.repositories.observations import ObservationRepository
 from bls_escalation_mcp.repositories.series import SeriesRepository
 
-_SERIES_NAME = re.compile(r"^(pc|pd)\.series$")
+_SERIES_NAME = re.compile(r"^(pc|pd|ci)\.series$")
 _MAPPING_NAME = re.compile(
-    r"^(pc|pd)\.(industry|product|period|footnote|seasonal)(\.txt)?$"
+    r"^(pc|pd|ci)\."
+    r"(industry|product|period|footnote|seasonal|area|estimate|owner|"
+    r"occupation|subcell|periodicity)(\.txt)?$"
 )
-_DATA_NAME = re.compile(r"^(pc|pd)\.data\..+?(\.sample|\.head)?$")
+# ci.aspect (standard errors, different layout) intentionally cannot match
+# the data pattern: no "ci.data." prefix.
+_DATA_NAME = re.compile(r"^(pc|pd|ci)\.data\..+?$")
 
 
 _SLICE_SUFFIXES = (".sample", ".head", ".slice")
@@ -106,6 +112,12 @@ def _period_of(year: int, code: str) -> EconomicPeriod:
             month=int(match.group(1)),
             periodicity=Periodicity.MONTHLY,
         )
+    if match := re.fullmatch(r"Q(\d{2})", code):
+        return EconomicPeriod(
+            year=year,
+            quarter=int(match.group(1)),
+            periodicity=Periodicity.QUARTERLY,
+        )
     raise ValueError(f"Unknown begin/end period code {code!r}")
 
 
@@ -128,6 +140,9 @@ class IngestionService:
         self.names: dict[tuple[str, str], dict[str, str]] = {}
         self.footnotes: dict[str, dict[str, str]] = {}
         self.units: dict[str, str | None] = {}
+        # Latest end period of the current series run; ECI's "active" flag
+        # means "reaches the survey's latest period in this snapshot".
+        self._survey_end: tuple[int, str] | None = None
 
     def ingest_file(
         self,
@@ -147,11 +162,17 @@ class IngestionService:
         series_loaded = observations_loaded = 0
         rows_parsed = 0
         warnings: dict[str, int] = {}
+        skip_reasons: Counter[str] = Counter()
 
         if kind == "mapping":
             key_columns = 2 if canonical_name.endswith(".product") else 1
+            # CI mappings keep the name in column 2 with trailing display
+            # metadata; PC/PD use the (quirk-proof) last field.
             mapping, rows_parsed = parse_code_mapping(
-                text, file_label=label, key_columns=key_columns
+                text,
+                file_label=label,
+                key_columns=key_columns,
+                name_column=1 if program == "ci" else None,
             )
             map_name = canonical_name.rsplit(".", 1)[-1]
             if map_name == "footnote":
@@ -164,6 +185,23 @@ class IngestionService:
             )
             rows_parsed = len(series)
             warnings = dict(outcome.warnings)
+            if program == "ci":
+                # ECI eligibility: current-dollar index levels only; every
+                # percent-change/constant-dollar/rate series is skipped with
+                # a recorded count (see flat_file.eci_is_index).
+                eligible: list[ParsedSeries] = []
+                for parsed in series:
+                    if eci_is_index(parsed):
+                        eligible.append(parsed)
+                    else:
+                        skip_reasons[
+                            f"periodicity_{parsed.periodicity_code}"
+                        ] += 1
+                series = eligible
+            if program == "ci" and series:
+                self._survey_end = max(
+                    (parsed.end_year, parsed.end_period) for parsed in series
+                )
             metadata = [
                 self._to_metadata(program, parsed) for parsed in series
             ]
@@ -202,6 +240,7 @@ class IngestionService:
             series_loaded=series_loaded,
             observations_loaded=observations_loaded,
             period_warnings=warnings,
+            skipped_series=dict(skip_reasons),
             notes=notes,
         )
         manifest = load_manifest(self.manifest_path)
@@ -261,6 +300,23 @@ class IngestionService:
                 if parsed.base_or_bench_date
                 else "index"
             )
+            program_enum = BLSProgram.PPI
+            periodicity = Periodicity.MONTHLY
+            geography = None
+            occupation = None
+        elif program == "ci":
+            # ECI flat files always cite base December 2005 = 100 (ci.txt).
+            title = parsed.title or f"ECI {parsed.series_id}"
+            classification = "NAICS"
+            description = None
+            units = "index (base Dec 2005=100)"
+            program_enum = BLSProgram.ECI
+            periodicity = Periodicity.QUARTERLY
+            geography = self.names.get(("ci", "area"), {}).get(
+                parsed.area_code or ""
+            )
+            occupation = parsed.occupation_code
+            active = (parsed.end_year, parsed.end_period) == self._survey_end
         else:
             product = self.names.get(("pd", "product"), {})
             industry = self.names.get(("pd", "industry"), {})
@@ -280,16 +336,23 @@ class IngestionService:
                 if parsed.base_or_bench_date
                 else "index"
             )
+            program_enum = BLSProgram.PPI
+            periodicity = Periodicity.MONTHLY
+            geography = None
+            occupation = None
         return SeriesMetadata(
             series_id=parsed.series_id,
-            program=BLSProgram.PPI,
+            program=program_enum,
             title=title,
             description=description,
             classification_system=classification,
             classification_code=parsed.industry_code,
             industry_code=parsed.industry_code,
-            commodity_code=parsed.product_code,
-            periodicity=Periodicity.MONTHLY,
+            commodity_code=parsed.product_code or None,
+            occupation_code=occupation,
+            geography=geography,
+            area_code=parsed.area_code,
+            periodicity=periodicity,
             seasonal_adjustment=(
                 parsed.seasonal_code == "S" if parsed.seasonal_code else None
             ),
@@ -317,9 +380,12 @@ class IngestionService:
             period=EconomicPeriod(
                 year=parsed.year,
                 month=parsed.month,
+                quarter=parsed.quarter,
                 periodicity=(
                     Periodicity.MONTHLY
                     if parsed.month is not None
+                    else Periodicity.QUARTERLY
+                    if parsed.quarter is not None
                     else Periodicity.ANNUAL_AVERAGE
                 ),
             ),
@@ -327,7 +393,9 @@ class IngestionService:
             units=units,
             retrieved_at=datetime.now(UTC),
             source=PROGRAM_DIR_URLS[program] + canonical_name,
-            is_preliminary="P" in codes,
+            # "P" marks PPI preliminary values; CI has no preliminary state
+            # (verified against ci.footnote), so CI rows are final.
+            is_preliminary=False if program == "ci" else "P" in codes,
             footnotes=[
                 footnote_map.get(code, code) for code in sorted(set(codes))
             ],
