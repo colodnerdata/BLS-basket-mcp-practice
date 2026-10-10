@@ -1,0 +1,368 @@
+			Producer Price Index (PD)
+				pd.txt
+
+Section Listing
+
+1. Survey Definition
+2. FTP files listed in the survey directory.
+3. Time series, series file, data file, & mapping file definitions and relationships
+4. Series file format and field definitions
+5. Data file format and field definitions
+6. Mapping file formats and field definitions
+7. Data Element Dictionary
+================================================================================
+Section 1
+================================================================================
+
+The following is a definition of:  PRODUCER PRICE INDEX REVISION (PD)
+
+Survey Description:  The Producer Price Index Revision indexes reflect
+price movements for the net outputs of producers organized according to the 
+Standard Industrial Classification System (SIC).  Thus, the PC 
+(current indexes) and PD (discontinued indexes) are compatible with a 
+wide assortment of economic time series including:  productivity, 
+production, employment, wages, and earnings.  Producer Price Index coverage
+currently includes nearly all industries in the goods-producing sectors of
+the American economy--mining, manufacturing, agriculture, fishing, and 
+forestry--as well as gas, electricity, and goods competitive with those made
+in the producing sectors, such as waste and scrap materials.  In addition,
+a number of service sector industries are currently in publication.
+
+To the extent possible, prices used in constructing the indexes are the 
+actual revenue or net transaction prices producers receive for sales of
+their outputs.  They are net transaction prices actually received by the 
+reporting establishment.  Scientific (probability) sampling techniques are 
+used to select reporting establishments, products, and transactions for all
+types and volumes of output (not just volume-sellers) are priced each month.
+
+Coverage includes over 500 mining and manufacturing industries and approximately 
+50 services industries.  The PPI is meant to measure changes in prices
+received by domestic producers, import products are not priced
+in the survey. 
+
+BLS collects over 100,000 price quotations each month covering over 500 industries
+and over 10,000 products and product categories.
+
+Frequency of Observations:  Monthly in most cases.
+
+Annual Averages:  Annual averages are not available.
+
+Data Characteristics:  All indexes are stored with one decimal place.
+
+Updating Schedule:  The PD database contains times series data that are not
+in calculation.  Every January and July, the database is updated to include
+historical data for newly discontinued time series.
+
+
+References:	BLS Handbook of Methods, Chapter 14, "Producer Prices", 
+		Bulletin 2490 (1997).
+
+
+
+
+
+==================================================================================
+Section 2
+==================================================================================
+
+The following Producer Price Index files are on the BLS internet in the 
+sub-directory pub/time.series/pd:
+
+       	
+	pd.data.0.Current	  	  - All current year-to-date 
+	pd.data.1.MetalMining	  	  - (industry code = 10...)Metal mining
+	pd.data.3.BituminousAndLignite	  - (industry code = 12...)Bituminous coal 
+					    and lignite mining
+	pd.data.4.OilAndGas		  - (industry code = 13...)Oil & gas extraction
+	pd.data.5.NonMetallicMining	  - (industry code = 14...)Mining & quarrying 
+					    of non-metallic minerals, except fuels
+	pd.data.6.Food			  - (industry code = 20...)Food & kindred 
+					    products
+	pd.data.7.Tobacco		  - (industry code = 21...)Tobacco manufactures
+	pd.data.8.Textile		  - (industry code = 22...)Textile mill products
+	pd.data.9.Apparel		  - (industry code = 23...)Apparel and other 
+					    finished products made from fabrics and 
+					    similar materials
+	pd.data.10.Lumber		  - (industry code = 24...)Lumber and wood 
+					    products, except furniture
+	pd.data.11.Furniture		  - (industry code = 25...)Furniture and 
+					    fixtures
+	pd.data.12.Paper		  - (industry code = 26...)Paper & allied 
+					    products
+	pd.data.13.Printing		  - (industry code = 27...)Printing, publishing, 
+					    and allied industries
+	pd.data.14.Chemicals		  - (industry code = 28...)Chemicals and allied 
+					    products
+	pd.data.15.Petroleum		  - (industry code = 29...)Petroleum refining 
+					    and related products
+	pd.data.16.Rubber		  - (industry code = 30...)Rubber & miscellaneous 
+					    plastic products
+	pd.data.17.Leather		  - (industry code = 31...)Leather and leather 
+					    products
+	pd.data.18.Stone		  - (industry code = 32...)Stone, clay, glass, 
+					    and concrete products
+	pd.data.19.PrimaryMetal		  - (industry code = 33...)Primary
+					    metal industries
+	pd.data.20.FabricatedMetal	  - (industry code = 34...)Fabricated metal 
+					    products except machinery & transportation 
+					    equipment
+	pd.data.21.Machinery		  - (industry code = 35...)Machinery, except 
+					    electrical
+	pd.data.22.ElectricalMachinery	  - (industry code = 36...)Electrical & 
+					    electronic machinery, equipment, & 
+					    supplies
+	pd.data.23.TransportationEquipment- (industry code = 37...)Transportation 
+					    equipment
+	pd.data.24.MeasuringInstruments	  - (industry code = 38...)Measuring and 
+					    controlling instruments; photographic, 
+					    medical, optical goods; watches
+	pd.data.25.Miscellaneous	  - (industry code = 39...) 
+					    Miscellaneous manufacturing industries
+	pd.data.29.AirTransportation	  - (industry code = 45...)Transportation 
+					    by air
+	pd.data.30.PipeLines		  - (industry code = 46...) Pipe lines, 
+					    except natural gas
+	pd.data.31.Other		  - Other (all alphabetic industry codes)
+	pd.contacts			  - Contacts for pd survey 
+	pd.footnote			  - Footnote codes		mapping file
+	pd.industry			  - Industry codes		mapping file
+	pd.period			  - Period codes		mapping file
+	pd.product			  - Product codes		mapping file
+	pd.series			  - All series and their beginning and end dates
+	pd.txt				  - General information
+=================================================================================
+Section 3
+=================================================================================
+The definition of a time series, its relationship to and the interrelationship
+among series, data and mapping files is detailed below:
+
+A time series refers to a set of data observed over an extended period of time
+over consistent time intervals (i.e. monthly, quarterly, semi-annually, annually).  
+BLS time series data are typically produced at monthly intervals and represent data 
+ranging from a specific consumer item in a specific geographical area whose price 
+is gathered monthly to a category of worker in a specific industry whose employment
+rate is being recorded monthly, etc.
+
+The FTP files are organized such that data users are provided with the following
+set of files to use in their efforts to interpret data files:
+
+a)  a series file (only one series file per survey)
+b)  mapping files
+c)  data files
+
+The series file contains a set of codes which, together, compose a series 
+identification code that serves to uniquely identify a single time series.  
+Additionally, the series file also contains the following series-level information:
+
+a) the period and year corresponding to the first data observation 
+b) the period and year corresponding to the most recent data observation. 
+
+The mapping files are definition files that contain explanatory text descriptions
+that correspond to each of the various codes contained within each series
+identification code.
+
+The data file contains one line of data for each observation period pertaining to a
+specific time series.  Each line contains a reference to the following:
+
+a) a series identification code
+b) year in which data is observed
+c) period for which data is observed (M13, Q05, and S03 indicate annual averages)
+d) value
+e) footnote code (if available)
+=================================================================================
+Section 4
+=================================================================================
+File Structure and Format: The following represents the file format used to define 
+pd.series.  Note that the Field Numbers are for reference only; they do not exist 
+in the database.  Data files are in ASCII text format.  Data elements are separated 
+by spaces; the first record of each file contains the column headers for the data
+elements stored in each field.  Each record ends with a new line character. 
+
+Field #/Data Element	Length		Value(Example)		
+
+1.  series_id		  17		PDU1011#1 
+
+2.  industry_code	  4		1011
+
+3.  product_code	  9		#122
+					
+4.  seasonal		  1		U		
+						
+5.  bench_date		  4  		8412
+					
+6.  begin_year		  4		1984
+
+7.  begin_period	  3		M12	
+				
+8.  end_year		  4		1989		
+
+9.  end_period		  3		M13		
+					
+The series_id (PDU1011#1) can be broken out into:
+
+Code					Value
+
+survey abbreviation	=		PD
+seasonal (code) 	=		U
+industry_code		=		1011
+product_code		=		#1
+==================================================================================
+Section 5
+==================================================================================
+File Structure and Format: The following represents the file format used to define
+each data file.  Note that the field numbers are for reference only; they do not 
+exist in the database.  Data files are in ASCII text format.  Data elements are 
+separated by spaces; the first record of each file contains the column headers for 
+the data elements stored in each field.  Each record ends with a new line character.  
+
+The pd.data file is partitioned into a number of separate files:  See Section 2
+
+All of the above-referenced data files have the following format:
+
+Field #/Data Element	Length		Value(Example)		
+
+1. series_id		  17		PDU1011#122
+
+2. year			   4		1994	
+
+3. period		   3		M01		
+
+4. value		  12      	82.0	 	
+				 
+5. footnote_codes	  10		It varies
+				
+
+The series_id (PDU1011#1) can be broken out into:
+
+Code					Value
+
+survey abbreviation	=		PD
+seasonal (code) 	=		U
+industry_code		=		1011
+product_code		=		#1
+================================================================================
+Section 6
+================================================================================
+File Structure and Format:  The following represents the file format used to define
+each mapping file. Note that the field numbers are for reference only; they do not
+exist in the database.  Mapping files are in ASCII text format.  Data elements are
+separated by tabs; the first record of each file contains the column headers for the
+data elements stored in each field.  Each record ends with a new line character. 
+
+File Name:  pd.footnote
+
+Field #/Data Element		Length		Value(Example)
+
+1. footnote_code		1		P
+
+2. footnote_text		100		Text
+
+
+File Name:  pd.industry
+
+Field #/Data Element		Length		Value(Example)
+
+1.  industry_code		4		1011
+
+2.  industry_name		100		Text
+
+
+File Name:  pd.period
+
+Field #/Data Element		Length		Value(Example)
+
+1.  period			3		M01
+
+2.  period_abbr			5		JAN
+
+3.  period_name			20		Text
+
+
+File Name:  pd.product
+
+Field #/Data Element		Length		Value(Example)
+
+1.  industry_code		4		1011
+
+2.  product_code		9		#8
+						
+3.  product_name		100		Text
+
+=========================================================================================
+Section 7
+=========================================================================================
+PRODUCER PRICE INDEX REVISION (PD) DATABASE ELEMENTS
+
+
+Data Element	Length		Value(Example)			Description
+
+begin_period	3		M01-M13			Identifies first data observation
+				Ex: MO6=June 		within the first year for which 
+				(M=Monthly, M13=Annual	data is available for a given
+				Avg)			time series.
+
+begin_year	4		YYYY			Identifies first year for which 
+				Ex: 1975		data is available for a given 
+							time series.
+
+bench_date	4		YYMM			The base year used in
+				Ex: 8412 (year=1984,	calculating the index.
+				month=12,i.e. December)	
+
+end_period	3		M01-M13			Identifies last data observation
+				Ex: M06=June		within the last year for which
+				(M=Monthly, M13=Annual	data is available for a given 
+				Avg)			time series.
+				
+end_year	4		YYYY			Identifies last year for which 
+				Ex: 1980		data is available for a given
+							time series.
+
+footnote_code	1		P			Identifies footnote for the data 
+							series.
+
+footnote_codes	10		It varies		Identifies footnotes for the data 
+							series.	
+
+footnote_text	100		Text			Contains the text of the footnote.
+
+industry_code	4		1011			SIC code for the industry.
+
+industry_name	100		Text			Name of the industry.
+				Ex: Natural and
+				processed cheese
+
+period_abbr	5		Period name 		Abbreviation of period name.
+				abbreviation
+				Ex: JUN
+
+period		3		M01-M13			Identifies period for which
+				Ex: M06=June		data is observed.
+				(M=Monthly, M13=Annual	
+				Avg)	
+				
+period name	20		Text			Full name of period to which
+				Ex: June		the data observation refers.
+					
+product_code	9		Ex: #8			Code identifying the product 
+							to which the data 
+							observation refers.
+					
+product_name	100		Text			Name of the product to which
+				Ex: cheddar cheese	the data observation refers.
+
+seasonal	1		S=Seasonally		Code identifying whether the
+				  Adjusted		data are seasonally adjusted.
+				U=Unadjusted  		
+
+series_id	17		Code series identifier	Code identifying the specific 
+				Ex:PDU1011#122		series.
+
+value		12		Index			Price index for item.
+				Ex: 82.0
+
+year		4		YYYY			Identifies year of observation.
+				Ex: 1990		
+			
+
+

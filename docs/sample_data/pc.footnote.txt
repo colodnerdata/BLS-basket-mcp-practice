@@ -1,0 +1,3 @@
+footnote_code	footnote_text
+C	Correction
+P	Preliminary. All indexes are subject to monthly revisions up to four months after original publication.
