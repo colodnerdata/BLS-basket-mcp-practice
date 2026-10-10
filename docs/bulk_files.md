@@ -84,6 +84,31 @@ files themselves use tabs).
     (and fail loudly if the shape changes). PD `bench_date` is `YYMM`.
   - PD has **no series title**. Names come from `pd.industry` (and `pd.product`,
     not yet sampled). PC titles are in `pc.series`.
+- **Data file sample** (`sample_data/pd.data.20.FabricatedMetal.head`, first 40
+  lines of the full file; the full file is 208,929 rows, 10.4 MB, and was
+  profiled but not committed). Profile of the full PD partition:
+  - 1,263 series, all present in `pd.series`; every series' last observation
+    matches its `end_year`/`end_period`; no duplicate `(series, year, period)`.
+  - Years 1947-2003. Months `M01`-`M12` plus `M13` (annual average) rows,
+    15,378 of them, so PD *does* carry annual averages despite `pd.txt`.
+    `M13` follows `M12` in each year (`33.2` for Dec 1967, `32.8` for the
+    annual average), so it must never be read as a thirteenth month.
+  - `value` is a **left-padded 12-character field** (`        32.7`), one decimal
+    in every row. Strip, then parse with `Decimal`.
+  - `footnote_codes` is blank for all rows (PD history is final). The column is
+    still space-padded, so a blank is `""` after stripping, not missing.
+  - Every row had exactly 5 fields. This is one PD partition only; **no PC data
+    sample has been seen yet** (the upload was PD), so PC's three-decimal
+    values after June 2021 and `P` footnotes on recent months are still
+    unverified.
+- **Product mapping:** `pc.product` (4,510 rows) and `pd.product` (17,439) each
+  join one-to-one to their series file on `(industry_code, product_code)`;
+  all 4,510 PC and 17,439 PD series match. Codes are space-padded in PD
+  (`#        `), so strip before joining. `pd.product` line 3392 has 6 tab
+  fields instead of 3 (`2384`, `#SS`, then empty fields, then
+  `Secondary products`): the name is in the last field. Parse mapping files
+  defensively (take the last field as the name, or reject and report), never
+  assume a fixed column count.
 - **Series ID structure:** `PCU` + industry code + product code, space-padded.
   PC industry codes are 6 characters and use `-` padding (`1133--`, `OMIN--`);
   PD codes are 4 characters and use `#` and `_` (`PDU1011#`, `PDUWINE#`). Codes
@@ -167,11 +192,10 @@ establish numerical or format correctness.
 - [ ] **Unverified:** whether the server returns `ETag`/`Last-Modified` and
       honors conditional requests; BLS's current User-Agent and rate rules.
       Needs one `curl -I` per file from a networked machine.
-- [ ] **Unverified:** `pc.product` and `pd.product` (not yet sampled) and their
-      row counts; whether `pc.series.product_code` always joins to them.
-- [ ] **Unverified:** a data-file sample (`head -n 50` of `pc.data.0.Current`
-      and `pd.data.0.Current`) for real footnote placement and value formats;
-      only the first row layout has been seen.
+- [x] `pc.product` / `pd.product` join one-to-one to their series files (above).
+- [x] PD data-file layout and value format (one partition profiled).
+- [ ] **Unverified:** a **PC** data sample (`head -n 50` of `pc.data.0.Current`;
+      recent months with `P` footnotes and three-decimal values).
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
       directory listings.
 - [ ] Decide on `wp` (and `ci`, `oe`) and sample their `xx.txt` and `xx.series`.

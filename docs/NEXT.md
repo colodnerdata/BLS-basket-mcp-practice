@@ -29,9 +29,10 @@
 
 - Flat-file cache: plan drafted in `bulk_files.md` (PC, PD, ECI, later OEWS;
   release-aligned conditional refresh). PC/PD file formats are now
-  confirmed from `docs/sample_data/`. Next action: add `pc.product`,
-  `pd.product`, data-file head samples and `curl -I` headers (see the
-  unchecked items in its "Verify first"), then decide on `wp`.
+  confirmed from `docs/sample_data/`. PD data and the product
+  mappings are also confirmed. Next action: a PC data sample
+  (`pc.data.0.Current` head) and `curl -I` headers (the unchecked items in its
+  "Verify first"), then decide on `wp`.
 
 - Template layout: all exposed tools/resources now live in individual files
   and use package aggregators. Maintain this layout for future additions;
