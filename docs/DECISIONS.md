@@ -187,6 +187,9 @@ MIME types, verified on resource reads as well as discovery.
 - **Open:** Unverified facts are listed in `bulk_files.md` ("Verify first").
   Vintage policy for revised PPI values is required before observations are
   served from cache.
+- **Update (2026-10-10):** the "ECI after the MVP" ordering below is revised
+  by the MVP data-scope entry at the end of this document: ECI is the MVP's
+  baseline labor source; OEWS localization is the deferred piece.
 - **Revisit when:** The verify-first checklist is done.
 
 ## 2026-10-10 — Hackathon MVP: flat-file snapshot, build-from-Git deployment, and an ingestion manifest
@@ -253,3 +256,35 @@ MIME types, verified on resource reads as well as discovery.
   outgrows comfortable size (then reconsider release assets or LFS); BLS
   publishes a flat-file usage policy; or non-public or multi-tenant
   features require authentication and per-user state.
+
+
+## 2026-10-10 — MVP data scope: materials and baseline labor in, OEWS localization out
+
+- **Status:** accepted. Revises the ECI ordering in the flat-file mirror
+  proposal above ("ECI after the MVP") and the matching sentences in
+  `bulk_files.md`.
+- **Context:** The first basket archetype is vertical construction "from
+  the materials to the labor" (owner, 2026-10-10). Labor escalation
+  therefore cannot wait past the MVP; geographic localization can.
+- **Decision:** MVP data scope is PPI materials (the `pc`/`pd` ingestion
+  already landed; whether raw materials map better to the `wp` commodity
+  program stays an open owner decision) **plus** the ECI program (`ci`) as
+  the baseline labor source, ingested in M2' once its formats are sampled
+  and verified. OEWS (`oe`) locality mapping and any automated wage-ratio
+  application stay deferred to after the MVP. Locality factors remain
+  explicit, user-supplied values only — the methodology rule (never
+  inferred, locality and temporal factors reported separately) is
+  unchanged.
+- **Consequences:** ECI is quarterly and PPI is monthly, and the MVP keeps
+  the one-periodicity-per-specification rule (open decision 3 (a)), so a
+  single basket mixing monthly materials and quarterly labor is still
+  refused. Composition paths — an annual-average basket (PPI `M13` with
+  ECI's annual-average code) or separate same-periodicity specifications —
+  are decided once ECI's period encodings (`Q01`-`Q05`, any `S01`/`A01`)
+  are verified against real `ci` files; they are unverified as of this
+  decision. The owner fetches the small `ci` documentation/series/mapping
+  files per `docs/bls_etiquette.md` and commits them to
+  `docs/sample_data/`; ECI parsing and ingestion then follow the same
+  verified-format, fixture-tested pattern as PC/PD.
+- **Revisit when:** ECI period codes and value semantics are verified, or
+  the hackathon concludes and OEWS localization returns to the plan.

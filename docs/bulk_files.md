@@ -33,12 +33,13 @@ One directory per survey (two-letter code). Each holds:
 | --- | --- | --- | --- |
 | PPI industry, current (NAICS) | `pc` | **Yes (requested)** | Live monthly series: 4,510 series, 3,454 ending 2026-M08. `pc.data.0.Current` ~64 MB (search snippet, unverified) |
 | PPI industry, discontinued (SIC) | `pd` | **Yes (requested), static** | Frozen history: 17,439 series, latest end year 2003 in the sample. Useful for pre-2004 SIC history, not for current escalation |
-| ECI | `ci` | **After the MVP (kept in plan)** | Labor escalation; already a project data source (`data_sources.md`). Owner decision: deal with it after the MVP |
+| ECI | `ci` | **Yes — baseline labor (owner decision 2026-10-10)** | Labor escalation for the vertical-construction archetype; quarterly program; format research and parser land in M2' |
 | OEWS | `oe` | **Yes, later** | Locality wage ratios; already a project data source; annual, large |
 | PPI commodities | `wp` | **Undecided (owner: unknown)** | `overview.txt` lists `WP` (commodities) separately from `PC`/`PD`. Materials and equipment escalation may need it. `WD`/`ND` are its/NAICS discontinued sets |
 | CPI | `cu` | Optional | Only if baskets need consumer-price components; not in current scope |
 
-Start with `pc` and `pd`; `ci` comes after the MVP; `wp` is undecided. Add `oe` when locality mapping is scheduled.
+Start with `pc` and `pd`; `ci` follows for MVP labor (owner decision
+2026-10-10). `wp` is undecided. `oe` (locality) is the deferred program.
 
 ## What to fetch per program
 
@@ -223,5 +224,8 @@ establish numerical or format correctness.
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
       directory listings — superseded for `pc/` by the 2026-10-10 probe
       JSON; repeat for `pd/` when its download is scheduled.
-- [ ] `wp` undecided; `ci` and `oe` deferred past the MVP. Sample their
+- [ ] `ci` (ECI, in MVP scope since 2026-10-10): sample `ci.txt`,
+      `ci.series`, and mapping files before parsing — its period codes
+      (`Q01`-`Q05`, any `S01`/`A01`) and value semantics are unverified.
+- [ ] `wp` undecided; `oe` (locality) deferred past the MVP. Sample their
       `xx.txt` and `xx.series` only when scheduled.

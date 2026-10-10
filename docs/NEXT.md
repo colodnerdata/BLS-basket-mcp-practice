@@ -33,9 +33,12 @@
   (asphalt), 16.NonmetallicMineral (cement/aggregate), 17.PrimaryMetal,
   18.FabricatedMetal, 19.Machinery (HVAC), 21.ElectricalMachinery,
   75.Construction. Caveats: raw materials may map better to the `wp`
-  commodity program (owner decision still open), and labor escalation
-  needs ECI, which is deferred past the MVP — labor components stay
-  fixed/supplied-value until then. Then M3 (observation resolution over the
+  commodity program (owner decision still open). Labor enters the MVP via
+  ECI (`ci`) per the 2026-10-10 scope decision — next ECI step is
+  owner-run: fetch the small `ci.txt`/`ci.series`/mapping files per
+  `bls_etiquette.md` into `docs/sample_data/` so its quarterly period codes
+  can be verified before parsing. OEWS (`oe`) localization (mapping and
+  automated wage ratios) is the deferred piece. Then M3 (observation resolution over the
   snapshot), M4' (eval evidence pack), M5' (Code Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from
   2026-10-13) or mcp@gsa.gov: the submission deadline; whether an existing

@@ -47,7 +47,8 @@ In the MVP:
    periods and a single periodicity (M3).
 4. A curated catalog of about 15-25 verified series from the PPI `pc`/`pd`
    flat files, selected from owner-supplied basket archetypes and verified
-   against real flat files (part of M2'; supersedes old M4). ECI and OEWS
+   against real flat files (part of M2'; supersedes old M4). ECI enters as
+   the baseline labor source (2026-10-10 scope decision); OEWS (locality)
    coverage is deferred past the MVP.
 5. Submission readiness (M5'): the template-conformant shell landed on
    main; remaining work is LICENSE/SECURITY.md (in this change), the
@@ -144,10 +145,17 @@ rebuild the database from checked-in slices with zero network access.
   (space-padded series IDs, `pd.series`' undocumented extra column, PD's
   lack of series titles, `M13` annual averages in PD despite `pd.txt`),
   partition layouts, and refresh cadence are confirmed against owner-saved
-  real files in `docs/sample_data/`. Remaining live verification: the
-  header probe (`scripts/probe_bls_headers.py pc`) from a networked
-  machine. ECI is deferred past the MVP; `wp` (PPI commodities) is
-  undecided.
+  real files in `docs/sample_data/`, and the header probe verified
+  conditional-request support (304s across `pc/`, 2026-10-10; JSON at
+  `docs/sample_data/pc_headers_probe.json`). Parsers, the manifest, and
+  offline PC/PD catalogue ingestion landed via this milestone's groundwork
+  PR; remainder: the conditional-GET fetcher and the first owner-invoked
+  live download of basket-relevant partitions.
+- ECI (`ci`) enters MVP scope as the baseline labor source (2026-10-10
+  scope decision): sample `ci.txt`, `ci.series`, and its mapping files into
+  `docs/sample_data/` (owner-run per the etiquette doc) and verify its
+  quarterly period codes and value semantics before any parsing. `wp`
+  (PPI commodities) remains undecided for raw materials.
 - Cut parser fixture slices from the checked-in `docs/sample_data/` files
   into `tests/fixtures/bls/`, with the source file and retrieval date
   recorded alongside. They are the parser's offline ground truth (replacing
@@ -430,7 +438,8 @@ nothing in the code breaks when behavior drifts.
 | 7 | Eval spend and credentials | Per-run cap, default model, who supplies Anthropic credentials | Cap per run; `claude-sonnet-5-5` while iterating | Post-MVP |
 | 8 | License | Adopted the hackathon template's MIT license 2026-10-10 (see LICENSE) | Resolved | — |
 | 9 | Deployment kit | (a) Code Engine build-from-Git; (b) prebuilt public image; (c) local stdio toolkit only | (a) — owner's choice 2026-10-10: judges inspect the repo, which is the build source; nothing is published to a registry the owner controls. Requires a public repo and paid-tier IBM Cloud; the endpoint is public without auth per the kit, acceptable for public data only | Resolved |
-| 10 | Submission mechanics | Whether an existing repo may adopt the template's structure or must start from it; the unpublished submission deadline | Confirm at the weekly office hours (from 2026-10-13) | NEXT.md owner inputs |
+| 10 | Submission mechanics | Whether an existing repo may adopt the template's structure or must be based on it; the unpublished submission deadline | Confirm at the weekly office hours (from 2026-10-13) | NEXT.md owner inputs |
+| 11 | Labor and locality scope | ECI (`ci`) is the MVP's baseline labor source; OEWS localization (mapping, automated wage ratios) stays post-MVP | Resolved 2026-10-10 — owner decision, see DECISIONS | — |
 
 ## After the MVP
 
@@ -450,7 +459,7 @@ Not scheduled. Most live-API items are described in [bls_api.md](bls_api.md).
   `bulk_files.md`).
 - Full-survey bulk ingestion beyond the curated selection — per-program
   inclusion status (PC first; PD is the discontinued SIC set, static with
-  January/July updates; ECI after the MVP; WP undecided), confirmed file
+  January/July updates; ECI in the MVP as baseline labor; WP undecided), confirmed file
   formats, and the fetcher/loader design are in
   [bulk_files.md](bulk_files.md). If the checked-in slice set ever outgrows
   comfortable size, revisit release assets or LFS per the 2026-10-10
