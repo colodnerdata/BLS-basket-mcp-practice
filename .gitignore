@@ -13,6 +13,7 @@ dist/
 .env
 .env.*
 !.env.example
+# Databases are build artifacts (docs/DECISIONS.md, 2026-10-10); never commit
 *.db
 *.db-*
 *.sqlite*

@@ -126,4 +126,5 @@ and the planned design for combining requests and returning multi-query results.
 
 ## License
 
-This repository does not yet declare a project license; update before public reuse.
+This project is released under the MIT license; see [LICENSE](LICENSE).
+The security policy is in [SECURITY.md](SECURITY.md).

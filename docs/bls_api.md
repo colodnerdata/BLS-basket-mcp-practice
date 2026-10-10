@@ -1,5 +1,10 @@
 # BLS access, setup, and request planning
 
+> Planning note (2026-10-10): the hackathon MVP data path is an ingested
+> flat-file snapshot with no user keys (see [ROADMAP.md](ROADMAP.md) and the
+> 2026-10-10 [DECISIONS.md](DECISIONS.md) entry). This document remains the
+> reference for the optional, deferred live-API path described there.
+
 ## Current behavior
 
 The MCP server is local and single-user. `get_bls_access_status` reports missing

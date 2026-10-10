@@ -123,20 +123,29 @@ aggregate discovery, schemas, annotations, invocation and resource contents.
 
 ## Evals
 
-**Status: not implemented.** The suite above verifies deterministic code —
-given fixed inputs, is the output correct. It says nothing about an LLM or
-agent's judgment when driving these MCP tools under ambiguity (which series
-to pick, how to handle a basket with no explicit weights, whether to ask for
-guidance instead of exceeding a request bound).
+**Status: a deterministic eval-evidence pack is in scope for the hackathon
+MVP (M4' in [ROADMAP.md](ROADMAP.md)); the LLM-backed harness is deferred to
+after the hackathon.** The M4' pack runs scripted scenarios through the real
+MCP client against a fixture-built database (oracle workflows plus negative
+probes), commits a short results summary under `eval/`, and feeds the
+hackathon evaluation document's testing-methodology and performance-metrics
+sections. The first external eval remains the hackathon judging
+itself; owner manual-eval sessions precede it (the M6 gate).
 
-The planned design and its milestone (M5) are in [ROADMAP.md](ROADMAP.md).
+The suite above verifies deterministic code — given fixed inputs, is the
+output correct. It says nothing about an LLM or agent's judgment when
+driving these MCP tools under ambiguity (which series to pick, how to
+handle a basket with no explicit weights, whether to ask for guidance
+instead of inventing a value).
+
 When an evals harness is built, document it here in the same shape as the
 tests above, and build it on these principles:
 
 - Start from this project's own known failure modes, not generic prompts:
   silent weight normalization, series substitution without disclosure,
-  missing-data interpolation, exceeding the 50-series/20-year bounds instead
-  of consulting `setup://bls-api`, conflating temporal and locality factors.
+  missing-data interpolation, presenting a stale snapshot as current, and
+  conflating temporal and locality factors. (The request-bounds failure
+  modes belong to the deferred live-API path.)
 - Score tool choice, numeric correctness, and methodology disclosure as
   separate dimensions — one blended pass rate hides which one regressed.
 - Grade programmatically wherever checkable (the actual tool calls made, the
