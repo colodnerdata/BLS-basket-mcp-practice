@@ -1,5 +1,22 @@
 # Decisions
 
+## 2026-10-07 — GSA hackathon project shell
+
+- **Status:** accepted.
+- **Decision:** Add the GSA launch/deployment/documentation shell around the
+  existing factory and lifespan. Separate transport configuration from BLS
+  settings; load local `.env` with environment precedence. Preserve existing
+  stdio entry points. Verify APIs against installed FastMCP 3.2.4.
+- **Why:** Template launch conventions and probes support platform integration
+  without replacing reviewed typed adapters, services, or persistence.
+  Prefer locked dependencies and Python 3.12 over the template's image defaults.
+- **Deferred:** License choice, registry publication, vendor account-specific
+  kits, authentication/tenant isolation, reusable prompts, and agent evals.
+  Draft metadata has no invented remote URL; cloud.gov starts with no route.
+- **Reference:** [Pinned template and mapping](hackathon_template.md).
+- **Revisit when:** A concrete approved hosted demo needs platform identity,
+  persistence, and access controls; do not infer those from shell files.
+
 Record the choices future-you or a coding assistant might otherwise repeat.
 Add an entry when a decision affects interfaces, architecture, dependencies,
 data formats, verification, or a meaningful constraint. Keep entries short.
@@ -136,9 +153,47 @@ MIME types, verified on resource reads as well as discovery.
   and multi-request retrieval are implemented and independently validated.
 
 
+## 2026-10-07 — Template component layout for future work
+
+- **Status:** accepted; supersedes the shell mapping's earlier suggestion to
+  keep grouping exposed tools by domain. The existing factory/lifespan and
+  domain-service boundaries remain accepted.
+- **Decision:** One exposed tool, prompt, or resource per file, each with a
+  typed `register(mcp)` function and explicit package aggregation. Apply this
+  to every component; the existing grouped modules have been split.
+  Keep public contracts stable during
+  layout-only migration and register each component exactly once.
+- **Why:** The owner requested durable template compliance, including the
+  template's one-tool-per-file convention. Canonical agent rules and developer
+  instructions now agree; shared logic stays below the MCP handler layer.
+- **Implementation:** All existing tools and resources were subsequently
+  migrated in this PR to individual modules and package aggregators. Public
+  contracts and resource contents are preserved. Layout checks and existing
+  FastMCP client tests guard the migration; no grouped adapters remain.
+
+## 2026-10-10 — Plan a BLS flat-file mirror instead of API-only retrieval
+
+- **Status:** proposed; plan only, nothing implemented. Direction adopted for
+  the MVP by the accepted hackathon entry below.
+- **Decision:** Plan to cache `download.bls.gov/pub/time.series` flat files
+  (PC, PD first; then ECI, OEWS; evaluate WP) with release-aligned conditional refresh,
+  run outside MCP handlers. The API path stays for ad hoc lookups.
+- **Why:** No per-call quota or key for bulk reads, a real series catalogue,
+  and reproducible provenance (file validators and hashes).
+- **Correction (2026-10-10, after reading the saved BLS docs):** PD is the
+  discontinued SIC-based PPI, not commodity data; it is static (updated each
+  January and July), so only PC needs monthly refresh. Commodities are `WP`.
+  `pd.series` rows have one more field than its header; see `bulk_files.md`.
+- **Open:** Unverified facts are listed in `bulk_files.md` ("Verify first").
+  Vintage policy for revised PPI values is required before observations are
+  served from cache.
+- **Revisit when:** The verify-first checklist is done.
+
 ## 2026-10-10 — Hackathon MVP: flat-file snapshot, build-from-Git deployment, and an ingestion manifest
 
-- **Status:** accepted.
+- **Status:** accepted. Builds on the flat-file mirror proposal above; the
+  per-program formats, quirks, and refresh cadence that inform it live in
+  [bulk_files.md](bulk_files.md).
 - **Context:** The project is an entry in GSA's MCP Server Hackathon (owner,
   2026-10-10; the event page and the GSA-TTS/mcp-hackathon-template repo
   were reviewed the same day). Deliverables are the repo, a slide deck, and
@@ -154,15 +209,16 @@ MIME types, verified on resource reads as well as discovery.
   checked 2026-10-10, BLS publishes no volume policy for them, so
   `docs/bls_etiquette.md` imposes conservative self-limits.
 - **Decision:** The MVP data path is an ingested flat-file snapshot; no
-  user keys anywhere. The curated raw slices are checked into git (small at
-  curated scale), and the SQLite database is a build artifact rebuilt
+  user keys anywhere. The SQLite database is a build artifact rebuilt
   wherever needed — developer machines, CI, and the Code Engine image all
-  build it from the same slices; nothing is committed whole, tracked with
-  Git LFS, or published as a release or build artifact. Ingestion is
-  recorded twice — `data/manifest.json` in git (authoritative: file IDs,
-  URLs, retrieval dates, sha256 hashes, sizes, ingestion timestamps and
-  code versions, row/series/observation counts, period-code warning counts,
-  status) and an `ingestion_log` table in the database (the receipt). A
+  build it from the same checked-in inputs (`docs/sample_data/` and fetched
+  slices); nothing is committed whole, tracked with Git LFS, or published
+  as a release or build artifact. Ingestion is recorded twice —
+  `data/manifest.json` in git (authoritative: file IDs, URLs, retrieval
+  dates, sha256 hashes, sizes, ingestion timestamps and code versions,
+  row/series/observation counts, period-code warning counts, status —
+  matching the per-file provenance fields in `bulk_files.md`) and an
+  `ingestion_log` table in the database (the receipt). A
   `poe verify-ingest` task checks the two agree, offline. The sha256
   detects silent upstream revision: a hash mismatch on re-download is an
   explicit decision, never a silent overwrite. The live BLS API path
@@ -171,29 +227,29 @@ MIME types, verified on resource reads as well as discovery.
 - **Why:** Zero-setup judging locally and a judge-inspectable build source
   in Code Engine; deterministic, reproducible offline evals; few,
   identified, cached BLS fetches per the etiquette doc; cross-device
-  reproducibility through the checked-in slices plus manifest. Rejected
+  reproducibility through the checked-in manifest. Rejected
   alternatives: per-judge BLS keys (setup burden); sharing the owner's key
   (policy, quota, hygiene); the prebuilt-image kit (publishes a build); Git
   LFS or release assets for the database (unnecessary at curated size; LFS
   versions binaries without deltas against a small account quota);
-  committing full raw flat files (size; generated-artifact doctrine in
-  DEVELOPMENT.md).
+  committing full raw flat files beyond the sample set (size;
+  generated-artifact doctrine in DEVELOPMENT.md).
 - **Consequences:** The snapshot date is disclosed in provenance and
   methodology resources, and the server makes no claim of latest data after
   the snapshot. Build-from-Git requires the repo to be **public** and a
   paid-tier IBM Cloud account: making the repo public (after a
-  no-secrets-in-history sweep and the license choice) is part of milestone
-  M5', and the 2026-10-01 CodeQL entry's revisit condition should be
-  reconsidered then (automatic triggers were disabled because the repo was
-  private; scanning is free on public repos). The deployed `/mcp` endpoint
-  is public without authentication per the kit's design — acceptable only
-  because the data is public domain. Old roadmap M1/M2 (key plumbing, live
-  readiness) and the LLM-backed eval harness move to after the MVP; the
-  2026-10-01 access-bounds entry is partially superseded as noted in its
-  status line. An earlier same-day VM-hosting direction was retracted by
-  the owner and is recorded here for the history.
+  no-secrets-in-history sweep) is part of milestone M5', and the
+  2026-10-01 CodeQL entry's revisit condition should be reconsidered then
+  (automatic triggers were disabled because the repo was private; scanning
+  is free on public repos). The deployed `/mcp` endpoint is public without
+  authentication per the kit's design — acceptable only because the data is
+  public domain. Old roadmap M1/M2 (key plumbing, live readiness) and the
+  LLM-backed eval harness move to after the MVP; the 2026-10-01
+  access-bounds entry is partially superseded as noted in its status line.
+  An earlier same-day VM-hosting direction was retracted by the owner and
+  is recorded here for the history.
 - **Revisit when:** The hackathon concludes; a revision/refresh cadence is
-  needed; the slice set outgrows comfortable in-git size (then reconsider
-  release assets or LFS); BLS publishes a flat-file usage policy; or
-  non-public or multi-tenant features require authentication and per-user
-  state.
+  scheduled (already drafted in `bulk_files.md`); the checked-in slice set
+  outgrows comfortable size (then reconsider release assets or LFS); BLS
+  publishes a flat-file usage policy; or non-public or multi-tenant
+  features require authentication and per-user state.

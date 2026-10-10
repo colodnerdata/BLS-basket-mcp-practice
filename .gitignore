@@ -13,11 +13,9 @@ dist/
 .env
 .env.*
 !.env.example
-.DS_Store
-Thumbs.db
-
 # Databases are build artifacts (docs/DECISIONS.md, 2026-10-10); never commit
 *.db
-*.db-wal
-*.db-shm
-bls_catalogue.db
+*.db-*
+*.sqlite*
+.DS_Store
+Thumbs.db

@@ -7,7 +7,7 @@ from bls_escalation_mcp.models.specifications import EscalationIndexSpec
 from bls_escalation_mcp.models.validation import ValidationResult
 
 
-def register_tools(mcp: FastMCP) -> None:
+def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations={"readOnlyHint": True, "openWorldHint": False})
     def validate_index_spec(
         spec: EscalationIndexSpec, ctx: Context

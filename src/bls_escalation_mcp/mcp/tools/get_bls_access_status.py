@@ -6,7 +6,7 @@ from bls_escalation_mcp.mcp.adapters import get_services
 from bls_escalation_mcp.models.access import BLSAccessStatus
 
 
-def register_tools(mcp: FastMCP) -> None:
+def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations={"readOnlyHint": True, "openWorldHint": False})
     def get_bls_access_status(ctx: Context) -> BLSAccessStatus:
         """Check configuration and published limits without HTTP or secrets.

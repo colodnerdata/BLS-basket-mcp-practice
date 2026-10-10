@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     log_level: str = Field(default="INFO", alias="BLS_LOG_LEVEL")
 
     model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
         env_prefix="BLS_",
         extra="ignore",
         case_sensitive=False,

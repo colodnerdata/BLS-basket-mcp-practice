@@ -9,7 +9,7 @@ from bls_escalation_mcp.models.locality import (
 )
 
 
-def register_tools(mcp: FastMCP) -> None:
+def register(mcp: FastMCP) -> None:
     @mcp.tool(annotations={"readOnlyHint": True, "openWorldHint": False})
     def calculate_labor_locality_factor(
         input_data: LaborLocalityInput, ctx: Context

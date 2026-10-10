@@ -29,12 +29,14 @@ dev = [
 packages = ["src/bls_escalation_mcp"]
 
 [tool.poe.tasks]
+serve = { cmd = "python -m bls_escalation_mcp.app", help = "Launch the MCP server using local .env configuration" }
 lint = "ruff check ."
 format = "ruff format ."
 format-check = "ruff format --check ."
 test = "pytest"
 typecheck = "mypy src"
 check = ["lint", "format-check", "typecheck", "test"]
+export-requirements = "uv export --locked --no-dev --no-emit-project --no-hashes --output-file requirements.txt"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

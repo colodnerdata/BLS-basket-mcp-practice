@@ -48,11 +48,12 @@ In the MVP:
 4. A curated catalogue of about 15-25 verified series across PPI, ECI and
    OEWS, selected from owner-supplied basket archetypes and verified against
    real flat files (part of M2'; supersedes old M4).
-5. Submission readiness: template-conformant packaging (QUICKSTART.md,
-   LICENSE, SECURITY.md, Dockerfile, `manifest.yaml`, `server.json`,
-   `eval/`), a clean-clone run in two real MCP clients, and the IBM Code
-   Engine build-from-Git deployment registered in watsonx Orchestrate
-   (M5').
+5. Submission readiness (M5'): the template-conformant shell landed on
+   main; remaining work is LICENSE/SECURITY.md (in this change), the
+   QUICKSTART seed-database build step, Dockerfile verification,
+   `server.json`/`manifest.yaml` identity review, the public-repo
+   checkpoint, a clean-clone run in two real MCP clients, and the IBM Code
+   Engine build-from-Git deployment registered in watsonx Orchestrate.
 6. A deterministic, offline eval-evidence pack — scripted scenarios through
    the real MCP client with committed results — feeding the evaluation
    document's testing-methodology and performance-metrics sections (M4').
@@ -64,9 +65,15 @@ multi-user hardening, and everything under [After the MVP](#after-the-mvp).
 ## Where the repository stands
 
 Checked on 2026-10-06 at commit `5d68324`. "Probed" means run in the session
-that wrote this roadmap; see [Evidence and limits](#evidence-and-limits). New
-since the probe: `docs/bls_etiquette.md` (2026-10-10) governs all BLS-bound
-traffic, including the flat-file downloads this plan depends on.
+that wrote this roadmap; see [Evidence and limits](#evidence-and-limits). This
+table is a dated snapshot, not the current state: since the probe, the
+template-aligned shell (one component per file, `main.py`/`app.py`/
+`routes.py`, Dockerfile, `manifest.yaml`, `server.json`, QUICKSTART.md,
+`eval/`) and the bulk-file research (`bulk_files.md`, `docs/sample_data/`)
+landed on main, and database files became git-ignored. Where a row disagrees
+with the milestone text, the milestone text wins. New since the probe:
+`docs/bls_etiquette.md` (2026-10-10) governs all BLS-bound traffic, including
+the flat-file downloads this plan depends on.
 
 | Area | State |
 | --- | --- |
@@ -76,7 +83,7 @@ traffic, including the flat-file downloads this plan depends on.
 | Calculation | Deterministic and tested, but the tools take floats and nothing links observations to a result. The service never fills `ComponentCalculation.base_period`/`target_period`, and `CalculationLedger`, `SourceProvenance`, `SeriesObservations` and the spec's `observation_policy` are not consumed by any service or tool. |
 | Catalogue | The PPI/ECI/OEWS loaders are deliberate stubs that return nothing, and the only fixture is two synthetic series, so `search_series` is empty on a fresh database. M2' fills this from real flat files. |
 | BLS client | Mocked HTTP only; no live call has been made. Probed: period codes `M13` and `Q05` are dropped with no error or warning, `S01` is labelled a plain annual period (the same identity as a real annual value), and observations are labelled `units="index"` unless the payload carries a `units` field. These parser issues move to M2' against flat-file fixtures. |
-| Launch | `uv --directory <repo> run --locked fastmcp run fastmcp.json` works over stdio (probed). HTTP transport for VM hosting is unverified (M5'). The default database path `./bls_catalogue.db` is relative to the launch directory and is not in `.gitignore`; the probe created the file in the repo root. |
+| Launch | `uv --directory <repo> run --locked fastmcp run fastmcp.json` works over stdio (probed). The streamable-HTTP/`app.py` launcher and Dockerfile for the Code Engine deployment landed on main but are unverified end-to-end (M5'). The default database path `./bls_catalogue.db` is relative to the launch directory; database files are now git-ignored, so the file the probe created in the repo root can no longer be committed by accident. |
 | Tests | No `conftest.py`; client and transport scaffolding is duplicated across the integration modules; no live-test command; no coverage task. |
 | Evals | None; see [TESTING.md](TESTING.md). The hackathon judges' harness is the first external eval. |
 | CI | One offline job (Python 3.12, `poe check`). CodeQL is manual-only because GitHub Advanced Security is not enabled. |
@@ -131,15 +138,21 @@ Goal: `search_series` returns real, verified series; observations resolve
 from the local snapshot; every ingested file is recorded so any device can
 rebuild the database from checked-in slices with zero network access.
 
-- Confirm authoritative per-program bulk-file mappings (PPI, ECI, OEWS)
-  against BLS documentation before parsing; cite sources in code and docs.
-  This is owner-facing research and the milestone's main risk.
-- Check in small raw fixture slices under `tests/fixtures/bls/`, cut from
-  real files with the URL and retrieval date recorded alongside. They are
-  the parser's offline ground truth, replacing the API recordings planned
-  in old M2. The slices are triple-duty: parser fixtures, curated seed
-  data, and container build input — the Code Engine image builds the
-  database from the same checked-in slices.
+- The per-program mapping research is largely done in
+  [bulk_files.md](bulk_files.md): PC/PD file formats and quirks
+  (space-padded series IDs, `pd.series`' undocumented extra column, PD's
+  lack of series titles, `M13` annual averages in PD despite `pd.txt`),
+  partition layouts, and refresh cadence are confirmed against owner-saved
+  real files in `docs/sample_data/`. Remaining live verification: the
+  header probe (`scripts/probe_bls_headers.py pc`) from a networked
+  machine. ECI is deferred past the MVP; `wp` (PPI commodities) is
+  undecided.
+- Cut parser fixture slices from the checked-in `docs/sample_data/` files
+  into `tests/fixtures/bls/`, with the source file and retrieval date
+  recorded alongside. They are the parser's offline ground truth (replacing
+  the API recordings planned in old M2) and triple-duty: parser fixtures,
+  seed inputs, and container build source — the Code Engine image builds
+  the database from the same checked-in slices.
 - Explicit period-code mapping including `M13`, `Q05`, `S01`, `A01`; unknown
   codes become typed warnings counted in the manifest — never silently
   dropped, never mislabelled. Units come from verified catalogue metadata
@@ -156,17 +169,18 @@ rebuild the database from checked-in slices with zero network access.
   period-code warning counts, status).
 - Add `ingestion_log` to `db/schema.py` and add `poe verify-ingest`, which
   fails on any manifest/database disagreement and runs offline in `check`.
-- Curated seed of about 15-25 series across PPI, ECI and OEWS chosen from
-  owner-supplied basket archetypes, each cross-checked against its BLS web
-  listing. This is a selection from ingested real files, not the deferred
-  bulk ingestion of every series.
+- Catalogue seeding through real ingestion of the `pc`/`pd` series and
+  mapping files per `bulk_files.md`, replacing the stub loaders;
+  owner-supplied basket archetypes decide which data partitions are
+  ingested first (the `0.Current` files plus the partitions those baskets
+  need).
 
 Done when: ingestion from fixtures reproduces a known database offline;
 `verify-ingest` passes and its tests catch a seeded mismatch; one real,
 owner-invoked download is ingested end-to-end with evidence recorded (date,
 URL list, hashes, request count, per the etiquette doc); period fixtures
-parse to hand-checked values with nothing silently dropped; docs list the
-seed with its provenance; TESTING.md is updated.
+parse to hand-checked values with nothing silently dropped; every ingested
+file has recorded provenance; TESTING.md is updated.
 
 ### M3 - Source-backed calculation workflow (L)
 
@@ -239,14 +253,15 @@ describing the pack; the run is part of `poe check` if it stays fast.
 Goal: a judge following the quickstart from a clean clone succeeds, and the
 sandbox deployment builds from the same repo.
 
-- Template conformance: add QUICKSTART.md (the judge path: `uv sync`,
-  build the seed database from the checked-in slices, launch, connect
-  Claude Desktop/Code/Inspector), LICENSE (owner decision; the template is
-  MIT), SECURITY.md, a Dockerfile verified locally (the template's pattern
-  serves streamable HTTP on port 8080), `manifest.yaml`, `server.json`, and
-  `eval/`. Note where our layout differs from the template's
-  one-tool-per-file convention and why (domain modules with
-  `register_tools` aggregators — the same aggregation pattern per domain).
+- Template conformance: the shell landed on main (one exposed component per
+  file with package aggregators, QUICKSTART.md, Dockerfile,
+  `manifest.yaml`, `server.json`, `requirements.txt`, `eval/`, `deploy/`;
+  see the 2026-10-07 DECISIONS entry). Remaining here: verify the
+  Dockerfile builds and serves streamable HTTP on the template's port
+  locally; give QUICKSTART.md the seed-database build step from the
+  checked-in slices; review `server.json`/`manifest.yaml` identity and
+  version fields against this server. LICENSE (MIT) and SECURITY.md land
+  with this replan.
 - Public-repo checkpoint: build-from-Git points Code Engine at a **public**
   repo. Before flipping visibility: confirm no key or secret has ever been
   committed (history sweep), choose the license, then reconsider the
@@ -295,7 +310,7 @@ Orchestrate; the evidence is recorded.
 | MCP contract | Every tool and resource through `Client(create_server(...))` over `httpx.MockTransport`: schemas, JSON, errors | `poe test` | nothing |
 | Recorded replay | Real flat-file fixture slices replayed through the parser and ingestion | `poe test` | nothing |
 | Ingestion agreement | `manifest.json` vs `ingestion_log`, seeded-mismatch detection | `poe check` (via `verify-ingest`) | nothing |
-| Launch smoke | The documented launch (stdio locally, HTTP on the VM) | `poe test` (marked if slow) | `uv` |
+| Launch smoke | The documented launch (stdio locally, streamable HTTP in the Code Engine image) | `poe test` (marked if slow) | `uv` |
 | Live (deferred) | The same flows against real BLS API, small fixed request budget | `poe test-live` | key, `api.bls.gov` |
 | Judge path | Clean-clone QUICKSTART run in two clients; Code Engine deployment registered in Orchestrate | manual, part of M5'/M6 | IBM sandbox |
 | Eval self-test | Oracle, null and bad agents through the eval runner and graders | post-MVP | nothing |
@@ -408,7 +423,7 @@ nothing in the code breaks when behavior drifts.
 | 1 | Credential seam | Resolved 2026-10-10: no user key — the MVP serves a snapshot. `Depends` + `os.environ` (old M1 design, spike-verified) stays on the shelf for the optional server-side live path | Snapshot by default | Resolved |
 | 2 | Calculation surface | (a) one server-side tool that resolves and calculates; (b) the model relays values; (c) cache, then calculate | (a): (b) routes hundreds of numbers through model context as floats and loses provenance; (c) waits for a vintage policy | M3 |
 | 3 | Mixed periodicity | (a) one periodicity per spec; (b) align to quarter-end month; (c) quarterly mean of months; (d) annual average | (a) for the MVP, then design (c) or (d) with every constituent observation in the ledger | M3 |
-| 4 | Seed catalogue | About 15-25 series from owner-supplied basket archetypes; verification is parsing from real flat files plus cross-checking the BLS web listing — no live API calls needed | Owner supplies archetypes; the assistant proposes IDs | M2' |
+| 4 | Seed selection | Catalogue comes from real `pc`/`pd` series ingestion per `bulk_files.md`; owner archetypes decide which partitions are ingested first | Owner supplies archetypes | M2' |
 | 5 | CI for live and eval runs | Not needed while the live path is deferred; local/manual only | Defer with the live path | Post-MVP |
 | 6 | Eval runner | Messages API loop, or a host harness via the Agent SDK | Messages API loop when the harness returns post-MVP; revisit host fidelity | Post-MVP |
 | 7 | Eval spend and credentials | Per-run cap, default model, who supplies Anthropic credentials | Cap per run; `claude-sonnet-5-5` while iterating | Post-MVP |
@@ -420,20 +435,25 @@ nothing in the code breaks when behavior drifts.
 
 Not scheduled. Most live-API items are described in [bls_api.md](bls_api.md).
 
-- Live BLS API path: server-side key on the VM via `Depends` + `os.environ`
-  (old M1 design; the spike findings recorded 2026-10-06 in [Evidence and
-  limits](#evidence-and-limits) remain valid), response status and
-  rejected-key mapping, retries with backoff subject to
+- Live BLS API path: server-side key on the deployment host via `Depends`
+  + `os.environ` (old M1 design; the spike findings recorded 2026-10-06 in
+  [Evidence and limits](#evidence-and-limits) remain valid), response status
+  and rejected-key mapping, retries with backoff subject to
   `docs/bls_etiquette.md`, request budgets and quota handling, and
   `poe test-live` with recorded evidence.
 - Request planner with rate, quota and retry handling, and merge with
   conflict detection (`ceil(S/50) * ceil(Y/20)` requests), per bls_api.md.
 - The LLM-backed eval harness (old M5's remainder; design kept above).
 - Snapshot refresh cadence: scheduled re-ingestion with hash comparison and
-  a manifest history of vintages.
-- Full-survey bulk ingestion beyond the curated selection (if the slice set
-  ever outgrows comfortable in-git size, revisit release assets or LFS per
-  the 2026-10-10 DECISIONS entry).
+  a manifest history of vintages (release-aligned cadence drafted in
+  `bulk_files.md`).
+- Full-survey bulk ingestion beyond the curated selection — per-program
+  inclusion status (PC first; PD is the discontinued SIC set, static with
+  January/July updates; ECI after the MVP; WP undecided), confirmed file
+  formats, and the fetcher/loader design are in
+  [bulk_files.md](bulk_files.md). If the checked-in slice set ever outgrows
+  comfortable size, revisit release assets or LFS per the 2026-10-10
+  DECISIONS entry.
 - OEWS locality mapping and automated wage ratios.
 - Mixed-periodicity policies and other observation policies, each with
   explicit disclosure.

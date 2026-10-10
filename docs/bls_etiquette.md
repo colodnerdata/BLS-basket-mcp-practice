@@ -38,7 +38,9 @@ on the owner's whole network, not on the agent or process that caused it.
    tests, evals, and inspection. Before any re-download, check freshness
    with a `HEAD` or conditional request rather than refetching wholesale.
    Do not crawl directory listings programmatically and do not mirror whole
-   survey trees; fetch only the files the catalogue actually uses.
+   survey trees; fetch only the files the catalogue actually uses. The
+   per-program refresh cadence and verified format findings are in
+   `docs/bulk_files.md`.
 5. **Identify the traffic.** When live or download features land, send a
    descriptive `User-Agent` naming the project plus an owner-provided
    contact address from configuration — never a hardcoded address, and never
