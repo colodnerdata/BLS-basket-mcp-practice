@@ -45,9 +45,10 @@ In the MVP:
 3. A source-backed path from a basket specification to factors with
    provenance, resolving observations from the local snapshot, using exact
    periods and a single periodicity (M3).
-4. A curated catalogue of about 15-25 verified series across PPI, ECI and
-   OEWS, selected from owner-supplied basket archetypes and verified against
-   real flat files (part of M2'; supersedes old M4).
+4. A curated catalogue of about 15-25 verified series from the PPI `pc`/`pd`
+   flat files, selected from owner-supplied basket archetypes and verified
+   against real flat files (part of M2'; supersedes old M4). ECI and OEWS
+   coverage is deferred past the MVP.
 5. Submission readiness (M5'): the template-conformant shell landed on
    main; remaining work is LICENSE/SECURITY.md (in this change), the
    QUICKSTART seed-database build step, Dockerfile verification,
