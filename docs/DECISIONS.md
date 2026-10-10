@@ -286,5 +286,15 @@ MIME types, verified on resource reads as well as discovery.
   files per `docs/bls_etiquette.md` and commits them to
   `docs/sample_data/`; ECI parsing and ingestion then follow the same
   verified-format, fixture-tested pattern as PC/PD.
+- **Verified the same day:** `ci.txt` and `ci.series` settle the pending
+  items (see the CI section of `bulk_files.md`): data periods are
+  `Q01`—`Q04` only, with **no** annual-average period code, and ECI's
+  `periodicity_code` (`I` index / `Q` 3-month / `A` 12-month percent
+  change) decides eligibility — only index (`I`) series are escalation
+  inputs. Consequence: monthly PPI materials and quarterly ECI labor still
+  cannot share one specification, and an annual-average basket has no ECI
+  counterpart, so the MVP composition path is **parallel same-periodicity
+  specifications** (e.g. a quarterly labor spec alongside a monthly or
+  annual-average materials spec) until open decision 3 is revisited.
 - **Revisit when:** ECI period codes and value semantics are verified, or
   the hackathon concludes and OEWS localization returns to the plan.

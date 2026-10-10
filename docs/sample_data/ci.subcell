@@ -1,0 +1,16 @@
+subcell_code	subcell_text	display_level	selectable	sort_sequence
+00	All workers	0	T	1
+23	Union	2	T	28
+24	Nonunion	2	T	29
+27	Excluding incentive-based pay	2	T	34
+AA	Establishment Size	1	F	2
+AB	Region and Division	1	F	10
+AC	Metropolitan Statistical Areas	1	F	24
+AD	Bargaining Status	1	F	27
+AE	Work status	1	F	30
+AF	Basis of pay	1	F	33
+AG	Average Wage	1	F	36
+AH	Civilian Wage Percentiles	1	F	42
+AI	Private Wage Percentiles	1	F	48
+AJ	Government Wage Percentiles	1	F	55
+AK	Plan Sponsor	1	F	62

@@ -150,6 +150,40 @@ files themselves use tabs).
   month is an error under the roadmap's missing-data rule, not something to
   fill.
 
+## Confirmed file facts (CI — ECI, verified 2026-10-10)
+
+From the owner-saved `ci.txt` (the authoritative file list) and the checked-in
+`ci.series`, `ci.industry`, `ci.subcell`, `ci.footnote`, `ci.seasonal`.
+
+- **Files that exist:** `ci.series`, `ci.data.0.Current`, `ci.data.1.AllData`,
+  `ci.aspect`, mappings `ci.area`/`ci.estimate`/`ci.footnote`/`ci.industry`/
+  `ci.occupation`/`ci.owner`/`ci.periodicity`/`ci.seasonal`/`ci.subcell`,
+  plus `ci.contacts`, `ci.txt`. **`ci.period` and `ci.datatype` do *not*
+  exist** (an earlier guess fetched 404 pages — deleted, not committed).
+- **Periods:** data-period codes are `Q01`-`Q04` only (reference months
+  Mar/Jun/Sep/Dec, ci.txt §1). There is **no annual-average period code** —
+  no `Q05` or `S01` in these files.
+- **periodicity_code picks the measure, and it is the `series_id`'s final
+  character:** `I` = index (levels; every current index shares base
+  *December 2005 = 100*, ci.txt §1), `Q` = 3-month percent change, `A` =
+  12-month percent change. **Only `I` series are valid temporal-factor
+  inputs;** `Q`/`A` are percent changes and must be refused per the M3
+  units rule. Example pair proving the encoding: `CIS...00I` ("current
+  dollar index") vs `CIS...00Q` ("3-month percent change").
+- **estimate_code** selects the cost concept (total compensation, wages and
+  salaries, total benefits) — needed for basket selection; its mapping
+  (`ci.estimate`) was not yet fetched.
+- **Series layout:** TSV, padded fields, 15 columns, real `series_title`
+  (`CIS1010000000000I` = "Total compensation for all civilian workers,
+  current dollar index"), begin/end year+period; 2,471 series in this
+  snapshot. Construction industry code is `230000` (`ci.industry`).
+- **Data layout:** `ci.data.0.Current`/`AllData` share the PC/PD 5-column
+  shape. `ci.aspect` is standard errors with an extra `aspect_type` column —
+  **never ingest it as observations.**
+- **Missing data:** footnote `A` = "Dashes indicate data not available" — a
+  data row may carry `-`; missing stays an error, never zero or
+  interpolated, and `-` must not parse as a number (existing convention).
+
 ## Etiquette and safety
 
 - Send a descriptive `User-Agent` with a contact address; BLS has rejected
@@ -224,8 +258,11 @@ establish numerical or format correctness.
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
       directory listings — superseded for `pc/` by the 2026-10-10 probe
       JSON; repeat for `pd/` when its download is scheduled.
-- [ ] `ci` (ECI, in MVP scope since 2026-10-10): sample `ci.txt`,
-      `ci.series`, and mapping files before parsing — its period codes
-      (`Q01`-`Q05`, any `S01`/`A01`) and value semantics are unverified.
+- [x] `ci` (ECI, in MVP scope since 2026-10-10): sampled and verified
+      2026-10-10 — formats above; quarterly `Q01`-`Q04` only, no
+      annual-average period code; `I`/`Q`/`A` periodicity encodes index vs
+      percent change (only `I` is escalation-eligible). Still small fetches
+      before parsing: `ci.periodicity`, `ci.estimate`, `ci.owner`,
+      `ci.occupation`, `ci.area`, `ci.contacts`.
 - [ ] `wp` undecided; `oe` (locality) deferred past the MVP. Sample their
       `xx.txt` and `xx.series` only when scheduled.

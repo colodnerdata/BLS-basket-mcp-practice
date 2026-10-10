@@ -152,10 +152,12 @@ rebuild the database from checked-in slices with zero network access.
   PR; remainder: the conditional-GET fetcher and the first owner-invoked
   live download of basket-relevant partitions.
 - ECI (`ci`) enters MVP scope as the baseline labor source (2026-10-10
-  scope decision): sample `ci.txt`, `ci.series`, and its mapping files into
-  `docs/sample_data/` (owner-run per the etiquette doc) and verify its
-  quarterly period codes and value semantics before any parsing. `wp`
-  (PPI commodities) remains undecided for raw materials.
+  scope decision). Formats verified 2026-10-10 from the owner-saved files
+  (see the CI section of `bulk_files.md`): quarterly `Q01`-`Q04` only, no
+  annual-average period code, and periodicity `I`/`Q`/`A` marks index vs
+  percent change — a parser accepts only `I` series and must refuse the
+  percent-change ones. Its parser and fixtures follow the PC/PD pattern.
+  `wp` (PPI commodities) remains undecided for raw materials.
 - Cut parser fixture slices from the checked-in `docs/sample_data/` files
   into `tests/fixtures/bls/`, with the source file and retrieval date
   recorded alongside. They are the parser's offline ground truth (replacing
