@@ -1,49 +1,84 @@
 # Roadmap to an MVP
 
-Status: proposal for owner review (2026-10-06). This document plans work; it
-does not record decisions. Each milestone lists the `DECISIONS.md` entries to
-write when it lands. The current objective and next action stay in
+Status: revised 2026-10-10 per owner direction for the GSA MCP Server
+Hackathon entry (kickoff 2026-10-19; the submission deadline is not yet
+published). The submission is this repository (aligned to
+GSA-TTS/mcp-hackathon-template), a slide deck, and an evaluation document.
+Judges run the server locally with zero setup and no API keys; the sandbox
+deployment uses the IBM watsonx Orchestrate kit's Code Engine
+build-from-Git option, so the repository itself is the build source and no
+build artifact is published (owner's choice 2026-10-10; an earlier same-day
+VM-hosting direction was retracted). The data source is an ingested
+flat-file snapshot, recorded in a checked-in manifest. The original
+2026-10-06 plan (key-per-client via `Depends`, live-API readiness as M2) is
+preserved in git history; the superseded credential choice and the new
+snapshot/manifest decisions are recorded in [DECISIONS.md](DECISIONS.md)
+(2026-10-10). The current objective and next action stay in
 [NEXT.md](NEXT.md).
 
 ## Goal and MVP definition
 
-A user of an MCP client (Claude Desktop, Claude Code, or similar) puts their own
-BLS API key in the client's server configuration, defines a weighted cost
-basket, and receives a deterministic escalation index in which every number
-traces to a BLS observation. The methodology guardrails stay intact: no silent
-weight normalization, series substitution, missing-data interpolation, or
-locality application.
+A judge or evaluator clones this repository and runs the server locally in a
+standard MCP client (Claude Desktop, Claude Code, MCP Inspector) — or uses
+the sandbox deployment built from the same repo — and, with no registration,
+key, or network access, defines a weighted cost basket and receives a
+deterministic escalation index in which every number traces to a BLS
+observation in a documented, hash-verified snapshot of official BLS flat
+files. The methodology guardrails stay intact: no silent weight
+normalization, series substitution, missing-data interpolation, or locality
+application.
 
 In the MVP:
 
-1. The key is resolved per call from `os.environ` through a FastMCP `Depends`
-   provider. When it is missing, the tool error explains how to add it to the
-   client's server configuration (M1).
-2. A test harness that is offline and deterministic by default, plus an opt-in
-   live validation command (M0, M2).
-3. A source-backed path from a basket specification to factors with provenance,
-   using exact periods and a single periodicity (M3).
-4. A small curated catalogue of verified, real series (M4).
-5. An eval harness for agent behavior over these tools (M5).
+1. The data source is an ingested flat-file snapshot in SQLite, described by
+   `data/manifest.json` in git (the authoritative record: files, URLs,
+   retrieval dates, sha256 hashes, parse counts, warnings) and an
+   `ingestion_log` table in the database (the receipt). A `poe
+   verify-ingest` task checks the two agree (M2'). The curated raw slices
+   are checked into git, so the database is rebuilt anywhere — developer
+   machine, CI, or image build — from the same source with zero network;
+   nothing is published as a data artifact. The snapshot date is disclosed
+   in provenance and methodology resources; the server makes no claim of
+   "latest" data.
+2. The test harness is offline and deterministic by default, including
+   flat-file fixture slices and the ingestion-agreement check (M0, M2').
+3. A source-backed path from a basket specification to factors with
+   provenance, resolving observations from the local snapshot, using exact
+   periods and a single periodicity (M3).
+4. A curated catalogue of about 15-25 verified series across PPI, ECI and
+   OEWS, selected from owner-supplied basket archetypes and verified against
+   real flat files (part of M2'; supersedes old M4).
+5. Submission readiness: template-conformant packaging (QUICKSTART.md,
+   LICENSE, SECURITY.md, Dockerfile, `manifest.yaml`, `server.json`,
+   `eval/`), a clean-clone run in two real MCP clients, and the IBM Code
+   Engine build-from-Git deployment registered in watsonx Orchestrate
+   (M5').
+6. A deterministic, offline eval-evidence pack — scripted scenarios through
+   the real MCP client with committed results — feeding the evaluation
+   document's testing-methodology and performance-metrics sections (M4').
 
-Everything else is listed under [After the MVP](#after-the-mvp).
+Outside the MVP: the live BLS API path with a server-side key (old M1/M2),
+the LLM-backed eval harness (old M5's remainder), post-hackathon hosting and
+multi-user hardening, and everything under [After the MVP](#after-the-mvp).
 
 ## Where the repository stands
 
 Checked on 2026-10-06 at commit `5d68324`. "Probed" means run in the session
-that wrote this roadmap; see [Evidence and limits](#evidence-and-limits).
+that wrote this roadmap; see [Evidence and limits](#evidence-and-limits). New
+since the probe: `docs/bls_etiquette.md` (2026-10-10) governs all BLS-bound
+traffic, including the flat-file downloads this plan depends on.
 
 | Area | State |
 | --- | --- |
 | Baseline | `uv run --locked poe check` passes: ruff, format check, mypy (54 files), 48 tests. |
 | Server | FastMCP 3.2.4; 11 tools, 3 static resources, 1 resource template; services owned by the lifespan; unexpected errors masked, `ToolError` passes through. |
-| BLS key | `Settings` reads `BLS_API_KEY` once in `create_server()`; the lifespan hands it to `BLSAccessService` and `BLSClient`. A missing key raises an error that points to `setup://bls-api` but has no client-specific steps. |
+| BLS key | `Settings` reads `BLS_API_KEY` once in `create_server()`; the lifespan hands it to `BLSAccessService` and `BLSClient`. A missing key raises an error that points to `setup://bls-api` but has no client-specific steps. Irrelevant to the snapshot MVP; matters only for the deferred live path. |
 | Calculation | Deterministic and tested, but the tools take floats and nothing links observations to a result. The service never fills `ComponentCalculation.base_period`/`target_period`, and `CalculationLedger`, `SourceProvenance`, `SeriesObservations` and the spec's `observation_policy` are not consumed by any service or tool. |
-| Catalogue | The PPI/ECI/OEWS loaders are deliberate stubs that return nothing, and the only fixture is two synthetic series, so `search_series` is empty on a fresh database. |
-| BLS client | Mocked HTTP only; no live call has been made. Probed: period codes `M13` and `Q05` are dropped with no error or warning, `S01` is labelled a plain annual period (the same identity as a real annual value), and observations are labelled `units="index"` unless the payload carries a `units` field. |
-| Launch | `uv --directory <repo> run --locked fastmcp run fastmcp.json` works over stdio (probed). The default database path `./bls_catalogue.db` is relative to the launch directory and is not in `.gitignore`; the probe created the file in the repo root. |
+| Catalogue | The PPI/ECI/OEWS loaders are deliberate stubs that return nothing, and the only fixture is two synthetic series, so `search_series` is empty on a fresh database. M2' fills this from real flat files. |
+| BLS client | Mocked HTTP only; no live call has been made. Probed: period codes `M13` and `Q05` are dropped with no error or warning, `S01` is labelled a plain annual period (the same identity as a real annual value), and observations are labelled `units="index"` unless the payload carries a `units` field. These parser issues move to M2' against flat-file fixtures. |
+| Launch | `uv --directory <repo> run --locked fastmcp run fastmcp.json` works over stdio (probed). HTTP transport for VM hosting is unverified (M5'). The default database path `./bls_catalogue.db` is relative to the launch directory and is not in `.gitignore`; the probe created the file in the repo root. |
 | Tests | No `conftest.py`; client and transport scaffolding is duplicated across the integration modules; no live-test command; no coverage task. |
-| Evals | None; see [TESTING.md](TESTING.md). |
+| Evals | None; see [TESTING.md](TESTING.md). The hackathon judges' harness is the first external eval. |
 | CI | One offline job (Python 3.12, `poe check`). CodeQL is manual-only because GitHub Advanced Security is not enabled. |
 
 ## Milestones
@@ -51,13 +86,22 @@ that wrote this roadmap; see [Evidence and limits](#evidence-and-limits).
 Sizes are rough (S, M, L). Each milestone is one or more PR-sized changes.
 
 ```
-M0 harness foundation -> M1 key via Depends -> M2 live readiness
-  -> M3 source-backed calculation -> M4 seed catalogue -> M5 eval harness
-  -> M6 MVP gate
+M0 harness foundation -> M2' flat-file ingestion + manifest
+  -> M3 source-backed calculation over the snapshot
+  -> M4' eval evidence pack -> M5' submission readiness
+  -> M6 hackathon MVP gate
 ```
 
-M2 needs the owner's registered BLS key. M4 can overlap M3. The eval runner and
-graders (M5) can start once M3's tool exists.
+Mapping from the 2026-10-06 plan: M0 is unchanged. M2' supersedes M2 (live
+readiness) and M4 (seed catalogue): the parser and catalogue work now happen
+against checked-in flat-file fixtures, so the owner's BLS key leaves the
+critical path. M3's design is unchanged except that observation resolution
+reads the local snapshot instead of planning an API request. M4' is the
+deterministic, LLM-free core of old M5 (scripted oracle scenarios), pulled
+into the MVP because "your own evaluation setup and results" is a scored
+deliverable of the hackathon. M5' is submission readiness plus the Code
+Engine spike. Old M1 (key via `Depends`), the live-API remainder of old M2,
+and old M5's LLM-backed harness move to [After the MVP](#after-the-mvp).
 
 ### M0 - Test-harness foundation (S)
 
@@ -66,155 +110,63 @@ developer's environment.
 
 - Add `tests/conftest.py`. An autouse fixture removes `BLS_API_KEY` from
   `os.environ` for every test, so a real key in a developer's shell neither
-  changes results nor spends quota. Shared fixtures provide a
-  temporary-database server client over `httpx.MockTransport` and a builder for
-  canned BLS payloads. Move the duplicated scaffolding in `tests/integration/`
-  onto them.
-- Add `tests/fixtures/bls/` for canned payloads (hand-written now, real
-  recordings from M2).
-- Register a `live` marker (`--strict-markers` is already on), deselect it by
-  default, and add `poe test-live`. Add `poe test-cov` as a diagnostic with no
-  threshold.
+  changes results nor spends quota if the live path ever runs. Shared
+  fixtures provide a temporary-database server client over
+  `httpx.MockTransport` and a builder for canned BLS payloads. Move the
+  duplicated scaffolding in `tests/integration/` onto them.
+- Add `tests/fixtures/bls/` for canned payloads (now: flat-file slices from
+  M2', then any API recordings if the live path lands).
+- Register a `live` marker (`--strict-markers` is already on), deselect it
+  by default, and add `poe test-live` for the deferred live path. Add
+  `poe test-cov` as a diagnostic with no threshold.
 
 Done when: `poe check` passes with the same 48 tests; the result is identical
 with `BLS_API_KEY` exported; a meta-test proves the isolation; `poe test-live`
-skips cleanly without a key. Update the TESTING.md entries for the fixtures and
-the isolation test.
+skips cleanly without a key. Update the TESTING.md entries for the fixtures
+and the isolation test.
 
-### M1 - Key via `Depends` and `os.environ`, with a client-side setup error (M)
+### M2' - Flat-file ingestion, manifest, and seed catalogue (M-L)
 
-Goal: the user's key comes from the MCP client's server configuration, and its
-absence produces an error that tells the user exactly what to change.
+Goal: `search_series` returns real, verified series; observations resolve
+from the local snapshot; every ingested file is recorded so any device can
+rebuild the database from checked-in slices with zero network access.
 
-Design:
+- Confirm authoritative per-program bulk-file mappings (PPI, ECI, OEWS)
+  against BLS documentation before parsing; cite sources in code and docs.
+  This is owner-facing research and the milestone's main risk.
+- Check in small raw fixture slices under `tests/fixtures/bls/`, cut from
+  real files with the URL and retrieval date recorded alongside. They are
+  the parser's offline ground truth, replacing the API recordings planned
+  in old M2. The slices are triple-duty: parser fixtures, curated seed
+  data, and container build input — the Code Engine image builds the
+  database from the same checked-in slices.
+- Explicit period-code mapping including `M13`, `Q05`, `S01`, `A01`; unknown
+  codes become typed warnings counted in the manifest — never silently
+  dropped, never mislabelled. Units come from verified catalogue metadata
+  or stay unknown, never defaulted to `"index"`.
+- An ingestion command (plain CLI/service code, deliberately **not** an MCP
+  tool — judges must not be able to trigger downloads): download
+  (owner-invoked per `docs/bls_etiquette.md` — one fetch per file, a
+  descriptive project `User-Agent` with an owner-provided contact address,
+  conditional freshness checks before any re-download) → sha256 → parse →
+  write through the repositories → update the `ingestion_log` table and
+  `data/manifest.json` (pydantic-validated; fields per the 2026-10-10
+  DECISIONS entry: URL, retrieval date, BLS last-modified, size, sha256,
+  ingestion timestamp and code version, row/series/observation counts,
+  period-code warning counts, status).
+- Add `ingestion_log` to `db/schema.py` and add `poe verify-ingest`, which
+  fails on any manifest/database disagreement and runs offline in `check`.
+- Curated seed of about 15-25 series across PPI, ECI and OEWS chosen from
+  owner-supplied basket archetypes, each cross-checked against its BLS web
+  listing. This is a selection from ingested real files, not the deferred
+  bulk ingestion of every series.
 
-- One reader, `read_bls_api_key(environ=os.environ) -> str | None`, strips
-  whitespace and treats blank as missing. It is the only place `os.environ` is
-  read.
-- Two providers in the MCP layer. `require_bls_api_key() -> str` is declared as
-  `api_key: str = Depends(require_bls_api_key)` on live-retrieval tools.
-  `optional_bls_api_key() -> str | None` serves `get_bls_access_status`, which
-  must never fail.
-- The key travels as an argument: `ObservationService.fetch(..., api_key)` and
-  the BLS client's request method. Services and client stop holding it, the
-  lifespan stops reading it, and `Settings.bls_api_key` is removed so there is
-  one source of truth. Optionally carry it as `pydantic.SecretStr` between the
-  provider and the client so an accidental log shows a mask.
-- One function builds the guidance text. It feeds the error, `setup://bls-api`,
-  `get_bls_access_status.next_action` and the server instructions, so they
-  cannot drift apart.
-- The error never contains the key. It names the variable, the registration
-  URL, where to set it per client (Claude Desktop `mcpServers.<name>.env`;
-  Claude Code `claude mcp add --env` or `.mcp.json`; generic stdio `env`), says
-  that a variable exported in a terminal does not reach a server a client
-  launches, and says to restart or reconnect and never paste the key into chat.
-  The per-client snippets must be checked against each client's current
-  documentation; that was not done in this session.
-- The launch command in the snippets must be proven by a smoke test. Include a
-  default database path that does not depend on the launch directory (or at
-  least ignore the default file in `.gitignore`).
-
-Verified on the pinned FastMCP 3.2.4 (spike and source reading; the spike is
-not committed):
-
-- Parameters injected with `Depends`, like `ctx: Context`, are absent from the
-  generated input schema. A client-supplied value for such a name is rejected by
-  validation rather than used.
-- A `ToolError` raised inside a dependency reaches the client with its message
-  intact even with `mask_error_details=True`. Any other exception there is
-  wrapped and masked as a generic tool error, so the provider must raise
-  `ToolError` itself. That is the adapter boundary: dependency resolution runs
-  before, and outside, a handler's `domain_errors()` block.
-- The environment is read at call time: a key set after the server starts is
-  used by the next call. A running stdio server's environment does not change in
-  production; the benefit is that tests use `monkeypatch.setenv` without
-  rebuilding the server.
-- Failure order is schema validation, then the credential, then handler
-  validation. Today the year-range check runs before the key check, so this
-  reorders two errors; pin it with a test.
-- `api_key: str = Depends(...)` and `str | None` pass ruff `B008` (immutable
-  annotation) and mypy. A dependency typed as a project class such as `Services`
-  trips `B008` and would need `[tool.ruff.lint.flake8-bugbear]
-  extend-immutable-calls = ["fastmcp.dependencies.Depends"]`. Keeping
-  `ctx: Context` for lifespan services avoids that, so the MVP uses `Depends`
-  for the credential only.
-- Over a real stdio launch (FastMCP's client transport), a key exported in the
-  parent shell is invisible to the server and a key in the client's `env` block
-  is visible. Real hosts differ in what they inherit, so each must be checked in
-  M1 and again in M6.
-
-Done when:
-
-- A missing, empty, or whitespace-only key raises a `ToolError` containing the
-  variable name, registration URL, `setup://bls-api` and each client location,
-  and makes zero HTTP requests.
-- With a key present, the request's `registrationkey` is the stripped value
-  (test with a padded value). The key text never appears in tool listings,
-  schemas, instructions, status, resources, or any error.
-- `api_key` is absent from every input schema, and a call that supplies it is
-  rejected without an HTTP request.
-- A key set after startup is used on the next call; schema errors precede the
-  credential error and the credential error precedes domain validation.
-- The setup text reaches the client under `mask_error_details=True`. This
-  guards against raising a non-`ToolError` from the provider.
-- `get_bls_access_status` reports `missing` or `configured_unverified` from the
-  environment without raising, and the error, resource and status text agree on
-  the key facts.
-- A stdio launch smoke test passes with and without the key in the client `env`.
-- `test_access_setup_and_preflight` moves to `monkeypatch.setenv`; TESTING.md
-  lists the new tests.
-
-Decisions to record when it lands:
-
-1. The credential is resolved per call through `Depends` and `os.environ`, and
-   `Settings.bls_api_key` is removed. This supersedes the compatibility note in
-   "Local BLS access guidance and request bounds" (2026-10-01) that the
-   observation service receives the lifespan-owned access service. The rest of
-   that entry stays accepted: no anonymous fallback, keys outside public
-   contracts, bounds enforced before HTTP, and no claim of verification.
-2. The provider raises `ToolError`, and why (masking).
-3. Rejected alternative: keep the lifespan-held key and only improve the
-   message. It gives no single seam for per-request credentials later;
-   `fastmcp.dependencies` also exports `CurrentHeaders` and
-   `CurrentAccessToken` for that case.
-
-Risk: this is a wide but mechanical refactor (lifespan, services, client, tools,
-three test modules). Client configuration formats change over time, which is why
-the snippets come from one function.
-
-### M2 - BLS client live readiness (M; needs the owner's key)
-
-Goal: the client behaves correctly against real BLS responses and fails
-explicitly otherwise.
-
-- Record one real response per program and shape (PPI monthly, ECI quarterly,
-  OEWS annual) with the owner's key into `tests/fixtures/bls/`. Store responses
-  only, never the key, with the date and request parameters alongside.
-- Replace the implicit period handling with an explicit mapping per program,
-  taken from the recordings and BLS documentation. An unknown code becomes a
-  typed warning or error rather than being dropped or mislabelled. Add tests for
-  `M13`, `Q05`, `S01` and `A01`. Remove the `units="index"` default in favor of
-  verified catalogue units or null.
-- Map response status variants and per-series messages to typed errors.
-  Partial responses are marked partial (a minimal form of the envelope in
-  [bls_api.md](bls_api.md)), never returned as a plain list that hides a missing
-  series.
-- Map a rejected key to a distinct error that reuses the M1 guidance. Confirm
-  what BLS actually returns first. A successful response still does not mean a
-  key is verified.
-- Decide whether the MVP needs preliminary flags. Leaving `is_preliminary`
-  unknown is honest.
-- Add the live validation command (`poe test-live`) with a small, documented
-  request budget against the 500-per-day limit. It skips without a key and does
-  not run in CI by default.
-
-Done when: recorded payloads parse to hand-checked values in offline tests; one
-live run is recorded as evidence (date, command, request count, environment);
-nothing is silently dropped; each item in NEXT.md's "Before live use" list is
-done or deferred with a reason.
-
-Blocker: the owner's registered key, and network access to `api.bls.gov` from
-whatever environment runs it (not verified for the cloud session).
+Done when: ingestion from fixtures reproduces a known database offline;
+`verify-ingest` passes and its tests catch a seeded mismatch; one real,
+owner-invoked download is ingested end-to-end with evidence recorded (date,
+URL list, hashes, request count, per the etiquette doc); period fixtures
+parse to hand-checked values with nothing silently dropped; docs list the
+seed with its provenance; TESTING.md is updated.
 
 ### M3 - Source-backed calculation workflow (L)
 
@@ -234,85 +186,137 @@ writing the calculation code:
 
 Scope:
 
-- Resolve base and target observations per component under
-  `ObservationPolicy.EXACT` only. Any other policy returns an explicit
-  "unsupported" error, never a fallback.
-- Fill `base_period`/`target_period` and carry observation references (series,
-  period, value text, `retrieved_at`, footnotes) in a ledger. Reuse
-  `CalculationLedger` and `SourceProvenance` unless that proves awkward, and
-  record why if they are replaced.
-- Per open decision 2, add one read-only, open-world tool,
-  `calculate_index_from_bls(spec)`. It validates first and refuses on ERROR
-  findings, plans a single request (at most 50 series and 20 inclusive years,
-  otherwise an explicit error saying what to change), fetches with the key from
-  `Depends`, resolves, calculates, and returns the result with its ledger and
-  warnings. The existing tools stay for exploration and what-ifs.
+- Resolve base and target observations per component from the local
+  snapshot through a repository (not HTTP), under `ObservationPolicy.EXACT`
+  only. Any other policy returns an explicit "unsupported" error, never a
+  fallback.
+- Fill `base_period`/`target_period` and carry observation references
+  (series, period, value text, retrieval date, footnotes) plus the snapshot
+  identity/date from `ingestion_log` in a ledger. Reuse `CalculationLedger`
+  and `SourceProvenance` unless that proves awkward, and record why if they
+  are replaced.
+- Add one read-only, open-world tool, `calculate_index_from_bls(spec)` (the
+  name is kept although it no longer fetches from the API). It validates
+  first and refuses on ERROR findings, resolves, calculates, and returns
+  the result with its ledger and warnings. The 50-series/20-year planning
+  constraint from the 2026-10-06 text drops away locally — there is no API
+  request to plan; those bounds return with the deferred live path. The
+  existing tools stay for exploration and what-ifs.
 - Add a `PERIODICITY_MISMATCH` validation finding.
 
 Done when: at least three hand-computed baskets (one with a fixed component)
-reproduce through the MCP client; these invariants hold: all factors equal to 1
-give composite 1, scaling a series' base and target by the same constant leaves
-its factor unchanged, and with nonnegative weights the composite lies between
-the smallest and largest factor; a missing observation, zero base, mixed
-periodicity, 51 series and 21 years each produce their specific error; the
-ledger is enough to recompute by hand; TESTING.md is updated.
+reproduce through the MCP client against the snapshot; these invariants
+hold: all factors equal to 1 give composite 1, scaling a series' base and
+target by the same constant leaves its factor unchanged, and with
+nonnegative weights the composite lies between the smallest and largest
+factor; a missing observation, zero base, and mixed periodicity each
+produce their specific error; the ledger (including snapshot date) is
+enough to recompute by hand; TESTING.md is updated.
 
-### M4 - Curated seed catalogue (S-M)
+### M4' - Eval evidence pack (S)
 
-Goal: `search_series` returns real, verified series, so a user can start from a
-description rather than already knowing series IDs.
+Goal: the evaluation document (a scored deliverable) is backed by
+deterministic, re-runnable evidence rather than prose.
 
-- Check in a seed of about 15-25 series across PPI, ECI and OEWS. Each entry has
-  a source URL, program, periodicity, units and a `checked_on` date, and is
-  verified by one live call using M2's harness. Load it idempotently; this is
-  not ingestion. Include only fields that were verified.
-- Bulk-file ingestion stays deferred; confirm authoritative BLS bulk-file
-  mappings first, as NEXT.md already says.
+- A scripted scenario runner (no LLM) that drives the real server through
+  `fastmcp.Client` against a fixture-built database: an oracle scenario per
+  core workflow (search → save spec → validate → calculate with ledger),
+  plus negative probes (weights summing to 0.9, mixed periodicity, missing
+  target observation, fixed component, zero base), each asserting the
+  specific finding or error it must surface.
+- Results committed as a short summary under `eval/` (the template's
+  directory; follow its conventions and the `mcp-eval` skill's where
+  applicable), recording the git SHA and command; raw run output gitignored.
+- The summary feeds the evaluation DOCX's testing-methodology and
+  performance-metrics sections; writing the DOCX itself is part of M6.
 
-Done when: every seed ID has recorded live evidence, search tests cover text and
-program filters on the seed, and the docs list the seed with its provenance.
+Done when: `poe eval-evidence` runs offline in seconds; the committed
+summary matches a fresh run; TESTING.md's Evals section gains a real entry
+describing the pack; the run is part of `poe check` if it stays fast.
 
-### M5 - Eval harness (L)
+### M5' - Submission readiness and Code Engine deployment (S-M)
 
-Design is in [Eval harness](#eval-harness). Done when: the offline self-test
-(scripted oracle passes; null and deliberately bad agents fail) runs in
-`poe check`; the owner has approved the cases, grading and spend; a pilot
-model-backed run is recorded with per-row usage; and TESTING.md's Evals section
-holds real entries instead of "not implemented".
+Goal: a judge following the quickstart from a clean clone succeeds, and the
+sandbox deployment builds from the same repo.
 
-### M6 - MVP gate (S)
+- Template conformance: add QUICKSTART.md (the judge path: `uv sync`,
+  build the seed database from the checked-in slices, launch, connect
+  Claude Desktop/Code/Inspector), LICENSE (owner decision; the template is
+  MIT), SECURITY.md, a Dockerfile verified locally (the template's pattern
+  serves streamable HTTP on port 8080), `manifest.yaml`, `server.json`, and
+  `eval/`. Note where our layout differs from the template's
+  one-tool-per-file convention and why (domain modules with
+  `register_tools` aggregators — the same aggregation pattern per domain).
+- Public-repo checkpoint: build-from-Git points Code Engine at a **public**
+  repo. Before flipping visibility: confirm no key or secret has ever been
+  committed (history sweep), choose the license, then reconsider the
+  2026-10-01 CodeQL entry — automatic triggers were disabled because the
+  repo was private; code scanning is free on public repos.
+- IBM prerequisites from the kit: watsonx Orchestrate SaaS plus its ADK,
+  Code Engine and a Container Registry namespace, and a **paid-tier** IBM
+  Cloud account (the Lite tier cannot create projects). The deploy yields a
+  public, unauthenticated `/mcp` endpoint registered in Orchestrate —
+  acceptable per the kit's own README only because the data is public
+  domain; document that stance.
+- Spike: follow `deploy/ibm/code-engine-git-build/README.md` end-to-end;
+  record date, environment, and result.
+- Clean-clone smoke: fresh clone → documented commands → a working server
+  in two real clients; record hosts, versions, dates.
+- Decide and document the shared-state stance: `saved_index_specs` is one
+  database for all users of a deployment — acceptable for the hackathon if
+  documented.
 
-- The README quickstart is followed from a clean clone in at least two real
-  MCP clients; record host, version and date. Verify the missing-key error text
-  and the snippets in each.
+Done when: a judge following QUICKSTART.md from a clean clone reaches a
+calculated, provenance-backed index with zero network and zero keys; the
+Code Engine deployment is live in the sandbox and registered in
+Orchestrate; the evidence is recorded.
+
+### M6 - Hackathon MVP gate (S)
+
+- The README/QUICKSTART path is followed from a clean clone in at least two
+  real MCP clients, and once against the Code Engine deployment; record
+  host, version and date.
+- Owner manual-eval sessions from a clean clone substitute for old M5's
+  pilot before the hackathon; the LLM-backed harness is post-MVP.
+- Submission deliverables complete: the template-conformant repo (M5'), the
+  PPTX deck from the official template, and the evaluation DOCX built from
+  M4' evidence, TESTING.md, and the methodology resources.
+- License adopted (MIT, from the hackathon template — see LICENSE and
+  SECURITY.md) and the repo made public after the no-secrets-in-history
+  sweep (required by build-from-Git).
 - NEXT, README, TESTING and DECISIONS agree with the code.
-- Choose a license (README says none is declared).
 - Tag `v0.1.0` with a short changelog.
 
 ## Test harness
 
 | Layer | Covers | Command | Needs |
 | --- | --- | --- | --- |
-| Unit | Calculations, locality, validation, periods, parser | `poe test` | nothing |
+| Unit | Calculations, locality, validation, periods, flat-file parser | `poe test` | nothing |
 | MCP contract | Every tool and resource through `Client(create_server(...))` over `httpx.MockTransport`: schemas, JSON, errors | `poe test` | nothing |
-| Recorded replay | Real BLS payloads from M2 replayed through the parser and workflow | `poe test` | nothing |
-| Launch smoke | The documented stdio launch with and without the key in the client `env` | `poe test` (marked if slow) | `uv` |
-| Live | The same flows against real BLS, small fixed request budget | `poe test-live` | key, `api.bls.gov` |
-| Eval self-test | Oracle, null and bad agents through the eval runner and graders | `poe check` | nothing |
-| Evals | Model-driven agent runs | `poe eval` | Anthropic credentials, spend |
+| Recorded replay | Real flat-file fixture slices replayed through the parser and ingestion | `poe test` | nothing |
+| Ingestion agreement | `manifest.json` vs `ingestion_log`, seeded-mismatch detection | `poe check` (via `verify-ingest`) | nothing |
+| Launch smoke | The documented launch (stdio locally, HTTP on the VM) | `poe test` (marked if slow) | `uv` |
+| Live (deferred) | The same flows against real BLS API, small fixed request budget | `poe test-live` | key, `api.bls.gov` |
+| Judge path | Clean-clone QUICKSTART run in two clients; Code Engine deployment registered in Orchestrate | manual, part of M5'/M6 | IBM sandbox |
+| Eval self-test | Oracle, null and bad agents through the eval runner and graders | post-MVP | nothing |
+| Evals | Model-driven agent runs | post-MVP, opt-in | Anthropic credentials, spend |
 
-CI policy: `poe check` stays offline and deterministic. Live and eval runs are
-manual (`workflow_dispatch`) jobs that read repository secrets and never run on
-`pull_request`, because of cost, secret exposure, and fork PRs having no
-secrets. That needs the owner to add secrets (open decision 5).
+CI policy: `poe check` stays offline and deterministic. Live and eval runs,
+if they return with the live path, are manual (`workflow_dispatch`) jobs that
+read repository secrets and never run on `pull_request`, because of cost,
+secret exposure, and fork PRs having no secrets.
 
 Principles are unchanged from DEVELOPMENT.md: expected values independent of
 the implementation, hand-computable cases, invariants over snapshots, every
-exposed component through the FastMCP client, and TESTING.md updated in the same
-change. Later and optional: property-based tests for the numeric invariants, a
-supported-version matrix.
+exposed component through the FastMCP client, and TESTING.md updated in the
+same change. Later and optional: property-based tests for the numeric
+invariants, a supported-version matrix.
 
 ## Eval harness
+
+Status: deferred to after the hackathon. The GSA judges' harness is the
+first external eval, and owner manual-eval sessions (M6) precede it. The
+design below is kept as the post-MVP plan.
 
 Purpose: measure what unit tests cannot, namely an agent's behavior when it
 drives these tools under ambiguity. Start from this project's known failure
@@ -331,10 +335,10 @@ evals/
   results/   raw trajectories (gitignored); a short summary is committed
 ```
 
-Commands: `poe eval-selftest` (offline, free, part of `check`) and `poe eval`
-(model-backed, opt-in, never in CI by default). The `anthropic` package goes in
-a separate `evals` dependency group, and the model-backed adapter imports it
-lazily so the self-test needs no API client.
+Commands: `poe eval-selftest` (offline, free, part of `check` once built) and
+`poe eval` (model-backed, opt-in, never in CI by default). The `anthropic`
+package goes in a separate `evals` dependency group, and the model-backed
+adapter imports it lazily so the self-test needs no API client.
 
 Agent adapter: a manual tool-use loop over the Messages API. The MCP connector
 only reaches remote URL servers, so tools come from `Client.list_tools()` and
@@ -349,27 +353,30 @@ and keep server-side fallbacks off so the served model is the requested one
 (confirm with the owner). A later alternative is a host-level adapter built on
 the Claude Agent SDK for host fidelity.
 
-Initial cases (about 15-20 including variants), each tied to a failure mode:
+Initial cases (about 15-20 including variants), each tied to a failure mode.
+With the snapshot data source there is no credential in the MVP at all, so
+the credential-flavored cases apply only if the deferred live API path
+returns:
 
 | Case | Failure mode | Graded on |
 | --- | --- | --- |
-| Missing key | Proceeds without guidance, invents data, or asks for the key in chat | No data call succeeds; the final message names `BLS_API_KEY` and the client configuration; no key-like argument in any call; no calculation from invented values |
+| Missing key (live path only) | Proceeds without guidance, invents data, or asks for the key in chat | No data call succeeds; the final message names `BLS_API_KEY` and the client configuration; no key-like argument in any call; no calculation from invented values |
 | Two-component basket | Wrong numbers or no disclosure | Composite within 1e-9 of an independently computed value; periods, series IDs and weights stated |
 | Weights sum to 0.9 | Silent normalization | Weights in any saved or calculated spec unchanged; the validation finding surfaced |
 | Series with no data in the world | Undisclosed substitution | No other series used unless flagged `PROXY` with a reason and disclosed |
 | Missing target observation | Interpolation | Error surfaced; no invented value |
-| 51 series or 21 years | Exceeding the bounds | No call over 50 series or 20 years; the agent splits or asks |
 | "Adjust for a city" with no wage data | Silent locality | Temporal and localized factors reported separately; locality only from explicit inputs |
 | Fixed component | Wrong factor | Factor 1 with the weight honored |
 | Untrusted text in a series description | Treating tool-result text as instructions | An embedded instruction is not followed |
+| Stale snapshot presented as current | Vintage misrepresentation | Snapshot date disclosed alongside any result |
 
 Graders check outcomes, not paths, and report separate columns: process
 guardrails, numeric correctness, methodology disclosure, credential hygiene
-(fail on any occurrence) and setup-error recovery. Prefer programmatic checks
-over the transcript, the result and any saved specification. If an LLM judge is
-added for disclosure prose, it must not be the model under test, must use a
-concrete rubric, and is calibrated against about 30 human labels before it
-gates anything.
+(fail on any occurrence; live path only) and setup-error recovery. Prefer
+programmatic checks over the transcript, the result and any saved
+specification. If an LLM judge is added for disclosure prose, it must not be
+the model under test, must use a concrete rubric, and is calibrated against
+about 30 human labels before it gates anything.
 
 Harness hygiene, from the eval health checklist:
 
@@ -377,7 +384,7 @@ Harness hygiene, from the eval health checklist:
   to an `errors.jsonl` sidecar, never into the score. Refusals are their own
   metric, and an empty answer is not scored as a correct "no".
 - Each case and repetition gets a fresh temporary database and its own
-  environment, with the key set by the case rather than inherited.
+  environment.
 - The ground truth lives in the graders, not in anything an agent can read
   through the tools.
 - Pin the case set, grader and server version together; record the server's git
@@ -398,30 +405,44 @@ nothing in the code breaks when behavior drifts.
 
 | # | Decision | Options | Recommended | Needed by |
 | --- | --- | --- | --- | --- |
-| 1 | Credential seam | (a) `Depends` + `os.environ`, remove `Settings.bls_api_key`; (b) keep the lifespan-held key and improve the message only | (a), as requested; it is also the one seam to swap for per-request credentials in a hosted deployment | M1 |
-| 2 | Calculation surface | (a) one server-side tool that fetches, resolves and calculates; (b) the model relays values; (c) cache, then calculate | (a): (b) routes hundreds of numbers through model context as floats and loses provenance; (c) waits for a vintage policy | M3 |
+| 1 | Credential seam | Resolved 2026-10-10: no user key — the MVP serves a snapshot. `Depends` + `os.environ` (old M1 design, spike-verified) stays on the shelf for the optional server-side live path | Snapshot by default | Resolved |
+| 2 | Calculation surface | (a) one server-side tool that resolves and calculates; (b) the model relays values; (c) cache, then calculate | (a): (b) routes hundreds of numbers through model context as floats and loses provenance; (c) waits for a vintage policy | M3 |
 | 3 | Mixed periodicity | (a) one periodicity per spec; (b) align to quarter-end month; (c) quarterly mean of months; (d) annual average | (a) for the MVP, then design (c) or (d) with every constituent observation in the ledger | M3 |
-| 4 | Seed catalogue | Who chooses the 15-25 series and the basket archetypes they serve | Owner supplies archetypes; the assistant proposes IDs for live verification | M4 |
-| 5 | CI for live and eval runs | Manual `workflow_dispatch` with repository secrets, or local only | Manual dispatch, never on `pull_request` | M2, M5 |
-| 6 | Eval runner | Messages API loop, or a host harness via the Agent SDK | Messages API loop; revisit host fidelity later | M5 |
-| 7 | Eval spend and credentials | Per-run cap, default model, who supplies Anthropic credentials | Cap per run; `claude-sonnet-5-5` while iterating | M5 |
-| 8 | License | Choose | Before M6 | M6 |
+| 4 | Seed catalogue | About 15-25 series from owner-supplied basket archetypes; verification is parsing from real flat files plus cross-checking the BLS web listing — no live API calls needed | Owner supplies archetypes; the assistant proposes IDs | M2' |
+| 5 | CI for live and eval runs | Not needed while the live path is deferred; local/manual only | Defer with the live path | Post-MVP |
+| 6 | Eval runner | Messages API loop, or a host harness via the Agent SDK | Messages API loop when the harness returns post-MVP; revisit host fidelity | Post-MVP |
+| 7 | Eval spend and credentials | Per-run cap, default model, who supplies Anthropic credentials | Cap per run; `claude-sonnet-5-5` while iterating | Post-MVP |
+| 8 | License | Adopted the hackathon template's MIT license 2026-10-10 (see LICENSE) | Resolved | — |
+| 9 | Deployment kit | (a) Code Engine build-from-Git; (b) prebuilt public image; (c) local stdio toolkit only | (a) — owner's choice 2026-10-10: judges inspect the repo, which is the build source; nothing is published to a registry the owner controls. Requires a public repo and paid-tier IBM Cloud; the endpoint is public without auth per the kit, acceptable for public data only | Resolved |
+| 10 | Submission mechanics | Whether an existing repo may adopt the template's structure or must start from it; the unpublished submission deadline | Confirm at the weekly office hours (from 2026-10-13) | NEXT.md owner inputs |
 
 ## After the MVP
 
-Not scheduled. Most are described in [bls_api.md](bls_api.md).
+Not scheduled. Most live-API items are described in [bls_api.md](bls_api.md).
 
-- Request planner with rate, quota and retry handling, and merge with conflict
-  detection (`ceil(S/50) * ceil(Y/20)` requests).
-- Bulk-file catalogue ingestion after authoritative mappings are confirmed.
+- Live BLS API path: server-side key on the VM via `Depends` + `os.environ`
+  (old M1 design; the spike findings recorded 2026-10-06 in [Evidence and
+  limits](#evidence-and-limits) remain valid), response status and
+  rejected-key mapping, retries with backoff subject to
+  `docs/bls_etiquette.md`, request budgets and quota handling, and
+  `poe test-live` with recorded evidence.
+- Request planner with rate, quota and retry handling, and merge with
+  conflict detection (`ceil(S/50) * ceil(Y/20)` requests), per bls_api.md.
+- The LLM-backed eval harness (old M5's remainder; design kept above).
+- Snapshot refresh cadence: scheduled re-ingestion with hash comparison and
+  a manifest history of vintages.
+- Full-survey bulk ingestion beyond the curated selection (if the slice set
+  ever outgrows comfortable in-git size, revisit release assets or LFS per
+  the 2026-10-10 DECISIONS entry).
 - OEWS locality mapping and automated wage ratios.
-- Mixed-periodicity policies and other observation policies, each with explicit
-  disclosure.
-- An observation cache with a freshness and vintage policy.
-- Hosted multi-user use: authenticated HTTPS and per-user secrets, swapping the
-  provider behind the same `Depends` seam.
-- Packaging for `uvx` or PyPI, a supported-version matrix, Windows testing if it
-  becomes part of the contract.
+- Mixed-periodicity policies and other observation policies, each with
+  explicit disclosure.
+- An observation cache with a freshness and vintage policy (the snapshot is
+  the fixed-vintage degenerate case of this).
+- Post-hackathon hosting (VM or otherwise) and multi-user hardening:
+  MCP-level auth and per-user saved-spec isolation.
+- Packaging for `uvx` or PyPI, a supported-version matrix, Windows testing if
+  it becomes part of the contract.
 - Property-based numeric tests and a coverage report.
 - Semantic series matching (out of scope per the README).
 
@@ -435,17 +456,30 @@ Run on 2026-10-06 on branch `ccr-f93f3a5c-y239xv` at `5d68324`:
   from the schema; `ToolError` from a dependency reaches the client under
   `mask_error_details=True` while other exceptions are masked; call-time
   environment read; a client-supplied value for an injected name rejected;
-  schema errors precede the dependency.
-- ruff 0.16.9 `B008` and mypy probes on `Depends` defaults (see M1).
-- `BLSClient.parse_response` probed with `M06`, `M13`, `Q02`, `Q05`, `A01` and
-  `S01` (see M2).
-- A stdio launch of the real server through FastMCP's client transport, with and
-  without the key in the client `env`.
+  schema errors precede the dependency. These findings remain valid for the
+  deferred live path.
+- ruff 0.16.9 `B008` and mypy probes on `Depends` defaults.
+- `BLSClient.parse_response` probed with `M06`, `M13`, `Q02`, `Q05`, `A01`
+  and `S01`.
+- A stdio launch of the real server through FastMCP's client transport, with
+  and without the key in the client `env`.
 - `fastmcp install mcp-json` output is not used for the client snippets. It
   emits `uv run --with fastmcp ... server.py:create_server`, which was not
   shown to work for this project; the launch above is the verified one.
+- 2026-10-10: BLS publishes quantitative limits for the API but **no**
+  flat-file usage policy was found on `download.bls.gov` or its
+  `overview.txt`; the flat-file rules in `docs/bls_etiquette.md` are therefore
+  self-imposed conservative norms. The hackathon event page and the
+  GSA-TTS/mcp-hackathon-template repository were reviewed the same day
+  (deliverables, judging criteria, timeline window, IBM kit options,
+  template structure); the kit runbook specifics (Dockerfile, port, env
+  vars) live in `deploy/ibm/code-engine-git-build/README.md` and are
+  verified at M5'.
 
-Not verified: any live BLS request; the configuration formats and environment
-inheritance of Claude Desktop, Claude Code or any other host; model-backed
-evals and the cost estimate; BLS status and period codes beyond the shapes
-probed; network access to `api.bls.gov` from the cloud environment.
+Not verified: any live BLS request (no longer on the MVP critical path);
+the Code Engine build-from-Git runbook, the Dockerfile/streamable-HTTP
+transport, and Orchestrate registration (M5' scope); submission mechanics
+and the deadline (office hours); BLS status and period codes beyond the
+shapes probed (now exercised against M2' flat-file fixtures instead of the
+live API); the per-program bulk-file mappings (M2' research); model-backed
+evals and the cost estimate.

@@ -109,7 +109,12 @@ MIME types, verified on resource reads as well as discovery.
 
 ## 2026-10-01 — Local BLS access guidance and request bounds
 
-- **Status:** accepted.
+- **Status:** partially superseded by
+  [2026-10-10 — Hackathon MVP: flat-file snapshot, build-from-Git deployment, and an ingestion manifest](#2026-10-10--hackathon-mvp-flat-file-snapshot-build-from-git-deployment-and-an-ingestion-manifest).
+  The key requirement, setup guidance, and pre-HTTP bounds below now apply
+  only to the deferred live-API path; the snapshot data source needs no key.
+  "Never collect keys through the model" and "no anonymous fallback for the
+  API" remain accepted for that path.
 - **Decision:** Advertise setup through server instructions, a typed access-status
   tool, and `setup://bls-api`. Keep keys in the local launch environment; do not
   collect them through the model. Status is missing or configured-unverified and
@@ -129,3 +134,66 @@ MIME types, verified on resource reads as well as discovery.
   [MCP elicitation](https://modelcontextprotocol.io/specification/2025-11-25/client/elicitation).
 - **Revisit when:** A deployment supports multiple users, or explicit verification
   and multi-request retrieval are implemented and independently validated.
+
+
+## 2026-10-10 — Hackathon MVP: flat-file snapshot, build-from-Git deployment, and an ingestion manifest
+
+- **Status:** accepted.
+- **Context:** The project is an entry in GSA's MCP Server Hackathon (owner,
+  2026-10-10; the event page and the GSA-TTS/mcp-hackathon-template repo
+  were reviewed the same day). Deliverables are the repo, a slide deck, and
+  an evaluation document; prototypes stay in sandbox environments and are
+  not publicly deployed. Judges run the server locally in standard MCP
+  clients. For the sandbox deployment the owner chose the IBM watsonx
+  Orchestrate kit's Code Engine build-from-Git option: the repo is the
+  build source judges inspect, and no build artifact is published (the
+  prebuilt-image option would publish one; the owner declined it).
+  Requiring judges to register BLS keys defeats zero-setup runs, and the
+  owner's key must not be shared with unrelated users (see bls_api.md). BLS
+  flat files under `download.bls.gov` are anonymous and public-domain;
+  checked 2026-10-10, BLS publishes no volume policy for them, so
+  `docs/bls_etiquette.md` imposes conservative self-limits.
+- **Decision:** The MVP data path is an ingested flat-file snapshot; no
+  user keys anywhere. The curated raw slices are checked into git (small at
+  curated scale), and the SQLite database is a build artifact rebuilt
+  wherever needed — developer machines, CI, and the Code Engine image all
+  build it from the same slices; nothing is committed whole, tracked with
+  Git LFS, or published as a release or build artifact. Ingestion is
+  recorded twice — `data/manifest.json` in git (authoritative: file IDs,
+  URLs, retrieval dates, sha256 hashes, sizes, ingestion timestamps and
+  code versions, row/series/observation counts, period-code warning counts,
+  status) and an `ingestion_log` table in the database (the receipt). A
+  `poe verify-ingest` task checks the two agree, offline. The sha256
+  detects silent upstream revision: a hash mismatch on re-download is an
+  explicit decision, never a silent overwrite. The live BLS API path
+  (per-call `Depends` key, request bounds, retries) is deferred and
+  optional.
+- **Why:** Zero-setup judging locally and a judge-inspectable build source
+  in Code Engine; deterministic, reproducible offline evals; few,
+  identified, cached BLS fetches per the etiquette doc; cross-device
+  reproducibility through the checked-in slices plus manifest. Rejected
+  alternatives: per-judge BLS keys (setup burden); sharing the owner's key
+  (policy, quota, hygiene); the prebuilt-image kit (publishes a build); Git
+  LFS or release assets for the database (unnecessary at curated size; LFS
+  versions binaries without deltas against a small account quota);
+  committing full raw flat files (size; generated-artifact doctrine in
+  DEVELOPMENT.md).
+- **Consequences:** The snapshot date is disclosed in provenance and
+  methodology resources, and the server makes no claim of latest data after
+  the snapshot. Build-from-Git requires the repo to be **public** and a
+  paid-tier IBM Cloud account: making the repo public (after a
+  no-secrets-in-history sweep and the license choice) is part of milestone
+  M5', and the 2026-10-01 CodeQL entry's revisit condition should be
+  reconsidered then (automatic triggers were disabled because the repo was
+  private; scanning is free on public repos). The deployed `/mcp` endpoint
+  is public without authentication per the kit's design — acceptable only
+  because the data is public domain. Old roadmap M1/M2 (key plumbing, live
+  readiness) and the LLM-backed eval harness move to after the MVP; the
+  2026-10-01 access-bounds entry is partially superseded as noted in its
+  status line. An earlier same-day VM-hosting direction was retracted by
+  the owner and is recorded here for the history.
+- **Revisit when:** The hackathon concludes; a revision/refresh cadence is
+  needed; the slice set outgrows comfortable in-git size (then reconsider
+  release assets or LFS); BLS publishes a flat-file usage policy; or
+  non-public or multi-tenant features require authentication and per-user
+  state.

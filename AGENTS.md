@@ -52,7 +52,16 @@ Tool-specific entry points should reference it instead of copying its rules.
   These repository notes are not blanket authorization for those actions.
 
 
-## FastMCP conventions
+## BLS site etiquette
+
+BLS throttles or blocks excessive automated access, and a block lands on the
+owner's whole network. `docs/bls_etiquette.md` is binding on every command
+and run in this repository. Core rules: checks and tests never touch BLS;
+live calls and flat-file downloads are opt-in and owner-invoked, never
+started by an agent on its own; stay inside the published API bounds; no
+retry loops and no evading limits; download flat files once and reuse them
+with their retrieval date recorded. On any throttling signal, stop the whole
+run and report — do not probe.
 
 - Verify APIs against the supported FastMCP version's official documentation.
   Record version and lifecycle decisions in `docs/DECISIONS.md`; update
