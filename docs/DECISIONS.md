@@ -165,3 +165,16 @@ MIME types, verified on resource reads as well as discovery.
   migrated in this PR to individual modules and package aggregators. Public
   contracts and resource contents are preserved. Layout checks and existing
   FastMCP client tests guard the migration; no grouped adapters remain.
+
+## 2026-10-10 — Plan a BLS flat-file mirror instead of API-only retrieval
+
+- **Status:** proposed; plan only, nothing implemented.
+- **Decision:** Plan to cache `download.bls.gov/pub/time.series` flat files
+  (PC, PD first; then ECI, OEWS) with release-aligned conditional refresh,
+  run outside MCP handlers. The API path stays for ad hoc lookups.
+- **Why:** No per-call quota or key for bulk reads, a real series catalogue,
+  and reproducible provenance (file validators and hashes).
+- **Open:** Unverified facts are listed in `bulk_files.md` ("Verify first").
+  Vintage policy for revised PPI values is required before observations are
+  served from cache.
+- **Revisit when:** The verify-first checklist is done.
