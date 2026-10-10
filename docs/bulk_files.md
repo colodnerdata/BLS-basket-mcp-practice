@@ -33,12 +33,12 @@ One directory per survey (two-letter code). Each holds:
 | --- | --- | --- | --- |
 | PPI industry, current (NAICS) | `pc` | **Yes (requested)** | Live monthly series: 4,510 series, 3,454 ending 2026-M08. `pc.data.0.Current` ~64 MB (search snippet, unverified) |
 | PPI industry, discontinued (SIC) | `pd` | **Yes (requested), static** | Frozen history: 17,439 series, latest end year 2003 in the sample. Useful for pre-2004 SIC history, not for current escalation |
-| ECI | `ci` | **Yes** | Labor escalation; already a project data source (`data_sources.md`) |
+| ECI | `ci` | **After the MVP (kept in plan)** | Labor escalation; already a project data source (`data_sources.md`). Owner decision: deal with it after the MVP |
 | OEWS | `oe` | **Yes, later** | Locality wage ratios; already a project data source; annual, large |
-| PPI commodities | `wp` | **Decide; likely wanted** | `overview.txt` lists `WP` (commodities) separately from `PC`/`PD`. Materials and equipment escalation may need it. `WD`/`ND` are its/NAICS discontinued sets |
+| PPI commodities | `wp` | **Undecided (owner: unknown)** | `overview.txt` lists `WP` (commodities) separately from `PC`/`PD`. Materials and equipment escalation may need it. `WD`/`ND` are its/NAICS discontinued sets |
 | CPI | `cu` | Optional | Only if baskets need consumer-price components; not in current scope |
 
-Start with `pc`, `pd`, `ci`; evaluate `wp` next. Add `oe` when locality mapping is scheduled.
+Start with `pc` and `pd`; `ci` comes after the MVP; `wp` is undecided. Add `oe` when locality mapping is scheduled.
 
 ## What to fetch per program
 
@@ -209,10 +209,13 @@ establish numerical or format correctness.
 - [x] Period codes (`M13` annual average) and footnote codes (`P`, `C`) for PC/PD.
 - [ ] **Unverified:** whether the server returns `ETag`/`Last-Modified` and
       honors conditional requests; BLS's current User-Agent and rate rules.
-      Needs one `curl -I` per file from a networked machine.
+      Run `scripts/probe_bls_headers.py pc --user-agent "<name email>"` from a
+      networked machine (HEAD only, sequential, 1 s delay) and commit its
+      `--out` JSON under `sample_data/`.
 - [x] `pc.product` / `pd.product` join one-to-one to their series files (above).
 - [x] PD data-file layout and value format (one partition profiled).
 - [x] PC data layout, 3-decimal values and `P` footnotes (one partition profiled).
 - [ ] **Unverified:** current partition sizes and dates from the `pc/`/`pd/`
       directory listings.
-- [ ] Decide on `wp` (and `ci`, `oe`) and sample their `xx.txt` and `xx.series`.
+- [ ] `wp` undecided; `ci` and `oe` deferred past the MVP. Sample their
+      `xx.txt` and `xx.series` only when scheduled.
