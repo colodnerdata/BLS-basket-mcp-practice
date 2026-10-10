@@ -97,7 +97,7 @@ files themselves use tabs).
     in every row. Strip, then parse with `Decimal`.
   - `footnote_codes` is blank for all rows (PD history is final). The column is
     still space-padded, so a blank is `""` after stripping, not missing.
-  - Every row had exactly 5 fields. This is one PD partition only; **PC behavior is in the next item.
+  - Every row had exactly 5 fields. This is one PD partition only; PC behavior is in the next item.
 - **PC data sample** (`sample_data/pc.data.20.ComputerProduct.sample`: header,
   first 14 rows and last 20 rows of the partition; the full file is 53,255 rows,
   2.8 MB, profiled but not committed). Findings for NAICS 334:
