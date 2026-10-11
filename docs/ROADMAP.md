@@ -148,7 +148,7 @@ rebuild the database from checked-in slices with zero network access.
   real files in `docs/sample_data/`, and the header probe verified
   conditional-request support (304s across `pc/`, 2026-10-10; JSON at
   `docs/sample_data/pc_headers_probe.json`). Parsers, the manifest, and
-  offline PC/PD catalogue ingestion landed via this milestone's groundwork
+  offline PC/PD catalog ingestion landed via this milestone's groundwork
   PR; remainder: the conditional-GET fetcher and the first owner-invoked
   live download of basket-relevant partitions.
 - ECI (`ci`) enters MVP scope as the baseline labor source (2026-10-10
