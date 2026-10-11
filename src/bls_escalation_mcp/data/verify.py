@@ -85,7 +85,7 @@ def file_mismatches(entry: ManifestFile, repo_root: Path) -> list[str]:
             series_loaded = rows_parsed
         warnings: dict[str, int] = {}
     elif entry.kind == "mapping":
-        key_columns = 2 if entry.file_id.endswith(".product") else 1
+        key_columns = 2 if entry.file_id.endswith((".product", ".item")) else 1
         _, rows_parsed = parse_code_mapping(
             text,
             file_label=label,

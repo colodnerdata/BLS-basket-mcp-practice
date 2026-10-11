@@ -44,8 +44,9 @@ def test_series_catalog_counts_match_files(ingested) -> None:
     ppi = SeriesRepository(str(ingested["database"])).list_by_program(
         BLSProgram.PPI
     )
-    # Verified file counts: 4,510 PC + 17,439 PD data rows (bulk_files.md).
-    assert len(ppi) == 4510 + 17439
+    # Verified file counts (bulk_files.md): 4,510 PC + 17,439 PD +
+    # 5,312 WP — every WP row loads (all price indexes, no gate).
+    assert len(ppi) == 4510 + 17439 + 5312
     eci = SeriesRepository(str(ingested["database"])).list_by_program(
         BLSProgram.ECI
     )
@@ -84,6 +85,30 @@ def test_eci_series_metadata_and_eligibility(ingested) -> None:
         )
     )
     assert any(s.series_id == "CIS2022300000000I" for s in found)
+
+
+def test_wp_series_metadata_and_activity(ingested) -> None:
+    repository = SeriesRepository(str(ingested["database"]))
+    lumber = repository.get("WPS0811")
+    assert lumber is not None
+    assert lumber.program == BLSProgram.PPI
+    assert lumber.classification_system == "WP commodity"
+    assert lumber.classification_code == "08"
+    assert lumber.parent_code == "08"
+    assert lumber.commodity_code == "11"
+    assert lumber.units == "index (base 198200=100)"
+    assert str(lumber.first_period) == "1975-M01"
+    assert str(lumber.latest_period) == "2026-M08"
+    assert lumber.active is True
+    # Ended series (WP->WD migration history) are retained, not active:
+    retired = repository.get("WPS00000000")
+    assert retired is not None
+    assert retired.active is False
+    assert str(retired.latest_period) == "1974-M12"
+    found = repository.search(
+        SeriesSearchRequest(query="Softwood lumber", active_only=True)
+    )
+    assert any(s.series_id == "WPS0811" for s in found)
 
 
 def test_pc_series_metadata(ingested) -> None:

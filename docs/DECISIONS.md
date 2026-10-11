@@ -290,9 +290,11 @@ MIME types, verified on resource reads as well as discovery.
   releases, so a basket series may legitimately end — under the
   missing-data rule that is an explicit error, and refresh tooling must
   watch for it (a discontinued basket component is a methodology decision,
-  never silent substitution). Byte-level verification of `wp.series`
-  padding/columns is pending its fetch; the parser follows once the files
-  land.
+  never silent substitution). Verified against the bytes the same day:
+  `wp.series` has 11 columns where `wp.txt` documents 10 (undocumented
+  `footnote_codes`, the PC pattern); 5,312 series ingested, 1,117 flagged
+  inactive because they ended before the survey's latest month — "active"
+  means "reaches the survey's latest end period" for PC/WP/CI.
 - **Consequences:** ECI is quarterly and PPI is monthly, and the MVP keeps
   the one-periodicity-per-specification rule (open decision 3 (a)), so a
   single basket mixing monthly materials and quarterly labor is still

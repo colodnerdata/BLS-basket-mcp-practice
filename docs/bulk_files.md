@@ -42,26 +42,33 @@ Start with `pc` and `pd`; `ci` follows for MVP labor (owner decision
 2026-10-10). `wp` is the materials layer (2026-10-10). `oe` (locality) is
 the deferred program.
 
-## Confirmed file facts (WP — PPI commodities, from wp.txt 2026-10-10)
+## Confirmed file facts (WP — PPI commodities)
 
-`wp.txt` reviewed; `wp.series`/`wp.item`/data bytes are **pending fetch** —
-the padding/byte-level claims below are from the doc, to be re-verified
-against real files before parsing (the PC/PD/CI pattern).
+`wp.txt` reviewed; series/mapping bytes **verified 2026-10-10** against the
+fetched files (they matched except one quirk), and ingestion landed. §3 of
+`wp.txt` also notes `Q05`/`S03` as annual-average codes for quarterly and
+semiannual series (matters for other programs, not WP itself). **WP → WD
+migration:** discontinued commodity series leave the WP database for WD
+between releases; a series ending is explicit information, never silent
+absence.
 
-- `wp.series`: 10 columns (`series_id`, `group_code`, `item_code`,
-  `seasonal`, `YYMM` base_date, `series_title` (real titles),
-  begin/end year+period). Series id = `WP` + seasonal + group + item.
-- Data files share the 5-column shape; monthly periods plus `M13` annual
-  averages; §3 notes `Q05`/`S03` as annual-average codes for quarterly and
-  semiannual series (matters for other programs, not WP itself).
-- Mappings: `wp.group` (group→text), `wp.item` (group+item→text),
-  `wp.period`, `wp.footnote`, `wp.contacts`.
-- Revisions: `P` preliminary, values revise for four months after first
-  publication (same as PC/PD). Data scale change mid-2021 matches PC
-  (one decimal before, three after).
-- **WP → WD migration:** discontinued commodity series leave the WP
-  database for WD between releases; refresh and basket validation must
-  treat a series ending as explicit information, never silent absence.
+- `wp.series`: padded TSV, **11 columns — `wp.txt` §4 documents only 10**;
+  the undocumented `footnote_codes` sits between `series_title` and
+  `begin_year` (the PC pattern). Real titles throughout. 5,312 series in
+  this snapshot; 1,117 end before the survey's latest month (2026-M08) —
+  `active` is computed as "reaches the survey's latest end period", so
+  ended series are retained but flagged inactive (the same rule now applies
+  to PC and CI).
+- Mappings: `wp.item` is keyed by **two** codes (`group_code`,
+  `item_code`), like `pd.product`; `wp.group`, `wp.period`, `wp.footnote`
+  are single-code. All keep the name as the last field (no CI-style
+  display-metadata columns).
+- Materials coverage verified by name: softwood lumber (`WPS0811`), steel
+  mill products (`WPS1017`), ready-mix concrete (`WPS1333`), gypsum
+  (`WPS1371` — item ends 2019; the group-level series continues), copper
+  scrap (`WPS102301`), asphalt (`WPS058`).
+- Revisions: `P` preliminary, values revise for four months (same as PC);
+  one decimal through 2021-M06, three after.
 
 ## What to fetch per program
 
@@ -302,8 +309,10 @@ establish numerical or format correctness.
       `ci.data.0.Current` fetched and ingested (21,041 CI observations; the
       missing/skipped row semantics are listed under "Confirmed file
       facts (CI)").
-- [ ] `wp` (decided 2026-10-10: it is the materials layer): `wp.txt`
-      reviewed; fetch `wp.series`, `wp.group`, `wp.item`, `wp.footnote`,
-      `wp.period`, `wp.contacts` before the parser, and re-verify the
-      doc-stated layout against the bytes.
+- [x] `wp` (decided 2026-10-10: it is the materials layer): sampled and
+      verified 2026-10-10 (WP section above; real header has 11 columns —
+      doc lists 10); ingested: 5,312 series, 1,117 inactive (ended before
+      2026-M08). Materials partitions for the archetype download:
+      `wp.data.9.Lumber`, `.11a/.11b` Metals, `.14.Minerals`,
+      `.80.Construction`, `.80i.ConstructionInputs`.
 - [ ] `oe` (locality) deferred past the MVP.

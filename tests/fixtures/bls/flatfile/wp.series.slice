@@ -1,0 +1,7 @@
+series_id                     	group_code	item_code	seasonal	base_date	series_title	footnote_codes	begin_year	begin_period	end_year	end_period
+WPS0811                       	08	11	S	198200	PPI Commodity data for Lumber and wood products-Softwood lumber, seasonally adjusted		1975	M01	2026	M08
+WPS1017                       	10	17	S	198200	PPI Commodity data for Metals and metal products-Steel mill products, seasonally adjusted		1975	M01	2000	M12
+WPS1333                       	13	33	S	198200	PPI Commodity data for Nonmetallic mineral products-Ready-mix concrete, seasonally adjusted		1990	M01	2026	M08
+WPS1371                       	13	71	S	198200	PPI Commodity data for Nonmetallic mineral products-Gypsum products, seasonally adjusted		2012	M01	2019	M12
+WPS058                        	05	8	S	198412	PPI Commodity data for Fuels and related products and power-Asphalt and other petroleum and coal products, n.e.c., seasonally adjusted		2001	M01	2018	M12
+WPS00000000                   	00	000000	S	198200	PPI Commodity data for All commodities, seasonally adjusted		1967	M01	1974	M12

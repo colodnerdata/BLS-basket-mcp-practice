@@ -18,13 +18,23 @@ Supported layouts, each verified against real files:
   constant-dollar indexes, or response rates — only ``I`` is a valid
   escalation input, so :func:`eci_is_index` gates ingestion eligibility
   and everything else is skipped with a recorded count.
-- CI missing data is a dash (footnote code ``A``); a ``-`` value must
-  raise rather than parse as a number.
+- **WP (PPI commodities):** monthly series, real titles in the series
+  file, indexed by ``group_code``/``item_code``. Verified 2026-10-10
+  against the fetched bytes: the real header has **11** columns, not the
+  10 documented in ``wp.txt`` §4 — ``footnote_codes`` (undocumented) sits
+  between ``series_title`` and ``begin_year``, exactly the PC pattern. All
+  WP series are price indexes (no percent-change gate needed). 1,117 of
+  5,312 series end before the survey's latest month (2026-M08); ended
+  series are migration candidates to the discontinued WD database — an
+  end is explicit information, never silent absence.
+- CI missing data is a dash (footnote code ``A``); such rows carry no
+  observation and are skipped with a counted ``missing_rows`` record
+  rather than raising.
 
 Parsers never fabricate or substitute: unknown period codes are skipped
 with a counted warning, and structural drift raises
-:class:`FlatFileFormatError` loudly. Other programs (OEWS ``oe``,
-commodities ``wp``) land with their own parsers when scheduled.
+:class:`FlatFileFormatError` loudly. Other programs (OEWS ``oe``) land
+with their own parsers when scheduled.
 """
 
 from __future__ import annotations
@@ -36,11 +46,11 @@ from dataclasses import dataclass, field
 from decimal import Decimal, InvalidOperation
 from typing import Literal
 
-FlatFileProgram = Literal["pc", "pd", "ci"]
+FlatFileProgram = Literal["pc", "pd", "ci", "wp"]
 
 PROGRAM_DIR_URLS: dict[str, str] = {
     program: f"https://download.bls.gov/pub/time.series/{program}/"
-    for program in ("pc", "pd", "ci")
+    for program in ("pc", "pd", "ci", "wp")
 }
 
 _MONTHLY_CODE = re.compile(r"^M(\d{2})$")
@@ -115,6 +125,22 @@ PC_SERIES_COLUMNS = (
 # pd.series' header names 9 columns; its rows have 10 fields, the sixth a
 # space-filled blank between bench_date and begin_year.
 PD_BLANK_FIELD_INDEX = 5
+
+# Verified against the bytes 2026-10-10: 11 columns — wp.txt §4 documents
+# only 10 and omits footnote_codes (the same undocumented column PC has).
+WP_SERIES_COLUMNS = (
+    "series_id",
+    "group_code",
+    "item_code",
+    "seasonal",
+    "base_date",
+    "series_title",
+    "footnote_codes",
+    "begin_year",
+    "begin_period",
+    "end_year",
+    "end_period",
+)
 
 CI_SERIES_COLUMNS = (
     "series_id",
@@ -201,6 +227,39 @@ def parse_series_file(
                     series_id=cell[index["series_id"]],
                     industry_code=cell[index["industry_code"]],
                     product_code=cell[index["product_code"]],
+                    seasonal_code=cell[index["seasonal"]],
+                    base_or_bench_date=cell[index["base_date"]],
+                    title=cell[index["series_title"]] or None,
+                    footnote_codes=cell[index["footnote_codes"]],
+                    begin_year=_require_int(
+                        cell[index["begin_year"]], "begin_year", file_label
+                    ),
+                    begin_period=cell[index["begin_period"]],
+                    end_year=_require_int(
+                        cell[index["end_year"]], "end_year", file_label
+                    ),
+                    end_period=cell[index["end_period"]],
+                )
+            )
+    elif program == "wp":
+        if sorted(header) != sorted(WP_SERIES_COLUMNS):
+            raise FlatFileFormatError(
+                f"{file_label}: wp series header {header!r} does not "
+                f"match the verified columns {list(WP_SERIES_COLUMNS)!r}"
+            )
+        index = {name: header.index(name) for name in WP_SERIES_COLUMNS}
+        for row_number, row in enumerate(rows, start=2):
+            if len(row) != len(header):
+                raise FlatFileFormatError(
+                    f"{file_label} row {row_number}: {len(row)} fields, "
+                    f"expected {len(header)}"
+                )
+            cell = [value.strip() for value in row]
+            parsed.append(
+                ParsedSeries(
+                    series_id=cell[index["series_id"]],
+                    industry_code=cell[index["group_code"]],
+                    product_code=cell[index["item_code"]],
                     seasonal_code=cell[index["seasonal"]],
                     base_or_bench_date=cell[index["base_date"]],
                     title=cell[index["series_title"]] or None,

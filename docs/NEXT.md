@@ -20,10 +20,13 @@
   template-aligned shell landed on main (one component per file,
   `main.py`/`app.py`/`routes.py`, Dockerfile, `manifest.yaml`,
   `server.json`, QUICKSTART.md, `eval/`). M0 landed in PR #11. M2'
-  groundwork landed in PR #12: PC/PD parsers, `ingestion_log` +
+  groundwork landed in PR #12: PC/PD/CI/WP parsers, `ingestion_log` +
   `data/manifest.json` dual provenance, `poe build-catalog` /
-  `poe verify-ingest`, and a catalog of all 21,949 PC/PD series
-  ingested offline from the checked-in samples.
+  `poe verify-ingest`, and a catalog of 27,767 series (PC+PD+WP PPI,
+  plus 506 current-dollar ECI index series with all refused families
+  recorded) and 21,041 observations (incl. real construction-labor index
+  levels from `ci.data.0.Current`), all from checked-in/owner-fetched
+  samples, offline.
 - Next action: M2' remainder — the conditional-GET fetcher (verified by
   the 2026-10-10 header probe: all `pc/` files honor 304; ETag is a
   per-release stamp, so the manifest sha256 is the revision signal) and one
@@ -33,21 +36,16 @@
   (asphalt), 16.NonmetallicMineral (cement/aggregate), 17.PrimaryMetal,
   18.FabricatedMetal, 19.Machinery (HVAC), 21.ElectricalMachinery,
   75.Construction. Materials mapping settled 2026-10-10: the `wp`
-  commodity program is the materials layer (end-use/material-composition
-  organization; all price indexes; Lumber/Metals/Nonmetallic minerals +
-  construction-inputs partitions) — evidence and the WP→WD discontinuation
-  hazard are recorded in DECISIONS.md and `bulk_files.md`. Caveat: WP
-  bytes are still unverified; fetch `wp.series`/`wp.group`/`wp.item`/
-  `wp.footnote`/`wp.period`/`wp.contacts` (owner-run) before its parser. Labor enters the MVP via
-  ECI (`ci`) per the 2026-10-10 scope decision; its parser landed with the
-  remaining mappings and **506 current-dollar index series are ingested**
-  (quarterly `Q01`-`Q04`; percent-change/rate series refused and recorded).
-  `ci.data.0.Current` is fetched and ingested — **21,041 ECI observations,
-  including real construction-labor index levels** (missing-value and
-  ineligible-series rows counted in the manifest, per `bulk_files.md`).
-  OEWS (`oe`) localization (mapping and
-  automated wage ratios) is the deferred piece. Then M3 (observation resolution over the
-  snapshot), M4' (eval evidence pack), M5' (Code Engine spike).
+  commodity program is the materials layer — series/mappings now ingested
+  (5,312 WP series; catalog total 27,767 series) with materials coverage
+  verified by name (lumber WPS0811, steel WPS1017, ready-mix WPS1333,
+  gypsum, copper scrap, asphalt) and the WP→WD hazard recorded. WP data
+  partitions for the archetype download: 9.Lumber, 11a/11b Metals,
+  14.Minerals, 80.Construction, 80i.ConstructionInputs — land with the
+  owner-invoked fetch run. OEWS (`oe`) localization (mapping and
+  automated wage ratios) is the deferred piece. Then M3 (observation
+  resolution over the snapshot), M4' (eval evidence pack), M5' (Code
+  Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from
   2026-10-13) or mcp@gsa.gov: the submission deadline; whether an existing
   repo may adopt the template's structure or must be based on it; IBM Cloud

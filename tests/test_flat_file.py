@@ -130,6 +130,44 @@ def test_simple_mappings(flat_fixtures) -> None:
     assert footnotes["P"].startswith("Preliminary")
 
 
+def test_wp_series_file_parse(flat_fixtures) -> None:
+    rows, _ = parse_series_file(_read(flat_fixtures, "wp.series.slice"), "wp")
+    assert len(rows) == 6
+    lumber = rows[0]
+    assert lumber.series_id == "WPS0811"  # padding stripped
+    assert lumber.industry_code == "08"  # Lumber and wood products
+    assert lumber.product_code == "11"  # Softwood lumber
+    assert lumber.seasonal_code == "S"
+    assert lumber.base_or_bench_date == "198200"  # YYMM
+    assert "Softwood lumber" in (lumber.title or "")
+    assert (lumber.begin_year, lumber.begin_period) == (1975, "M01")
+    assert (lumber.end_year, lumber.end_period) == (2026, "M08")
+    # Ended series are in the file (WP->WD migration); identity kept.
+    retired = {row.series_id for row in rows}
+    assert "WPS00000000" in retired  # All commodities ended 1974-M12
+    assert "WPS1371" in retired  # gypsum item ended 2019
+    # The undocumented 11th column (footnote_codes) is handled, and its
+    # absence (wp.txt §4 lists 10 fields) fails loudly:
+    doc_layout = (
+        "series_id\tgroup_code\titem_code\tseasonal\tbase_date\t"
+        "series_title\tbegin_year\tbegin_period\tend_year\tend_period\n"
+        "WPS000\t01\t11\tS\t198200\tx\t1975\tM01\t2026\tM08\n"
+    )
+    with pytest.raises(FlatFileFormatError, match="header"):
+        parse_series_file(doc_layout, "wp")
+
+
+def test_wp_mappings(flat_fixtures) -> None:
+    items, _ = parse_code_mapping(
+        _read(flat_fixtures, "wp.item.slice"), key_columns=2
+    )
+    assert items["08\t11"] == "Softwood lumber"
+    assert items["10\t17"] == "Steel mill products"
+    groups, _ = parse_code_mapping(_read(flat_fixtures, "wp.group.slice"))
+    assert groups["08"] == "Lumber and wood products"
+    assert groups["13"] == "Nonmetallic mineral products"
+
+
 def test_ci_series_file_parse(flat_fixtures) -> None:
     rows, _ = parse_series_file(_read(flat_fixtures, "ci.series.slice"), "ci")
     assert len(rows) == 4
@@ -236,6 +274,10 @@ def test_data_file_missing_dash_is_recorded() -> None:
         ("ci.series", ("ci", "series", "ci.series")),
         ("ci.periodicity.slice", ("ci", "mapping", "ci.periodicity")),
         ("ci.data.0.Current", ("ci", "data", "ci.data.0.Current")),
+        ("wp.series", ("wp", "series", "wp.series")),
+        ("wp.item.slice", ("wp", "mapping", "wp.item")),
+        ("wp.group", ("wp", "mapping", "wp.group")),
+        ("wp.data.9.Lumber", ("wp", "data", "wp.data.9.Lumber")),
     ],
 )
 def test_classify_file(name: str, expected: tuple[str, str, str]) -> None:

@@ -29,9 +29,9 @@ def harness_env(tmp_path: Path):
 def test_ingest_records_dual_provenance(harness_env) -> None:
     database, manifest_path, entries = harness_env
     manifest = load_manifest(manifest_path)
-    # 13 fixture files: 3 series slices, 7 mapping slices, 2 real data
+    # 18 fixture files: 4 series slices, 11 mapping slices, 2 real data
     # slices plus the header-only (empty) data slice.
-    assert len(entries) == len(manifest.files) == 13
+    assert len(entries) == len(manifest.files) == 18
     by_id = {entry.file_id: entry for entry in manifest.files}
     series = by_id["pc/pc.series"]
     assert series.series_loaded == 4

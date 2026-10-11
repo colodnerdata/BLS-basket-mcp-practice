@@ -59,15 +59,15 @@ from bls_escalation_mcp.repositories.ingestion_log import (
 from bls_escalation_mcp.repositories.observations import ObservationRepository
 from bls_escalation_mcp.repositories.series import SeriesRepository
 
-_SERIES_NAME = re.compile(r"^(pc|pd|ci)\.series$")
+_SERIES_NAME = re.compile(r"^(pc|pd|ci|wp)\.series$")
 _MAPPING_NAME = re.compile(
-    r"^(pc|pd|ci)\."
+    r"^(pc|pd|ci|wp)\."
     r"(industry|product|period|footnote|seasonal|area|estimate|owner|"
-    r"occupation|subcell|periodicity)(\.txt)?$"
+    r"occupation|subcell|periodicity|group|item)(\.txt)?$"
 )
 # ci.aspect (standard errors, different layout) intentionally cannot match
-# the data pattern: no "ci.data." prefix.
-_DATA_NAME = re.compile(r"^(pc|pd|ci)\.data\..+?$")
+# the data pattern: no "ci.data." / "wp.data." prefix.
+_DATA_NAME = re.compile(r"^(pc|pd|ci|wp)\.data\..+?$")
 
 
 _SLICE_SUFFIXES = (".sample", ".head", ".slice")
@@ -142,9 +142,9 @@ class IngestionService:
         self.units: dict[str, str | None] = {}
         # Known-catalog cache: avoids one DB query per data row.
         self._known: dict[str, bool] = {}
-        # Latest end period of the current series run; ECI's "active" flag
-        # means "reaches the survey's latest period in this snapshot".
-        self._survey_end: tuple[int, str] | None = None
+        # Latest end period per program in the current series run; a
+        # series is "active" when it reaches that period in this snapshot.
+        self._survey_end: dict[str, tuple[int, str]] = {}
 
     def ingest_file(
         self,
@@ -168,7 +168,9 @@ class IngestionService:
         skip_reasons: Counter[str] = Counter()
 
         if kind == "mapping":
-            key_columns = 2 if canonical_name.endswith(".product") else 1
+            key_columns = (
+                2 if canonical_name.endswith((".product", ".item")) else 1
+            )
             # CI mappings keep the name in column 2 with trailing display
             # metadata; PC/PD use the (quirk-proof) last field.
             mapping, rows_parsed = parse_code_mapping(
@@ -201,8 +203,8 @@ class IngestionService:
                             f"periodicity_{parsed.periodicity_code}"
                         ] += 1
                 series = eligible
-            if program == "ci" and series:
-                self._survey_end = max(
+            if program != "pd" and series:
+                self._survey_end[program] = max(
                     (parsed.end_year, parsed.end_period) for parsed in series
                 )
             metadata = [
@@ -317,7 +319,10 @@ class IngestionService:
         if program == "pc":
             title = parsed.title or f"PPI NAICS {parsed.industry_code}"
             classification = "NAICS"
-            active = True
+            active = (
+                parsed.end_year,
+                parsed.end_period,
+            ) == self._survey_end.get("pc")
             description = None
             units = (
                 f"index (base {parsed.base_or_bench_date}=100)"
@@ -328,6 +333,31 @@ class IngestionService:
             periodicity = Periodicity.MONTHLY
             geography = None
             occupation = None
+            classification_code = parsed.industry_code
+            parent = None
+        elif program == "wp":
+            # Commodity price of the material itself — the materials layer
+            # (see the 2026-10-10 scope entry in docs/DECISIONS.md).
+            title = parsed.title or (
+                f"PPI commodity {parsed.industry_code}/{parsed.product_code}"
+            )
+            classification = "WP commodity"
+            active = (
+                parsed.end_year,
+                parsed.end_period,
+            ) == self._survey_end.get("wp")
+            description = None
+            units = (
+                f"index (base {parsed.base_or_bench_date}=100)"
+                if parsed.base_or_bench_date
+                else "index"
+            )
+            program_enum = BLSProgram.PPI
+            periodicity = Periodicity.MONTHLY
+            geography = None
+            occupation = None
+            classification_code = parsed.industry_code  # group code
+            parent = parsed.industry_code
         elif program == "ci":
             # ECI flat files always cite base December 2005 = 100 (ci.txt).
             title = parsed.title or f"ECI {parsed.series_id}"
@@ -340,7 +370,12 @@ class IngestionService:
                 parsed.area_code or ""
             )
             occupation = parsed.occupation_code
-            active = (parsed.end_year, parsed.end_period) == self._survey_end
+            active = (
+                parsed.end_year,
+                parsed.end_period,
+            ) == self._survey_end.get("ci")
+            classification_code = parsed.industry_code
+            parent = None
         else:
             product = self.names.get(("pd", "product"), {})
             industry = self.names.get(("pd", "industry"), {})
@@ -364,13 +399,16 @@ class IngestionService:
             periodicity = Periodicity.MONTHLY
             geography = None
             occupation = None
+            classification_code = parsed.industry_code
+            parent = None
         return SeriesMetadata(
             series_id=parsed.series_id,
             program=program_enum,
             title=title,
             description=description,
             classification_system=classification,
-            classification_code=parsed.industry_code,
+            classification_code=classification_code,
+            parent_code=parent,
             industry_code=parsed.industry_code,
             commodity_code=parsed.product_code or None,
             occupation_code=occupation,
