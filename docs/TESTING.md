@@ -81,6 +81,13 @@ Expected values are hand-checked against the fixture slices in
 | `test_verify_catches_tampered_counts_and_hash` | Tampered size/hash/count in a copy → each reported | `verify-ingest` failing to detect a changed input file |
 | `test_verify_catches_missing_file_and_log_drift` / `test_verify_flags_unlogged_manifest_entries` | Missing checkout file listed by path; manifest/log disagreements (counts; unlogged entries) each reported | The git record and the database receipt drifting apart |
 
+### `tests/test_fetch.py` — conditional BLS file fetcher
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_flat_file_fetcher_download_and_conditional_304` | A new file download saves the exact bytes and records the User-Agent; a follow-up conditional GET with the manifest's `ETag`/`Last-Modified` returns 304 instead of re-downloading | The fetcher silently re-fetching unchanged files or dropping the required contact-bearing `User-Agent` |
+| `test_fetch_many_uses_settings_and_manifest_validators` | `fetch_many` reads the configured `bls_user_agent` and the manifest validators for `If-None-Match`/`If-Modified-Since`, and surfaces an unchanged result without ingesting the file again | The CLI using an unset/invalid user agent, or losing conditional-GET state between the manifest and the network fetch |
+
 ### `tests/integration/test_flatfile_ingest.py` — replay of the real samples (offline)
 
 Ingests `docs/sample_data/` (owner-saved real BLS files) into a scratch
