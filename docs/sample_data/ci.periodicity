@@ -1,0 +1,13 @@
+periodicity_code	periodicity_text	display_level	selectable	sort_sequence
+A	12-month percent change, current dollars	1	T	4
+B	Current Dollar (Nominal)	0	F	1
+C	Constant Dollar (Real)	0	F	5
+D	Response Rates	0	F	9
+I	Current dollar index number	1	T	2
+P	Usable rate, updates	1	T	12
+Q	3-month percent change, current dollars	1	T	3
+R	Usable rate, initiations	1	T	11
+S	Survey response rate	1	T	10
+T	Constant dollar index number	1	T	6
+X	3-month percent change, constant dollars	1	T	7
+Z	12-month percent change, constant dollars	1	T	8

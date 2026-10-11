@@ -1,0 +1,34 @@
+area_code	area_text	display_level	selectable	sort_sequence
+00122	Atlanta-Athens-Clarke County-Sandy Springs, GA-AL CSA	3	T	11
+00148	Boston-Worcester-Providence, MA-RI-NH CSA	3	T	5
+00176	Chicago-Naperville, IL-IN-WI CSA	3	T	21
+00206	Dallas-Fort Worth, TX-OK CSA	3	T	17
+00220	Detroit-Warren-Ann Arbor, MI CSA	3	T	22
+00288	Houston-Pasadena, TX CSA	3	T	18
+00348	Los Angeles-Long Beach, CA CSA	3	T	29
+00378	Minneapolis-St. Paul, MN-WI CSA	3	T	24
+00408	New York-Newark, NY-NJ-CT-PA CSA	3	T	8
+00428	Philadelphia-Reading-Camden, PA-NJ-DE-MD CSA	3	T	7
+00488	San Jose-San Francisco-Oakland, CA CSA	3	T	30
+00500	Seattle-Tacoma, WA CSA	3	T	31
+00548	Washington-Baltimore-Arlington, DC-MD-VA-WV-PA CSA	3	T	14
+33100	Miami-Port St. Lucie-Fort Lauderdale, FL CSA	3	T	13
+38060	Phoenix-Mesa, AZ CSA	3	T	27
+98100	Northeast census region	1	T	3
+98200	South census region	1	T	9
+98300	Midwest census region	2	T	19
+98400	West census region	2	T	25
+98999	Regions, divisions, and statistical areas	0	F	2
+99100	New England census division	2	T	4
+99120	Middle Atlantic census division	2	T	6
+99130	East South Central census division	2	T	15
+99140	South Atlantic census division	2	T	10
+99150	East North Central census division	2	T	20
+99160	West North Central census division	2	T	23
+99170	West South Central census division	2	T	16
+99180	Mountain census division	2	T	26
+99190	Pacific census division	2	T	28
+99200	Metropolitan statistical areas	0	F	32
+99210	Metropolitan	3	T	33
+99220	Nonmetropolitan	3	T	34
+99999	United States (National)	0	T	1

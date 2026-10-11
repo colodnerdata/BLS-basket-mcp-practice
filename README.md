@@ -63,7 +63,7 @@ Implemented for this scaffold:
 - deterministic escalation calculation service
 - labor-locality calculation service
 - validation service for obvious basket errors
-- SQLite-backed series repository and simple catalogue search
+- SQLite-backed series repository and simple catalog search
 - minimal BLS client for known series IDs
 - FastMCP server exposing implemented discovery, validation, calculation, locality, specification, and observation tools
 - client integration tests for all tools/resources, JSON schemas, and lifecycle
@@ -103,7 +103,7 @@ Set environment variables such as:
 
 ```bash
 export BLS_API_KEY=...
-export BLS_DATABASE_PATH=./bls_catalogue.db
+export BLS_DATABASE_PATH=./bls_catalog.db
 ```
 
 ## Configuration

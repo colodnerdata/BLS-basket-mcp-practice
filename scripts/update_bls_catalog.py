@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh the SQLite-backed BLS catalogue metadata."""
+"""Refresh the SQLite-backed BLS catalog metadata."""
 
 from __future__ import annotations
 

@@ -9,7 +9,7 @@ applications:
     health-check-http-endpoint: /health
     env:
       PYTHONUNBUFFERED: 1
-      BLS_DATABASE_PATH: /tmp/bls_catalogue.db
+      BLS_DATABASE_PATH: /tmp/bls_catalog.db
     no-route: true
     disk_quota: 1G
     memory: 512M

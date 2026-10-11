@@ -1,0 +1,365 @@
+			Producer Price Index (WP)
+				 wp.txt
+
+
+Section Listing
+
+1. Survey Definition
+2. Files listed in the survey directory.
+3. Time series, series file, data file, & mapping file definitions and 
+relationships
+4. Series file format and field definitions
+5. Data file format and field definitions
+6. Mapping file formats and field definitions
+7. Data Element Dictionary
+================================================================================
+Section 1
+================================================================================
+
+The following is a description of: PRODUCER PRICE INDEX-Current Commodity Series (WP)
+
+Survey Description:  About 10,000 PPIs for individual products and groups of products
+are released each month. PPIs are available for the output of nearly all industries in
+the goods-producing sectors of the U.S. economy--mining, manufacturing, agriculture, 
+fishing, and forestry--as well as natural gas, electricity, construction, and goods
+competitive with those made in the producing sectors, such as waste and scrap materials. 
+The PPI program covers approximately 72 percent of the service sector's output, as 
+measured by revenue reported in the 2007 Economic Census. Data includes industries in the
+following sectors: wholesale and retail trade; transportation and warehousing; information;
+finance and insurance; real estate brokering, rental, and leasing; professional, scientific,
+and technical services; administrative, support, and waste management services; health care
+and social assistance; and accommodation.
+
+To the extent possible, prices used in constructing the indexes are the 
+actual revenue or net transaction prices producers receive for sales of
+their outputs.  Scientific (probability) sampling techniques are 
+used to select reporting establishments, products, and transactions for all
+types and volumes of output (not just volume-sellers).
+
+The commodity classification structure of the PPI organizes products by 
+similarity of end use or material composition, regardless of whether the 
+products are classified as primary or secondary in their industry of origin. 
+This system is unique to the PPI and does not match any other standard coding 
+structure. The commodity classification system is organized as a hierarchical 
+structure that starts with major commodity groupings (2-digit level of aggregation). 
+Each major commodity grouping includes (in descending order of aggregation) 
+subgroups (3-digit level), product classes (4-digit level), subproduct classes 
+(5- and 6-digit level), item groupings (7-digit level), and individual items 
+(8-, 9-, and 10-digit levels). Commodity-based FD-ID price indexes regroup 
+commodities at the subproduct class (six-digit) level, according to the class 
+of buyer and the amount of physical processing or assembling the products have 
+undergone. Commodity-based Inputs to Industries indexes regroup commodities to form
+indexes for the net input to industry production (excluding capital investment,
+labor, and imports).
+
+Summary Data Available: More than 4,000 commodity price indexes organized by 
+product, service, and end use. Indexes by Final Demand-Intermediate Demand (FD-ID), 
+and Inputs to Industries are also available, some back to 1947.
+
+In addition, data are available for major (2-digit) commodity groupings.
+
+Seasonally adjusted data are available for about 360 commodity indexes.
+
+Frequency of Observations:  Monthly.
+
+Annual Averages:  Annual averages are available for all series which 
+published each month of the year and are unadjusted for seasonality.
+
+Data Characteristics:  All data through June 2021 are stored with one decimal 
+place. Data after June 2021 are stored with 3 decimal places.
+
+Updating Schedule:  Updates are made near the middle of the month 
+following a given reference month. Data are subject to monthly revisions up to four
+months after their original publication. For example, January index data are made 
+available in February and revisions to January data are published in each following
+month through June when May data is released, and January data becomes final. 
+Changes as a result of sample updates also result in adding, deleting, or re-coding 
+of indexes which results in some indexes moving from the WP to the WD database when 
+they become discontinued.
+
+
+References: BLS Handbook of Methods, Chapter 14, "Producer Prices", 
+            Online at https://www.bls.gov/opub/hom/pdf/homch14.pdf
+
+==================================================================================
+Section 2
+==================================================================================
+The following Producer Price Index (Commodities) files are on the BLS internet in the 
+sub-directory pub/time.series/wp:
+
+wp.data.0.Current	   		-All current series recent data
+wp.data.1.AllCommodities   	-(group 00) All commodities
+wp.data.2.FarmProducts	   	-(group 01) Farm products
+wp.data.3.ProcessedFoods   	-(group 02) Processed foods and feeds
+wp.data.4.Textile	   		-(group 03) Textile products and apparel
+wp.data.5.Leather	   		-(group 04) Hides, skins, leather, and related
+wp.data.6.Fuels		   		-(group 05) Fuels and related products and power
+wp.data.7.Chemicals	   		-(group 06) Chemicals and allied products
+wp.data.7i.ChemicalsInputs	   	-(group IP326) Inputs to chemical mfg industries
+wp.data.8.Rubber	   		-(group 07) Rubber and plastic products
+wp.data.8i.RubberInputs		-(group IP326) Inputs to rubber and plastic mfg industries
+wp.data.9.Lumber	   		-(group 08) Lumber and wood products
+wp.data.10.Pulp		   		-(group 09) Pulp, paper, and allied products
+wp.data.11a.Metals10-103   	-(group 10-103) Metals and metal products
+wp.data.11b.Metals104-109  	-(group 104-109) Metals and metal products
+wp.data.12a.Machinery11-113 	-(group 11-113) Machinery and equipment
+wp.data.12b.Machinery114-116 	-(group 114-116) Machinery and equipment
+wp.data.12c.Machinery117-119 	-(group 117-119) Machinery and equipment
+wp.data.12i.MachineryInputs	-(group IP333) Inputs machinery and equip. mfg industries
+wp.data.13.Furniture	   		-(group 12) Furniture and household durables
+wp.data.14.Minerals	   		-(group 13) Nonmetallic mineral products
+wp.data.15.Transportation  	-(group 14) Transportation equipment
+wp.data.14i.TransportEqInputs	-(group IP336) Inputs to transportation equip. mfg
+wp.data.16.Miscellaneous   	-(group 15) Miscellaneous products
+wp.data.17.TotalDurables   	-(group DUR) Indexes grouped by durability
+wp.data.18.SpecialIndexes		-(group SI) Special groupings indexes
+wp.data.19.SteelMill	   		-(group SIS) Steel mill products special indexes
+wp.data.20.StageofProcessing	-(group SOP) Stage of processing indexes
+wp.data.21.Aggregates   		-Aggregates of commodity groups
+wp.data.22.FD-ID			-(group 22) Final Demand-Intermediate Demand indexes
+wp.data.30.Services 			-(group 30-79) Wherever provided services
+wp.data.30i.TransportServInputs	-(group IP481-492) Inputs to transport services industries
+wp.data.51i.HealthServInputs	-(group IP62) Inputs to healthcare industries
+wp.data.56i.EntertnOtherInputs	-(group IP71-81) Inputs to rec. and other service industries
+wp.data.80.Construction		-(group 80) Construction services
+wp.data.80i.ConstructionInputs	-(group IP23) Inputs to construction industries
+wp.contacts	-Contacts for WP survey 
+wp.footnote	-Footnote definitions
+wp.group	-Group codes with their titles mapping file
+wp.item		-Item codes (all WP codes) with their titles mapping file
+wp.period	-Period code definitions
+wp.series	-List of all series codes, titles, and their beginning and end dates
+wp.txt		-Survey and files descriptions
+
+=================================================================================
+Section 3
+=================================================================================
+The definition of a time series, its relationship to and the interrelationship
+among series, data and mapping files is detailed below:
+
+A time series refers to a set of data observed over an extended period of time
+over consistent time intervals (i.e. monthly, quarterly, semi-annually, annually).  
+BLS time series data are typically produced at monthly intervals and represent data 
+ranging from a specific consumer item in a specific geographical area whose price 
+is gathered monthly to a category of worker in a specific industry whose employment
+rate is being recorded monthly, etc.
+
+The files are organized such that data users are provided with the following
+set of files to use in their efforts to interpret data files:
+
+a)  a series file (only one series file per survey)
+b)  mapping files
+c)  data files
+
+The series file contains a set of codes which, together, compose a series 
+identification code that serves to uniquely identify a single time series.  
+Additionally, the series file also contains the following series-level information:
+
+a) the period and year corresponding to the first data observation 
+b) the period and year corresponding to the most recent data observation. 
+
+The mapping files are definition files that contain explanatory text descriptions
+that correspond to each of the various codes contained within each series
+identification code.
+
+The data file contains one line of data for each observation period pertaining to a
+specific time series.  Each line contains a reference to the following:
+
+a) a series identification code
+b) year in which data is observed
+c) period for which data is observed (M13, Q05, and S03 indicate annual averages)
+d) value
+e) footnote code (if available)
+=================================================================================
+Section 4
+=================================================================================
+File Structure and Format: The following represents the file format used to define 
+wp.series.  Note that the Field Numbers are for reference only; they do not exist 
+in the database.  Data files are in ASCII text format.  Data elements are separated 
+by tabs; the first record of each file contains the column headers for the data
+elements stored in each field.  Each record ends with a new line character. 
+
+Field #/Data Element	Length		Value(Example)		
+
+1.  series_id		  30		WPS00000000
+
+2.  group_code		  3		01
+
+3.  item_code		  12		1101
+
+4.  seasonal		  1		S				
+
+5.  base_date		  6  		8206
+					
+6.  series_title          256           PPI Commodity data for Farm products-Citrus fruits, seasonally adjusted
+
+7.  begin_year		  4		1967
+
+8.  begin_period	  3		M01		
+				
+9.  end_year		  4		1974		
+
+10. end_period		  3		M12		
+					
+The series_id (WPS00000000) can be broken out into:
+
+Code					Value
+
+survey abbreviation	=		WP
+seasonal_(code) 	=		S
+group_code			=		00
+item_code			=		000000
+==================================================================================
+Section 5
+==================================================================================
+File Structure and Format: The following represents the file format used to define
+each data file.  Note that the field numbers are for reference only; they do not 
+exist in the database.  Data files are in ASCII text format.  Data elements are 
+separated by spaces; the first record of each file contains the column headers for 
+the data elements stored in each field.  Each record ends with a new line character.  
+
+The wp.data file is partitioned into a number of separate files:  See Section 2
+
+The above-referenced data files have the following format:
+
+Field #/Data Element	Length		Value(Example)		
+
+1. series_id		  30		WPS011101      	
+
+2. year			   4		1994	
+
+3. period		   3		M01		
+
+4. value		  12      	105.9	 	
+				 
+5. footnote_codes	  10		It varies
+				
+
+The series_id (WPS00000000) can be broken out into:
+
+Code					Value
+
+survey abbreviation	=		WP
+seasonal_(code) 	=		S
+group_code		=		00
+item_code		=		000000
+================================================================================
+Section 6
+================================================================================
+File Structure and Format:  The following represents the file format used to define
+each mapping file. Note that the field numbers are for reference only; they do not
+exist in the database.  Mapping files are in ASCII text format.  Data elements are
+separated by tabs; the first record of each file contains the column headers for the
+data elements stored in each field.  Each record ends with a new line character.  
+
+File Name:  wp.footnote
+
+Field #/Data Element		Length		Value(Example)
+
+1. footnote_code		2		P
+
+2. footnote_text		200		Text
+
+
+File Name:  wp.group
+
+Field #/Data Element		Length		Value(Example)
+
+1.  group_code			3		02
+
+2.  group_text			150		Text
+
+
+File Name:  wp.item
+
+Field #/Data Element		Length		Value(Example)
+
+1.  group_code			3		01
+
+2.  item_code			12		1101
+
+3.  item_text			150		Text
+
+
+File Name:  wp.period
+
+Field #/Data Element		Length		Value(Example)
+
+1.  period			3		M01
+
+2.  period_abbr			5		JAN
+
+3.  period_name			20		Text
+=========================================================================================
+Section 7
+=========================================================================================
+PRODUCER PRICE INDEX (WP) DATABASE ELEMENTS
+
+Data Element	Length		Value(Example)			Description
+
+base_date	6		YYMM			The base year and month used
+				Ex: 8206			in calculating the index.
+
+begin_period	3		M01-M13			Identifies first data observation
+				Ex: MO6=June 		within the first year for which
+				(M=Monthly, M13=Annual	data is available for a given
+				Avg)			time series.
+				
+begin_year	4		YYYY			Identifies first year for which 
+				Ex: 1975			data is available for a given 
+							time series.
+
+end_period	3		M01-M13			Identifies last data observation 
+				Ex: M06=June		within the last year for which
+				(M=Monthly, M13=Annual	data is available for a given
+				Avg)			time series.
+
+end_year	4		YYYY			Identifies latest year for 
+				Ex: 1980		which data series is available.
+							
+footnote_code	2		P			Identifies footnote for the data 
+							series.
+
+footnote_codes	10		It varies		Identifies footnotes for the data 
+							series.	
+							
+footnote_text	200		Text			Contains the text of the footnote.
+
+group_code	3		01			Code identifying major
+							commodity group covered by
+							the index.
+
+group_text	150		Text			Name of the major commodity
+				Ex: Farm products	group covered by the index.
+						
+item_code	12		1101			Identifies item for which 
+							data observations pertain.
+				
+item_text	150		Text			Full names of items.
+				
+period_abbr	5		Period name		Abbreviation of period name.
+				abbreviation
+				Ex: JUN
+
+period		3		M01-M13			Identifies period for which
+				Ex: M06=June		data is observed.
+				(M=Monthly, M13=Annual
+				Avg)	
+				
+period_name	20		Text			Full name of period to which
+				Ex: June		the data observation refers.
+					
+seasonal	1		S=Seasonally		Code identifying whether the
+				Adjusted		data are seasonally adjusted.
+				U=Unadjusted	
+
+series_id	30		Code Series Identifier	Code identifying the specific 
+				Ex:WPS00000000		series.
+
+value		12		Index			Price index for item.
+	   			Ex:105.9
+
+year		4		YYYY			Identifies year of observation.
+				Ex: 1990	
+			
+

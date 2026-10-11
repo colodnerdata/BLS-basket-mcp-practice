@@ -13,3 +13,12 @@ Rules for adding files here:
 - Hand-written fixtures should stay small and hand-checkable.
 - Real recordings must name their retrieval date and request parameters
   (see the etiquette rules in `docs/bls_etiquette.md`).
+
+`flatfile/` holds byte-exact slices cut from the owner-saved real files in
+`docs/sample_data/` (PC/PD formats confirmed in `docs/bulk_files.md`); the
+slice names keep the canonical upstream filename plus a `.slice` suffix so
+`data.ingest.classify_file` maps them the same way. The small CI mapping
+slices are the *complete* real files. No slice contains fabricated values;
+parser mechanics that lack a real data file yet (CI observations) are
+tested with inline text in the test module instead. The slices are the
+parser's offline ground truth and double as container-build seed input.

@@ -1,0 +1,430 @@
+Employment Cost Index (CI)
+					ci.txt 
+
+Section Listing
+
+1. Survey definition
+2. Download files listed in the survey directory
+3. Time series, series file, data file, and mapping file definitions and 
+relationships
+4. Series file format and field definitions
+5. Data file format and field definitions
+6. Mapping file formats and field definitions
+7. Data element definition
+
+===============================================================================
+Section 1: Survey Definition
+===============================================================================
+
+The following is a definition of: Employment Cost Index (CI)
+
+Survey description: The Employment Cost Index (ECI) measures the change in the 
+cost of labor, free from the influence of employment shifts among occupations 
+and industries. The total compensation series includes changes in wages and 
+salaries and in employer costs for employee benefits. 
+
+The survey covers all occupations in the civilian economy, which includes the 
+total private economy (excluding farms and households), and the public sector 
+(excluding the federal government). Statistics are published for the private 
+and public sectors separately, and the data are combined in a measure for the 
+civilian economy.
+
+Sample: The sample responding information is available in the latest ECI news 
+release technical note available at www.bls.gov/news.release/eci.nr0.htm. The 
+sample establishments are classified in industry categories based on the North 
+American Industrial Classification System (NAICS). Within an establishment, 
+specific job categories are selected to represent broader occupational 
+definitions. Jobs are classified according to the Standard Occupational 
+Classification (SOC) system. 
+
+Summary data available: For private industry workers, data are available for 
+total compensation costs, for wages and salaries alone, and for total benefits 
+alone. Compensation and wage and salary change estimates are available by 
+major occupational and industry groups, as well as by census regions and 
+divisions, 15 largest metropolitan areas (by employment), time-based workers, 
+and bargaining status. 
+
+For civilian as well as state and local government workers cost changes 
+are available for major occupational and industry series.
+
+Indexes and 3-month and 12-month percent changes are available for most 
+non-seasonally adjusted series. Seasonally adjusted series have indexes and 
+3-month percent changes available.
+
+Frequency of observations: Data are released for the reference months of 
+March, June, September, and December.
+
+Base periods: All current indexes have a base period of December 2005 = 100.
+
+Data characteristics: All percent changes are rounded to the nearest tenth.
+
+Updating schedule: Updates are available about four weeks following the end 
+of the reference month. Publication dates are available at 
+www.bls.gov/schedule/news_release/eci.htm.
+
+Detailed information on survey concepts, coverage, and methods can be found in 
+the BLS Handbook of Methods, www.bls.gov/opub/hom/eci/.
+
+===============================================================================
+Section 2: Download files listed in the survey directory
+===============================================================================
+
+The following Employment Cost Index files are on the BLS internet site at
+https://download.bls.gov/pub/time.series/ci/:
+
+	File Name		Contents			File Type
+	ci.series		- all series and their 		series file
+				beginning and end dates  
+	ci.data.0.Current	- all most recent reference 
+				period data			data file
+	ci.data.1.AllData	- all estimates			data file
+	ci.aspect		- all available standard 
+				errors and relative 	
+				importance estimates		data file
+	ci.area			- geographic codes		mapping file 
+	ci.estimate		- compensation type codes	mapping file
+	ci.footnote		- footnote codes		mapping file
+	ci.industry		- industry codes	   	mapping file	
+	ci.occupation		- occupation codes		mapping file
+	ci.owner		- ownership (sector) codes  	mapping file
+	ci.periodicity		- periodicity codes 		mapping file
+	ci.seasonal		- seasonal codes 		mapping file
+	ci.subcell		- subcell category codes	mapping file
+	ci.contacts		- contacts for CI survey	N/A
+	ci.txt			- general information for 
+				CI survey			N/A
+===============================================================================
+Section 3: Series file, data files, and mapping files definitions and 
+relationships
+===============================================================================
+
+The interrelationship among series, data, and mapping files is detailed below:
+
+The series file contains a unique series identification code that identifies a 
+single time series and columns of codes that define the series. Additionally, 
+the series file also contains the following series-level information:
+
+a) the period and year corresponding to the first data observation 
+b) the period and year corresponding to the most recent data observation
+
+The download files are organized such that data users are provided with the 
+following set of files to use in their efforts to interpret data files:
+
+a) a series file (only one series file per survey)
+b) data files
+c) mapping files
+
+The mapping files are definition files that contain explanatory text 
+descriptions that correspond to each of the various codes used to define each 
+series identification code.
+
+===============================================================================
+Section 4: Series file format and field definitions
+===============================================================================
+
+File structure and format: The following represents the file format used to 
+define the ci.series file. Note that the Field Numbers are for reference only; 
+they do not exist in the database. Data elements are separated by tabs; the 
+first record of each file contains the column headers for the data elements 
+stored in each field. Each record ends with a new line character. 
+
+Field #/Data Element		Length		Value(Example)		
+
+1.  series_id			17		CIS1010000000000I
+
+2.  seasonal			1		S 
+
+3.  owner_code			1		1
+
+4.  industry_code		6		000000
+
+5.  occupation_code		6		000000	
+						
+6.  subcell_code		3		00	
+						
+7.  area_code			5		99999
+
+8.  periodicity_code		1		I
+
+9.  estimate_code		2 		01
+
+10. series_title		250		(descriptive label text)
+
+11. footnote_codes		10		v,7
+
+12. begin_year			4		2008
+
+13. begin_period		3		Q01		
+				
+14. end_year			4		2018		
+
+15. end_period			3		Q01		
+
+
+The series_id (CIS1010000000000I) can be broken out into:
+
+Code					Value
+survey abbreviation		=	CI
+seasonal (code)			=	S
+owner_code			=	1
+estimate_code			=	01
+industry_code			=	0000
+occupation_code 		=	000
+subcell_code			= 	00
+periodicity_code		=	I
+
+===============================================================================
+Section 5: Data file formats and field definitions
+===============================================================================
+
+File structure and format: The following represents the file format used to 
+define each data file. Note that the field numbers are for reference only; they 
+do not exist in the database. Data files are in ASCII text format. Data 
+elements are separated by tabs; the first record of each file contains the 
+column headers for the data elements stored in each field. Each record ends 
+with a new line character. 
+
+The ci.data file is partitioned into two separate files:  
+ 
+	1. ci.data.0.Current	- All recent reference period estimates
+	2. ci.data.1.AllData	- All estimates
+	3. ci.aspect		- All available standard errors
+
+File Name: ci.data.0.Current
+Field #/Data Element		Length		Value(Example)		
+
+1. series_id			17		CIU1010000110000Q
+
+2. year				4		2018	
+
+3. period			3		Q01		
+ 
+4. value			12		1.1	
+
+5. footnote_codes		10		<blank>	
+				
+File Name: ci.data.1.AllData
+Field #/Data Element		Length		Value (Example)
+
+1. series_id			17		CIU1010000210000A
+
+2. year				4		2018
+
+3. period			3		Q01
+
+4. value			12		2.9	
+
+5. footnote_codes		10		<blank>	
+
+
+File Name: ci.aspect
+Field #/Data Element		Length		Value (Example)
+
+1. series_id			17		CIU1010000430000A
+
+2. year				4		2018
+
+3. period			3		Q01
+
+4. aspect_type			2		E
+
+5. value			12		0.2
+
+6. footnote_codes		10		<blank>	
+
+===============================================================================
+Section 6: Mapping file formats and field definitions
+===============================================================================
+
+File structure and format: The following represents the file format used to 
+define each mapping file. Note that the field numbers are for reference only; 
+they do not exist in the database. Mapping files are in ASCII text format. Data 
+elements are separated by tabs; the first record of each file contains the 
+column headers for the data elements stored in each field. Each record ends 
+with a new line character. 
+
+File Name: ci.area
+Field #/Data Element		Length	Value(Example)			
+1.  area_code			5		99999		
+2.  area_text			100		National
+3.  display_level		2		0
+4.  selectable			1		T
+5.  sort_sequence		5		1
+
+
+File Name: ci.estimate
+Field #/Data Element		Length	Value(Example)			
+1.  subcell_code		2		03		
+2.  subcell_text		100		Total Benefits
+3.  display_level		2		1
+4.  selectable			1		T
+5.  sort_sequence		5		3
+
+File Name: ci.footnote
+Field #/Data Element		Length	Value(Example)			
+1.  footnote_code		3		a				
+2.  footnote_text		200		Dashes indicate data not 
+						available.
+
+			
+File Name: ci.industry
+Field #/Data Element		Length	Value(Example)			
+1.  industry_code	  	6		622000	
+2.  industry_text		100		Hospitals
+3.  display_level		2		4
+4.  selectable			1		T
+5.  sort_sequence		5		1625						
+
+File Name: ci.occupation
+Field #/Data Element		Length	Value(Example)			
+1.  occupation_code	  	6		414300
+2.  occupation_text		100		Sales and office occupations
+3.  display_level		2		1
+4.  selectable			1		T
+5.  sort_sequence		5		760							
+
+File Name: ci.owner
+Field #/Data Element		Length	Value(Example)	
+1.  owner_code			1		2
+2.  owner_text			100       	Private industry workers
+3.  display_level		2		0
+4.  selectable			1		T
+5.  sort_sequence		5		2							
+
+File Name: ci.periodicity
+Field #/Data Element		Length	Value(Example)		
+1.  periodicity_code	  	1		I 
+2.  periodicity_text		30		Index number
+3.  display_level		2		0
+4.  selectable			1		T
+5.  sort_sequence		5		1							
+
+File Name: ci.seasonal
+Field #/Data Element		Length	Value(Example)		
+1.  seasonal_code		1		S		
+2.  seasonal_text		30		Seasonally adjusted	
+								
+File Name: ci.subcell
+Field #/Data Element		Length	Value(Example)			
+1.  subcell_code		3		23					
+2.  subcell_text		100		Union
+3.  display_level		2		2
+4.  selectable			1		T
+5.  sort_sequence		5		28
+
+
+===============================================================================
+Section 7: Data element dictionary
+===============================================================================
+Employment Cost Index (ECI) database elements
+
+Data Element       Length    Value(Example)       Description
+
+area_code          5         99999		Identifies the geographic
+						area for the estimate		
+
+area_text          100       United States	Description of area
+                             (National)		code
+
+aspect_type        2         E			Identifies the type of
+                                                additional data provided
+                                                for the series id 
+                                                (Example: E represents
+                                                standard error)
+
+begin_period       3         Q01                Identifies first data 
+                                                observation within the 
+                                                first reference quarter 
+                                                for which data is available 
+                                                for a given series
+
+begin_year         4         2004               Identifies first year for 
+                                                which data is available 
+                                                for a given series
+
+                                                  
+end_period         3         Q02                Identifies last data 
+                                                observation within the 
+                                                last reference quarter for 
+                                                which data is available for 
+                                                a given series
+
+end_year           4         2018               Identifies last year for 
+                                                which data is available 
+                                                for a given series
+
+estimate_code      2         01                 Identifies the type and 
+                                                unit of measure for the 
+                                                estimate
+
+estimate_text      100       Total 
+			     compensation   	Description of the estimate
+                                                code
+
+footnote_code      10        A                  Identifies footnotes for 
+                                                the series or observations
+
+
+footnote_text      200       Data not 
+			     available   	Description of the footnote
+                                                code
+
+industry_code      6         000000             Identifies the industry 
+                                                sector for the estimate, as 
+                                                classified by the North 
+                                                American Industry Classification
+                                                System (NAICS)
+
+industry_text      100       All industries     Description of industry code
+
+occupation_code    6         291111             Identifies the occupational
+                                                group, or family of jobs,
+                                                for the estimate as classified
+                                                by the Standard Occupational
+                                                Classification (SOC) system. Numbering
+                                                conventions may differ from SOC.
+
+occupation_text    100       Registered nurses 	Description of occupation code
+
+ownership_code     1         1                  Identifies the sector represented
+                                                by the estimate
+
+ownership_text     100       Civilian workers   Description of the ownership code
+
+
+period             3         Q01                Identifies period for the data
+                                                observation
+
+periodicity_code   1         I	               	Abbreviation of the period description
+
+periodicity_text   30        Index number      	Period description
+
+
+seasonal           1         U                 	Seasonality indicator code
+
+seasonal_text      30        Not seasonally    	Description of the seasonal code
+                             adjusted
+
+series_id          17        CIU1010000210000A 	Unique code identifying the 
+                            			specific series
+
+series_title       256       All civilian total	Description of the series id
+                             compensation for 
+			     all occupations; 
+			     cost per hour 
+			     worked 
+
+subcell_code       2         23			Job characteristic code
+                                                identifying the attributes of 
+                                                workers or establishments for 
+                                                the estimate
+
+subcell_text      100        Union workers      Description of job 
+                                                characteristic code
+
+value             12         3.3                Value of the estimate or relative
+                                                standard error corresponding
+                                                with the series id
+
+year              4          2018               Identifies year of observation                                                  
+ 

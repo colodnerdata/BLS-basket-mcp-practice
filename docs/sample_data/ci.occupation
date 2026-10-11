@@ -1,0 +1,22 @@
+occupation_code	occupation_text	display_level	selectable	sort_sequence
+000000	All occupations	0	T	1
+000001	All occupations, excluding sales	1	T	1420
+111300	Management, business, and financial occupations	2	T	3
+112900	Management, professional and related occupations	1	T	2
+114300	All white-collar occupations	1	T	1418
+114301	All white-collar occupations, excluding sales	2	T	1419
+152900	Professional and related occupations	2	T	126
+313900	Service occupations	1	T	577
+410000	Sales and related occupations	0	T	588
+414300	Sales and office occupations	1	T	760
+430000	Office and administrative support occupations	0	T	621
+43000D	Office and administrative support occupations (SOC 2010)	0	T	1444
+454700	Construction, and extraction, farming, fishing, and forestry occupations	2	T	918
+454900	Natural resources, construction, and maintenance occupations	1	T	917
+455300	All-blue collar occupations	1	T	1421
+490000	Installation, maintenance, and repair occupations	0	T	775
+510000	Production occupations	0	T	841
+515300	Production, transportation, and material moving occupations	1	T	1124
+530000	Transportation and material moving occupations	0	T	980
+53000D	Transportation and material moving occupations (SOC 2010)	0	T	1446
+DISCON	Discontinued Codes	0	F	1417

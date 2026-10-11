@@ -90,7 +90,7 @@ async def server_env(
     *,
     key: str | None = "fixture-secret",
     transport: CannedTransport | None = None,
-    db_name: str = "nested/catalogue.db",
+    db_name: str = "nested/catalog.db",
 ) -> AsyncIterator[ServerEnv]:
     """Run the real server against a temporary database and canned transport.
 
