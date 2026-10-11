@@ -17,6 +17,10 @@ class Settings(BaseSettings):
         alias="BLS_HTTP_TIMEOUT_SECONDS",
     )
     http_retry_count: int = Field(default=2, alias="BLS_HTTP_RETRY_COUNT")
+    bls_user_agent: str | None = Field(
+        default=None,
+        alias="BLS_USER_AGENT",
+    )
     weight_tolerance: float = Field(
         default=1e-4,
         alias="BLS_WEIGHT_TOLERANCE",

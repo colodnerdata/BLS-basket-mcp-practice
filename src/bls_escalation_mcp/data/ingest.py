@@ -247,6 +247,7 @@ class IngestionService:
             bls_last_modified=self._probe_last_modified(
                 path.parent, canonical_name
             ),
+            bls_etag=self._probe_etag(path.parent, canonical_name),
             size_bytes=len(raw),
             sha256=hashlib.sha256(raw).hexdigest(),
             ingested_at=datetime.now(UTC),
@@ -473,6 +474,16 @@ class IngestionService:
             for row in rows:
                 if row.get("file") == canonical_name:
                     return row.get("last-modified") or None
+        return None
+
+    @staticmethod
+    def _probe_etag(directory: Path, canonical_name: str) -> str | None:
+        """Use a header probe's JSON (same directory) for ETag."""
+        for probe in sorted(directory.glob("*_headers_probe.json")):
+            rows = json.loads(probe.read_text("utf-8")).get("files", [])
+            for row in rows:
+                if row.get("file") == canonical_name:
+                    return row.get("etag") or None
         return None
 
 

@@ -39,6 +39,7 @@ class ManifestFile(BaseModel):
     path_in_repo: str | None = None
     downloaded_at: datetime | None = None
     bls_last_modified: str | None = None
+    bls_etag: str | None = None
     size_bytes: int
     sha256: str
     ingested_at: datetime
