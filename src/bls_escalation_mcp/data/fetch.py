@@ -37,7 +37,10 @@ import httpx
 
 from bls_escalation_mcp.config import Settings, get_settings
 from bls_escalation_mcp.data.ingest import IngestionService, classify_file
-from bls_escalation_mcp.data.manifest import DEFAULT_MANIFEST_PATH, load_manifest
+from bls_escalation_mcp.data.manifest import (
+    DEFAULT_MANIFEST_PATH,
+    load_manifest,
+)
 from bls_escalation_mcp.db.connection import get_database_path
 from bls_escalation_mcp.db.schema import initialize_schema
 
@@ -138,7 +141,9 @@ class FlatFileFetcher:
         try:
             response = self._client.get(url, headers=headers)
         except httpx.HTTPError as exc:
-            raise FetchBlockedError(f"network error fetching {url}: {exc}") from exc
+            raise FetchBlockedError(
+                f"network error fetching {url}: {exc}"
+            ) from exc
         self.request_log.append(response.request)
         if response.status_code == 304:
             return FetchOutcome(
@@ -251,8 +256,7 @@ def main() -> int:
     parser.add_argument(
         "files",
         nargs="+",
-        help="Canonical file names, e.g. wp.data.9.Lumber "
-        "ci.data.0.Current",
+        help="Canonical file names, e.g. wp.data.9.Lumber ci.data.0.Current",
     )
     parser.add_argument(
         "--dir",
@@ -262,9 +266,7 @@ def main() -> int:
         "git-ignored on purpose)",
     )
     parser.add_argument("--db", default=None, help="Database path")
-    parser.add_argument(
-        "--manifest", type=Path, default=DEFAULT_MANIFEST_PATH
-    )
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
     parser.add_argument(
         "--no-ingest",
         action="store_true",
