@@ -99,7 +99,13 @@ def test_fetch_many_uses_settings_and_manifest_validators(
 
     def handler(request: httpx.Request) -> httpx.Response:
         if request.headers.get("If-None-Match") == "etag-1":
-            return httpx.Response(304)
+            return httpx.Response(
+                304,
+                headers={
+                    "etag": "etag-1",
+                    "last-modified": "Wed, 01 Jan 2025 00:00:00 GMT",
+                },
+            )
         body = b"abc"
         return httpx.Response(
             200,
