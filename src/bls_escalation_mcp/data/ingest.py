@@ -156,6 +156,8 @@ class IngestionService:
         ingested_by: str,
         downloaded_at: datetime | None = None,
         notes: str | None = None,
+        bls_last_modified: str | None = None,
+        bls_etag: str | None = None,
     ) -> ManifestFile:
         """Ingest one file and record it in the manifest and the log."""
         raw = path.read_bytes()
@@ -244,10 +246,16 @@ class IngestionService:
             source_url=PROGRAM_DIR_URLS[program] + canonical_name,
             path_in_repo=_repo_relative(path),
             downloaded_at=downloaded_at,
-            bls_last_modified=self._probe_last_modified(
-                path.parent, canonical_name
+            bls_last_modified=(
+                bls_last_modified
+                if bls_last_modified is not None
+                else self._probe_last_modified(path.parent, canonical_name)
             ),
-            bls_etag=self._probe_etag(path.parent, canonical_name),
+            bls_etag=(
+                bls_etag
+                if bls_etag is not None
+                else self._probe_etag(path.parent, canonical_name)
+            ),
             size_bytes=len(raw),
             sha256=hashlib.sha256(raw).hexdigest(),
             ingested_at=datetime.now(UTC),

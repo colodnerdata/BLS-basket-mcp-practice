@@ -132,3 +132,44 @@ def test_fetch_many_uses_settings_and_manifest_validators(
 
     assert outcomes[0].status == "unchanged"
     assert unchanged == ["pc.data.0.Current"]
+
+
+def test_fetch_many_persists_emittted_validators_into_manifest(
+    tmp_path: Path,
+) -> None:
+    manifest_path = tmp_path / "manifest.json"
+    save_manifest(manifest_path, IngestionManifest())
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = (
+            b"series_id\tyear\tperiod\tvalue\tfootnote_codes\n"
+            b"PCU123456123456\t2025\tM01\t100.0\t\n"
+        )
+        return httpx.Response(
+            200,
+            content=body,
+            headers={
+                "content-length": str(len(body)),
+                "etag": "etag-2",
+                "last-modified": "Wed, 02 Jan 2025 00:00:00 GMT",
+            },
+        )
+
+    db_path = tmp_path / "catalog.db"
+    outcomes, unchanged = fetch_many(
+        ["pc.data.0.Current"],
+        tmp_path,
+        settings=Settings(
+            bls_user_agent="Example Ops <ops@example.com>",
+            database_path=str(db_path),
+        ),
+        sleep=lambda _: None,
+        transport=httpx.MockTransport(handler),
+        manifest_path=manifest_path,
+    )
+
+    assert outcomes[0].status == "downloaded"
+    assert unchanged == []
+    saved = manifest_path.read_text("utf-8")
+    assert '"bls_etag": "etag-2"' in saved
+    assert '"bls_last_modified": "Wed, 02 Jan 2025 00:00:00 GMT"' in saved

@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS ingestion_log (
     path_in_repo TEXT,
     downloaded_at TEXT,
     bls_last_modified TEXT,
+    bls_etag TEXT,
     size_bytes INTEGER NOT NULL,
     sha256 TEXT NOT NULL,
     ingested_at TEXT NOT NULL,

@@ -26,12 +26,12 @@ class IngestionLogRepository:
                 """
                 INSERT INTO ingestion_log (
                     file_id, program, kind, source_url, path_in_repo,
-                    downloaded_at, bls_last_modified, size_bytes, sha256,
-                    ingested_at, ingested_by, rows_parsed, series_loaded,
-                    observations_loaded, missing_rows, skipped_rows,
-                    period_warnings, skipped_series, status
+                    downloaded_at, bls_last_modified, bls_etag, size_bytes,
+                    sha256, ingested_at, ingested_by, rows_parsed,
+                    series_loaded, observations_loaded, missing_rows,
+                    skipped_rows, period_warnings, skipped_series, status
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )
                 ON CONFLICT(file_id) DO UPDATE SET
                     program = excluded.program,
@@ -40,6 +40,7 @@ class IngestionLogRepository:
                     path_in_repo = excluded.path_in_repo,
                     downloaded_at = excluded.downloaded_at,
                     bls_last_modified = excluded.bls_last_modified,
+                    bls_etag = excluded.bls_etag,
                     size_bytes = excluded.size_bytes,
                     sha256 = excluded.sha256,
                     ingested_at = excluded.ingested_at,
@@ -63,6 +64,7 @@ class IngestionLogRepository:
                     if entry.downloaded_at
                     else None,
                     entry.bls_last_modified,
+                    entry.bls_etag,
                     entry.size_bytes,
                     entry.sha256,
                     entry.ingested_at.isoformat(),
@@ -96,6 +98,7 @@ class IngestionLogRepository:
                     path_in_repo=row["path_in_repo"],
                     downloaded_at=row["downloaded_at"],
                     bls_last_modified=row["bls_last_modified"],
+                    bls_etag=row["bls_etag"],
                     size_bytes=row["size_bytes"],
                     sha256=row["sha256"],
                     ingested_at=row["ingested_at"],

@@ -242,6 +242,8 @@ def fetch_many(
                     ingested_by=f"fetch {outcome.sha256[:12]}",
                     downloaded_at=datetime.now(UTC),
                     notes=None,
+                    bls_last_modified=outcome.last_modified,
+                    bls_etag=outcome.etag,
                 )
     finally:
         fetcher.close()
