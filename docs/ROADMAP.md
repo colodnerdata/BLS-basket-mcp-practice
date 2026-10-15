@@ -64,6 +64,19 @@ Outside the MVP: the live BLS API path with a server-side key (old M1/M2),
 the LLM-backed eval harness (old M5's remainder), post-hackathon hosting and
 multi-user hardening, and everything under [After the MVP](#after-the-mvp).
 
+## Resource and prompt workflow plan
+
+The [FastMCP resources and prompts plan](mcp_resources_prompts.md)
+(2026-10-15) adds concrete reference resources and five host workflow
+prompts. This replaces blanket prompt deferral; none is registered yet.
+Deliver workflow/catalog/snapshot/archetype resources and basket-design /
+candidate-review prompts during M2'/M3 preparation; add observation coverage,
+spec review and result explanation with M3. Saved-spec resources and locality
+review follow in a second tranche. M4' adds contract/evidence coverage, and
+M5' verifies selection in real hosts. No additional LLM dependency, automatic
+saving, mixed-periodicity calculation or OEWS automation is introduced.
+The plan specifies contracts, dependencies and completion criteria.
+
 ## Where the repository stands
 
 Checked on 2026-10-06 at commit `5d68324`. "Probed" means run in the session

@@ -323,3 +323,31 @@ MIME types, verified on resource reads as well as discovery.
   rule governs calculation-time resolution, not ingestion.
 - **Revisit when:** ECI period codes and value semantics are verified, or
   the hackathon concludes and OEWS localization returns to the plan.
+
+## 2026-10-15 — Plan resources and prompts for the project-to-index workflow
+
+- **Status:** accepted as an implementation plan; no runtime components
+  added. Supersedes the 2026-10-07 shell decision's blanket deferral of
+  reusable prompts; its component-layout and lifecycle decisions remain.
+- **Decision:** Adopt [mcp_resources_prompts.md](mcp_resources_prompts.md):
+  local workflow, coverage, snapshot and archetype resources; five named
+  host prompts covering basket design, candidate review, spec review,
+  source-backed explanation, and explicit locality review. Add core guidance
+  during M2'/M3 preparation; calculation explanation waits for M3's ledger.
+  Saved-spec resources and locality review are a second tranche.
+- **Why:** Deterministic tools alone do not teach a host how to elicit
+  defensible inputs, review candidates and explain limitations. Reviewed
+  archetypes provide reusable examples without imposing project weights.
+- **Boundaries:** Prompt retrieval only renders guidance, optionally reading
+  local state; no tool execution, LLM calls, calculations, saves or downloads.
+  Service validation remains authoritative. No automatic resource-loading
+  assumption, new draft/result store, mixed-periodicity math, or OEWS
+  expansion. Preserve existing URI/MIME contracts and verify FastMCP APIs
+  against 3.2.4 before implementation.
+- **Verification:** Planning-only change; implementation must add MCP client
+  discovery/read/render contracts, non-mutation checks and example evidence
+  to TESTING.md, then run the existing check task. LLM adherence requires
+  separate manual/model-backed evidence.
+- **Revisit when:** M3 fixes the calculation/ledger contract, a real host
+  reveals resource/prompt usability gaps, or post-MVP locality/user isolation
+  changes the scope.

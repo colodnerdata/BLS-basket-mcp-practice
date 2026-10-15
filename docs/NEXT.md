@@ -27,6 +27,13 @@
   recorded) and 21,041 observations (incl. real construction-labor index
   levels from `ci.data.0.Current`), all from checked-in/owner-fetched
   samples, offline.
+- Resource/prompt implementation plan: see
+  `mcp_resources_prompts.md` (2026-10-15). No new components are implemented
+  by the plan. Add workflow, catalog coverage, snapshot identity and reviewed
+  vertical-construction archetype resources plus basket-design/candidate-review
+  prompts alongside M2'/M3 preparation. Spec review and source-backed result
+  explanation depend on M3; saved-spec resources and locality review follow.
+  Include prompt/resource contracts in M4' evidence and host checks in M5'.
 - Next action: M2' remainder — the conditional-GET fetcher (verified by
   the 2026-10-10 header probe: all `pc/` files honor 304; ETag is a
   per-release stamp, so the manifest sha256 is the revision signal) and one
