@@ -32,8 +32,8 @@
   `bls://snapshot` (shared snapshot-identity service) and a vertical-construction
   archetype resource, extend the methodology resources, and add the
   `design_escalation_basket` prompt alongside M2'/M3 preparation. Unregistered
-  stubs exist for these. Decide in M3 whether `calculate_index_from_bls` takes a
-  spec or a saved spec ID before writing `calculate_and_explain_index`.
+  stubs exist for these. `calculate_index_from_bls` takes a saved `spec_id`
+  (decided 2026-10-16); `calculate_and_explain_index` follows it.
 - Next action: M2' remainder — the conditional-GET fetcher (verified by
   the 2026-10-10 header probe: all `pc/` files honor 304; ETag is a
   per-release stamp, so the manifest sha256 is the revision signal) and one

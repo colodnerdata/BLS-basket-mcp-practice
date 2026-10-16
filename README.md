@@ -84,7 +84,7 @@ live-API hardening is deferred.
 | `calculate_labor_locality_factor` | Calculate target/reference wage ratio from supplied wages. | **Implemented.** OEWS lookup, geographic mapping, and automated wage ratios are deferred. |
 | `get_bls_access_status` | Report live-API configuration and limits without HTTP or secrets. | **Implemented, optional live path.** Does not verify a key or remaining quota. |
 | `get_series_data` | Retrieve live-API observations for known series IDs. | **Implemented, optional live path.** Requires a configured key; at most 50 series and 20 inclusive years per call; no batching or caching; live validation/hardening deferred. |
-| `calculate_index_from_bls(spec)` | Validate, resolve exact observations from the local snapshot, calculate, and return a ledger with source references and warnings. | **Planned (M3); not registered.** Requires single periodicity, explicit missing-data errors, and snapshot identity/date. |
+| `calculate_index_from_bls(spec_id)` | Read the saved specification by ID, validate, resolve exact observations from the local snapshot, calculate, and return a ledger with source references and warnings. | **Planned (M3); not registered.** Requires single periodicity, explicit missing-data errors, and snapshot identity/date. |
 | Multi-request live retrieval / request planner (public name undecided) | Split and combine requests beyond API bounds with budgets and conflict detection. | **Deferred, post-MVP.** Separate from offline snapshot calculation. |
 
 ### Resources

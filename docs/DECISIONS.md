@@ -373,5 +373,8 @@ MIME types, verified on resource reads as well as discovery.
   suffices), `review_labor_locality` (OEWS deferred; methodology covers it).
 - **Why:** Prompts may not be surfaced by hosts, so the guide and tool
   descriptions must carry the workflow; fewer components mean less rework.
-- **Revisit when:** M3 fixes the tool contract (spec vs saved spec ID), a
+- **Contract:** `calculate_index_from_bls` takes a saved `spec_id` (owner,
+  2026-10-16: acceptable because every spec has a required ID). It requires
+  an explicit prior save and fails explicitly on an unknown ID.
+- **Revisit when:** hosted use needs per-user spec isolation, a
   real host shows a missing capability, or a second archetype exists.

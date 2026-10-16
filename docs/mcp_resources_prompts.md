@@ -82,7 +82,7 @@ contract and test them. Do not accept arbitrary resource URLs or paths.
 | Prompt | Arguments | Required host behavior / output |
 | --- | --- | --- |
 | `design_escalation_basket` | Required `project_description`; optional `base_period`, `target_period`, `locality`, `archetype_id`. | Read the workflow guide, snapshot, and relevant archetype; use search/metadata tools to compare a small candidate set per component (exact ID/title, program, unit, periodicity, date coverage, fit, exclusions, proxy rationale; missing metadata stays unknown; explicit no-match allowed; the user approves any disclosed proxy). Ask for only missing scope, dates, cost shares and evidence. Produce a draft component table with exclusions, unanswered questions, and weight sources; distinguish user inputs from illustrative assumptions. Use create/validate tools once inputs are sufficient; no automatic save. A city alone does not authorize a locality factor. |
-| `calculate_and_explain_index` (**design with M3**; argument may be `spec` or `spec_id` depending on the final tool contract) | Required `spec_id` (provisional). | Re-read the current saved spec, validate and call M3's `calculate_index_from_bls`. Report periods, weights, component observations/factors/contributions, composite factor and percent change, locality separately, snapshot vintage, source references and limitations. If M3 is unavailable, explain the blocker; never imitate source-backed calculation by relaying invented values. Do not persist prompt output. |
+| `calculate_and_explain_index` (**design with M3**) | Required `spec_id`. | Re-read the current saved spec, validate and call M3's `calculate_index_from_bls`. Report periods, weights, component observations/factors/contributions, composite factor and percent change, locality separately, snapshot vintage, source references and limitations. If M3 is unavailable, explain the blocker; never imitate source-backed calculation by relaying invented values. Do not persist prompt output. |
 
 Only `design_escalation_basket` precedes M3; locality guidance lives in the
 extended methodology text and does not bring OEWS automation into scope. Existing
@@ -133,8 +133,8 @@ upgrade only through the existing reviewed dependency process.
    and archetype resources; extend methodology and optional API setup
    wording; add `design_escalation_basket`.
    Implement the shared snapshot identity before returning provenance.
-2. **M3:** complete source-backed calculation and its ledger, settle the
-   `spec` vs `spec_id` contract, then add
+2. **M3:** complete source-backed calculation and its ledger, implement
+   `calculate_index_from_bls(spec_id)`, then add
    `calculate_and_explain_index`. Until then the prompt is not advertised
    as a working end-to-end path.
 3. **Later, only if needed:** per-series coverage, archetype index, other
@@ -182,6 +182,10 @@ The goal is to commit only to components that will not be deleted later.
 - **Examples as fixtures:** materials-only, labor-only, fixed-share, rejected
   mixed-periodicity and negative cases are shared eval/test fixtures; the
   archetype resource exposes the curated decomposition and a few examples.
-- **Open question for M3:** whether `calculate_index_from_bls` takes a full
-  `spec` or a saved `spec_id`. Decide before any ID-based prompt, since IDs
-  force `save_index_spec` and the deferred per-user isolation question.
+- **Decided (2026-10-16): the calculation tool takes `spec_id`.** Every
+  specification carries a required `id` (`EscalationIndexSpec.id`), and the
+  tool reads the saved spec, so ID-based prompts and the tool share one
+  contract. Consequences: calculation requires a prior explicit
+  `save_index_spec` (which replaces an existing ID; disclose this), an unknown
+  ID is an explicit error, and hosted per-user isolation of saved specs
+  remains a prerequisite for private use.
