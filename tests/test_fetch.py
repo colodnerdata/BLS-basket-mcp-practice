@@ -62,8 +62,7 @@ def test_flat_file_fetcher_download_and_conditional_304(
     assert changed.status == "unchanged"
     assert seen[1].headers["If-None-Match"] == "etag-1"
     assert (
-        seen[1].headers["If-Modified-Since"]
-        == "Wed, 01 Jan 2025 00:00:00 GMT"
+        seen[1].headers["If-Modified-Since"] == "Wed, 01 Jan 2025 00:00:00 GMT"
     )
     fetcher.close()
 
