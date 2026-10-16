@@ -40,7 +40,7 @@ async def test_smoke_rejects_unrelated_server():
     "argv",
     [
         ["--url", "http://example.com/mcp"],
-        ["--url", "******127.0.0.1:8000/mcp"],
+        ["--url", "http://user:secret@127.0.0.1:8000/mcp"],
         ["--timeout", "0"],
         ["--timeout", "nan"],
     ],
