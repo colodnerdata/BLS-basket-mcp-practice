@@ -101,27 +101,25 @@ live-API hardening is deferred.
 
 | Resource | Purpose | Status |
 | --- | --- | --- |
-| `guide://escalation-workflow` | Project-to-index workflow, missing-input handling, and tool/resource links. | **Planned, MVP preparation.** |
-| `bls://catalog/coverage` | Available programs, value types, periodicities, and catalog versus observation coverage. | **Planned, MVP preparation.** |
-| `bls://snapshot` | Manifest-derived snapshot identity, file retrieval dates, hashes, and verification scope. | **Planned, MVP preparation / M3.** |
-| `bls://series/{series_id}/coverage` | Stored observation periods, counts, and known gaps for a series. | **Planned, M3.** |
-| `basket://archetypes` and `basket://archetypes/{archetype_id}` | Reviewed decompositions, candidate search terms, and examples; begin with vertical construction. | **Planned, MVP preparation.** Illustrative examples do not supply authoritative weights. |
-| `index://specifications/{spec_id}` | Read-only saved specification including assumptions and selection rationale. | **Planned, second tranche.** Same access boundary as the existing read tool. |
+| `guide://escalation-workflow` | Single source for the project-to-index workflow, missing-input handling, and tool/resource links. | **Planned, MVP preparation.** Supplied-value path first; snapshot path after M3's contract is fixed. |
+| `bls://snapshot` | Manifest-derived snapshot identity, file retrieval dates, hashes, per-program catalog/observation coverage, and verification scope. | **Planned, MVP preparation / M3.** Shares one snapshot-identity service with the M3 ledger. |
+| `basket://archetypes/{archetype_id}` | Reviewed decomposition, candidate search terms, and examples; begin with `vertical-construction`. | **Planned, MVP preparation.** Illustrative examples do not supply authoritative weights. |
+
+Extensions to the existing methodology resources (M3 policy, locality evidence)
+add no new URIs. Deferred until a concrete need appears: an archetype index,
+per-series observation coverage, and a saved-specification resource.
 
 ### Prompts
 
 | Planned prompt | Purpose | Current status |
 | --- | --- | --- |
-| `design_escalation_basket` | Clarify scope, periods, shares and evidence; propose a reviewable component table. | **Planned, MVP preparation.** |
-| `review_series_candidates` | Compare catalog-backed candidates, coverage and proxy rationale for a component. | **Planned, MVP preparation.** |
-| `review_index_spec` | Review a saved specification, call validation, and expose unresolved assumptions. | **Planned, M3.** |
-| `calculate_and_explain_index` | Guide source-backed calculation and explain component contributions, provenance and limits. | **Planned, after M3 calculation/ledger support.** |
-| `review_labor_locality` | Clarify geographic intent and request comparable supplied wage evidence. | **Planned, second tranche.** OEWS automation remains deferred. |
+| `design_escalation_basket` | Clarify scope, periods, shares and evidence; propose a reviewable component table and review candidate series. | **Planned, MVP preparation.** |
+| `calculate_and_explain_index` | Guide source-backed calculation and explain contributions, provenance and limits. | **Deferred to M3**, designed with the final calculation tool contract. |
 
 See the [FastMCP resources and prompts plan](docs/mcp_resources_prompts.md)
-for argument contracts, resource contents, archetype examples, delivery order,
-and acceptance criteria. These additions are not registered yet. Retrieving
-a prompt does not execute tools, calculate, save, download, or call an LLM.
+for contents, delivery order, and the 2026-10-16 trim rationale. These
+additions are not registered yet. Retrieving a prompt does not execute tools,
+calculate, save, download, or call an LLM.
 
 Server-wide instructions already exist and are distinct from MCP prompts.
 They currently cover live-API setup, credential handling, request bounds,
@@ -135,7 +133,7 @@ reviewed examples; it is not a separate registered MCP component type.
 | Context / supporting capability | Current status |
 | --- | --- |
 | Methodology and guardrails | **Partly implemented.** Supplied-value calculations and basic validation exist; M3 adds source-backed exact-period resolution, single-periodicity enforcement, and a calculation ledger. No silent normalization, substitution, interpolation, or locality application is allowed. |
-| Basket archetypes and candidate-series examples | **Initial scope selected.** Vertical construction, from materials through labor, guides snapshot selection. A reviewed example set shared by archetype resources and prompts is planned in [the resource/prompt plan](docs/mcp_resources_prompts.md), but not implemented. Examples must not imply authoritative project weights. |
+| Basket archetypes and candidate-series examples | **Initial scope selected.** Vertical construction, from materials through labor, guides snapshot selection. A reviewed example set shared by the archetype resource and eval fixtures is planned in [the resource/prompt plan](docs/mcp_resources_prompts.md), but not implemented. Examples must not imply authoritative project weights. |
 | PPI materials and ECI labor coverage | **Ingestion implemented; curated coverage unfinished (M2').** WP is the materials layer; ECI index levels are baseline labor. Monthly materials and quarterly labor require parallel same-periodicity specifications under the MVP plan. OEWS locality mapping is deferred. |
 | Flat-file ingestion and refresh | **Partly implemented (M2').** Offline parsers, storage, manifest receipts, and agreement checks exist. Conditional-GET fetcher and basket-relevant owner-invoked downloads remain. This is operator CLI/service work, deliberately not an MCP download tool. |
 | Evaluation evidence | **Offline tests implemented; evidence pack planned (M4').** Scripted end-to-end evidence and committed results remain; model-backed agent evals are post-MVP. |

@@ -27,13 +27,13 @@
   recorded) and 21,041 observations (incl. real construction-labor index
   levels from `ci.data.0.Current`), all from checked-in/owner-fetched
   samples, offline.
-- Resource/prompt implementation plan: see
-  `mcp_resources_prompts.md` (2026-10-15). No new components are implemented
-  by the plan. Add workflow, catalog coverage, snapshot identity and reviewed
-  vertical-construction archetype resources plus basket-design/candidate-review
-  prompts alongside M2'/M3 preparation. Spec review and source-backed result
-  explanation depend on M3; saved-spec resources and locality review follow.
-  Include prompt/resource contracts in M4' evidence and host checks in M5'.
+- Resource/prompt plan: see `mcp_resources_prompts.md` (trimmed
+  2026-10-16). No new components are registered. Add the workflow guide,
+  `bls://snapshot` (shared snapshot-identity service) and a vertical-construction
+  archetype resource, extend the methodology resources, and add the
+  `design_escalation_basket` prompt alongside M2'/M3 preparation. Unregistered
+  stubs exist for these. Decide in M3 whether `calculate_index_from_bls` takes a
+  spec or a saved spec ID before writing `calculate_and_explain_index`.
 - Next action: M2' remainder — the conditional-GET fetcher (verified by
   the 2026-10-10 header probe: all `pc/` files honor 304; ETag is a
   per-release stamp, so the manifest sha256 is the revision signal) and one

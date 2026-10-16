@@ -327,7 +327,7 @@ MIME types, verified on resource reads as well as discovery.
 ## 2026-10-15 — Plan resources and prompts for the project-to-index workflow
 
 - **Status:** accepted as an implementation plan; no runtime components
-  added. Supersedes the 2026-10-07 shell decision's blanket deferral of
+  added. Component list superseded by the 2026-10-16 trim below. Supersedes the 2026-10-07 shell decision's blanket deferral of
   reusable prompts; its component-layout and lifecycle decisions remain.
 - **Decision:** Adopt [mcp_resources_prompts.md](mcp_resources_prompts.md):
   local workflow, coverage, snapshot and archetype resources; five named
@@ -351,3 +351,27 @@ MIME types, verified on resource reads as well as discovery.
 - **Revisit when:** M3 fixes the calculation/ledger contract, a real host
   reveals resource/prompt usability gaps, or post-MVP locality/user isolation
   changes the scope.
+
+## 2026-10-16 — Trim planned resources and prompts to durable components
+
+- **Status:** accepted; supersedes the component list (not the boundaries)
+  of the 2026-10-15 plan. No runtime components added.
+- **Context:** The 2026-10-15 list had seven new resource URIs and five
+  prompts, several duplicating existing tools, depending on unbuilt M3
+  behavior, or restating the workflow in a third place.
+- **Decision:** Keep `guide://escalation-workflow` (single workflow source),
+  `bls://snapshot` (absorbs `bls://catalog/coverage`),
+  `basket://archetypes/{archetype_id}`, extended methodology resources, and
+  prompt `design_escalation_basket` (absorbs candidate review). Design
+  `calculate_and_explain_index` with M3. Archetype example cases live as
+  shared eval fixtures, not only prose.
+- **Rejected/deferred:** `basket://archetypes` index (one entry),
+  `bls://series/{id}/coverage` (overlaps series metadata; endpoints do not
+  prove completeness; M3 re-checks periods), `index://specifications/{spec_id}`
+  (duplicates `get_index_spec`; extra access surface), prompts
+  `review_series_candidates` (folded), `review_index_spec` (validation tool
+  suffices), `review_labor_locality` (OEWS deferred; methodology covers it).
+- **Why:** Prompts may not be surfaced by hosts, so the guide and tool
+  descriptions must carry the workflow; fewer components mean less rework.
+- **Revisit when:** M3 fixes the tool contract (spec vs saved spec ID), a
+  real host shows a missing capability, or a second archetype exists.

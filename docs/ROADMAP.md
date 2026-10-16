@@ -67,15 +67,15 @@ multi-user hardening, and everything under [After the MVP](#after-the-mvp).
 ## Resource and prompt workflow plan
 
 The [FastMCP resources and prompts plan](mcp_resources_prompts.md)
-(2026-10-15) adds concrete reference resources and five host workflow
-prompts. This replaces blanket prompt deferral; none is registered yet.
-Deliver workflow/catalog/snapshot/archetype resources and basket-design /
-candidate-review prompts during M2'/M3 preparation; add observation coverage,
-spec review and result explanation with M3. Saved-spec resources and locality
-review follow in a second tranche. M4' adds contract/evidence coverage, and
-M5' verifies selection in real hosts. No additional LLM dependency, automatic
-saving, mixed-periodicity calculation or OEWS automation is introduced.
-The plan specifies contracts, dependencies and completion criteria.
+(2026-10-15, trimmed 2026-10-16) adds three reference resources
+(workflow guide, `bls://snapshot`, vertical-construction archetype) and the
+`design_escalation_basket` prompt during M2'/M3 preparation, plus extended
+methodology text. `calculate_and_explain_index` is designed with M3. Per-series
+coverage, an archetype index, a saved-spec resource and other prompts are
+deferred or dropped. M4' adds contract/evidence coverage, and M5' verifies
+selection in real hosts. None is registered yet. No additional LLM dependency,
+automatic saving, mixed-periodicity calculation or OEWS automation is
+introduced.
 
 ## Where the repository stands
 
