@@ -3,7 +3,7 @@
     "series_id": "TEST_PPI_001",
     "program": "PPI",
     "title": "Synthetic PPI material index",
-    "description": "Synthetic test series for catalogue search",
+    "description": "Synthetic test series for catalog search",
     "classification_code": "MATERIAL",
     "active": true
   },

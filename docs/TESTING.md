@@ -13,7 +13,94 @@ concrete mistake it would catch. "Expected value" is the independently
 computable result the test checks against (see `docs/DEVELOPMENT.md`'s
 testing principles) — not a description of the code path.
 
+## Test harness (M0)
+
+Shared scaffolding lives in `tests/conftest.py` (guarantees) and
+`tests/harness.py` (importable helpers), with canned payloads in
+`tests/fixtures/bls/` (hand-written, not recordings — see its README).
+
+Guarantees, and what enforces them:
+
+- **No test observes a real `BLS_API_KEY`.** An autouse fixture strips it
+  before every test not marked `live`, so a key exported in a developer's
+  shell can neither change offline results nor spend quota. `live` tests
+  are exempt by design (they only run under `poe test-live`).
+- **Nothing live runs by default.** The `live` marker is registered and
+  deselected in `addopts`; `poe test-live` selects it, and a collection
+  hook skips (never fails) when no key is exported, so CI and `poe check`
+  stay offline per `docs/bls_etiquette.md`.
+- **One canned-BLS world.** `CannedTransport` records requests, optionally
+  asserts each request body, and serves a fixture payload;
+  `server_env(...)` runs the real server on a temporary database through
+  the real FastMCP client and asserts — for every consumer and on failure
+  paths too — that the factory had no persistence side effects and the
+  lifespan closed the injected transport. `bls_payload()` returns a fresh
+  copy per call so tests cannot mutate each other's data.
+- `poe test-cov` is a diagnostic only; it carries no threshold and is not
+  part of `check`.
+
+### `tests/test_harness.py` — harness self-tests
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_env_leak_from_prior_test_a` + `_b` (an ordered pair relying on in-module definition order) | `_b` never observes the sentinel key that `_a` leaks into the real process environment | A leaked or shell-exported key silently changing offline results or letting a test spend real quota |
+| `test_live_marker_seam` | Deselected in the default run; skipped (not failed) by `poe test-live` without a key; passes with one; no network call in any of these | The live seam accidentally running in `check`/CI, or failing closed instead of skipping cleanly |
+
 ## Unit tests
+
+### `tests/test_flat_file.py` — BLS flat-file parsers (PC/PD)
+
+Expected values are hand-checked against the fixture slices in
+`tests/fixtures/bls/flatfile/` (bytes cut from the real files in
+`docs/sample_data/`).
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_pc_series_padding_and_fields` | `"PCU1133--1133--"` with padding stripped, title/base/periods as in the file | Space-padded fields leaking into stored IDs or metadata |
+| `test_pd_series_blank_extra_column` / `test_pd_series_shape_drift_fails_loudly` | PD's undocumented blank 6th column skipped; any other shape → `FlatFileFormatError` | The header/row field-count mismatch silently shifting PD columns (known real quirk) |
+| `test_data_file_period_identity_and_precision` | `M13` → `month=None` with exact value `99.0`; `234.780` keeps its 3-decimal scale; `P` footnote captured | Annual averages misfiling as a 13th month; float rounding of index values |
+| `test_data_file_unknown_period_is_warned_not_dropped` | Unknown `Q05` row skipped with `warnings["Q05"] == 1` | Silent data loss — skips are always counted into the manifest |
+| `test_data_file_header_only_partition_is_empty_not_error` | Header-only partition → 0 rows, no error | Empty partitions (they exist: 72 bytes) failing ingestion |
+| `test_data_file_field_drift_fails_loudly` | `FlatFileFormatError` on a 6-field data row | Column-count drift parsing into wrong positions |
+| `test_pd_product_quirk_name_in_last_field` / `test_simple_mappings` | `"Secondary products"` read from the last field of a 6-field row; code+name mappings exact | Fixed-position name parsing misreading real mapping rows |
+| `test_ci_series_file_parse` | The 4 fixture rows parse with owner/industry/periodicity/estimate codes and quarterly begin/end (construction wages series: 2001-Q1 → 2026-Q2), padding stripped | ECI's 15-column layout misread |
+| `test_ci_index_eligibility_gate` | The 3 `I` series are eligible and the `Q` percent-change twin is not | Percent-change or response-rate series leaking into the catalog as escalation inputs |
+| `test_ci_mappings` | `I` → "Current dollar index number", `01` → "Total compensation", `2` → "Private industry workers" | CI's name-in-column-2 layout (trailing display metadata) being misparsed as the last field |
+| `test_data_file_quarterly_periods` | `Q01` → quarter=1, month=None; out-of-range `Q05` skipped with a counted warning | Quarterly periods misfiled or silently dropped |
+| `test_data_file_missing_dash_is_recorded` | A `-` row (footnote `A`) is skipped with `missing_rows == 1` and a parallel fabricated-value row (`abc`) raises `FlatFileFormatError` | The missing-data sentinel ever becoming a stored observation, or hard failures that would make real released files un-ingestible |
+| `test_wp_series_file_parse` | 6 rows parse with group/item/seasonal/YYMM-base and titles (`WPS0811` lumber → 2026-M08); the doc's 10-field layout (file has 11: undocumented `footnote_codes`) fails loudly; retired series (`WPS00000000`, `WPS1371`) kept | WP header drift vs `wp.txt`; padding leaks; ended series vanishing |
+| `test_wp_mappings` | `08\t11` → "Softwood lumber", `10\t17` → "Steel mill products", `08` → "Lumber and wood products" | The two-code item key or last-field name rule misread |
+| `test_classify_file*` (parametrized) | Filenames map to `(program, kind, canonical upstream name)`, stripping `.txt`/`.sample`/`.head`/`.slice`; docs/probe/README files rejected | Misrouting a support file into a parser, or recording a sample's name as a canonical URL |
+
+### `tests/test_manifest.py` — manifest and `verify-ingest`
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_ingest_records_dual_provenance` | Manifest records all 13 fixture files with sha256/counts/repo paths, including the ECI eligibility skips (`skipped_series`) on `ci.series`; saving is byte-stable | Provenance drift, silent eligibility skips, or non-deterministic manifest writes |
+| `test_verify_passes_on_consistent_records` | No mismatches after a clean fixture ingestion | False positives in the agreement check |
+| `test_verify_catches_tampered_counts_and_hash` | Tampered size/hash/count in a copy → each reported | `verify-ingest` failing to detect a changed input file |
+| `test_verify_catches_missing_file_and_log_drift` / `test_verify_flags_unlogged_manifest_entries` | Missing checkout file listed by path; manifest/log disagreements (counts; unlogged entries) each reported | The git record and the database receipt drifting apart |
+
+### `tests/test_fetch.py` — conditional BLS file fetcher
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_flat_file_fetcher_download_and_conditional_304` | A new file download saves the exact bytes and records the User-Agent; a follow-up conditional GET with the manifest's `ETag`/`Last-Modified` returns 304 instead of re-downloading | The fetcher silently re-fetching unchanged files or dropping the required contact-bearing `User-Agent` |
+| `test_fetch_many_uses_settings_and_manifest_validators` | `fetch_many` reads the configured `bls_user_agent` and the manifest validators for `If-None-Match`/`If-Modified-Since`, and surfaces an unchanged result without ingesting the file again | The CLI using an unset/invalid user agent, or losing conditional-GET state between the manifest and the network fetch |
+
+### `tests/integration/test_flatfile_ingest.py` — replay of the real samples (offline)
+
+Ingests `docs/sample_data/` (owner-saved real BLS files) into a scratch
+database. This is the recorded-replay layer: no network is involved.
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_series_catalog_counts_match_files` | Exactly 4,510 PC + 17,439 PD + 5,312 WP series (verified file row counts), and ECI rows loaded equal the manifest's recorded eligible count with all skips accounted for | Series rows lost, double-counted at scale, or eligibility skips without a record |
+| `test_eci_series_metadata_and_eligibility` | `CIS2022300000000I` (construction wages, private industry) is quarterly ECI with units "index (base Dec 2005=100)", 2001-Q1→2026-Q2, active, and searchable; its `Q`/`A` twins are absent | The percent-change families leaking into the catalog, or ECI metadata (base, periodicity, active) mis-set |
+| `test_wp_series_metadata_and_activity` | `WPS0811` (softwood lumber) is active WP commodity with units "index (base 198200=100)"; retired `WPS00000000` (ended 1974-M12) is retained but inactive; "Softwood lumber" searchable | The survey-latest `active` rule, WP classification/parent codes, or units mis-set; ended series disappearing instead of flagging |
+| `test_pc_series_metadata` / `test_pd_series_metadata` / `test_search_finds_real_series` | Hand-read values from the files (`PCU1133--1133--` base 198112, first `1981-M12`, active; `PDU1011#` SIC, inactive, ends `2003-M13` with a synthesized title; "Logging" searchable) | Mis-mapping real series-file fields into catalog metadata |
+| `test_pc_observations_exact_and_preliminary` / `test_m13_is_a_distinct_annual_average` | `Decimal("234.780")` exact; `2026-M05` preliminary with footnote text and series-derived units; `1969-M13` is `ANNUAL_AVERAGE` distinct from `M12` and holds `35.0` | Value precision loss, preliminary-state confusion, and annual-average/month conflation through the full ingest path |
+| `test_manifest_and_log_agree_after_ingest` / `test_verify_cli_passes` | Manifest and `ingestion_log` agree; `verify` exits 0 | The dual-record contract breaking end-to-end |
 
 ### `tests/test_calculations.py` — `EscalationCalculationService`
 
@@ -78,6 +165,11 @@ testing principles) — not a description of the code path.
 
 ## Integration tests (real FastMCP client/server boundary)
 
+All three modules build on the shared harness above (canned transport,
+`server_env`, fixture payloads); the entries below keep their pre-M0 names
+and guards — M0 consolidated scaffolding without changing what any test
+asserts.
+
 ### `tests/integration/test_bls_client.py`
 
 | Test | Expected | Guards against |
@@ -123,20 +215,29 @@ aggregate discovery, schemas, annotations, invocation and resource contents.
 
 ## Evals
 
-**Status: not implemented.** The suite above verifies deterministic code —
-given fixed inputs, is the output correct. It says nothing about an LLM or
-agent's judgment when driving these MCP tools under ambiguity (which series
-to pick, how to handle a basket with no explicit weights, whether to ask for
-guidance instead of exceeding a request bound).
+**Status: a deterministic eval-evidence pack is in scope for the hackathon
+MVP (M4' in [ROADMAP.md](ROADMAP.md)); the LLM-backed harness is deferred to
+after the hackathon.** The M4' pack runs scripted scenarios through the real
+MCP client against a fixture-built database (oracle workflows plus negative
+probes), commits a short results summary under `eval/`, and feeds the
+hackathon evaluation document's testing-methodology and performance-metrics
+sections. The first external eval remains the hackathon judging
+itself; owner manual-eval sessions precede it (the M6 gate).
 
-The planned design and its milestone (M5) are in [ROADMAP.md](ROADMAP.md).
+The suite above verifies deterministic code — given fixed inputs, is the
+output correct. It says nothing about an LLM or agent's judgment when
+driving these MCP tools under ambiguity (which series to pick, how to
+handle a basket with no explicit weights, whether to ask for guidance
+instead of inventing a value).
+
 When an evals harness is built, document it here in the same shape as the
 tests above, and build it on these principles:
 
 - Start from this project's own known failure modes, not generic prompts:
   silent weight normalization, series substitution without disclosure,
-  missing-data interpolation, exceeding the 50-series/20-year bounds instead
-  of consulting `setup://bls-api`, conflating temporal and locality factors.
+  missing-data interpolation, presenting a stale snapshot as current, and
+  conflating temporal and locality factors. (The request-bounds failure
+  modes belong to the deferred live-API path.)
 - Score tool choice, numeric correctness, and methodology disclosure as
   separate dimensions — one blended pass rate hides which one regressed.
 - Grade programmatically wherever checkable (the actual tool calls made, the

@@ -1,5 +1,10 @@
 # BLS access, setup, and request planning
 
+> Planning note (2026-10-10): the hackathon MVP data path is an ingested
+> flat-file snapshot with no user keys (see [ROADMAP.md](ROADMAP.md) and the
+> 2026-10-10 [DECISIONS.md](DECISIONS.md) entry). This document remains the
+> reference for the optional, deferred live-API path described there.
+
 ## Current behavior
 
 The MCP server is local and single-user. `get_bls_access_status` reports missing
@@ -12,7 +17,7 @@ and per-request series/year bounds before making HTTP requests.
 Live MCP retrieval requires `BLS_API_KEY`. There is no anonymous v1 fallback.
 The lower-level BLS client is a transport/parser, not an access-policy boundary;
 standalone client calls do not receive the MCP service's preflight protections.
-Catalogue searches and calculations using supplied values need no key.
+Catalog searches and calculations using supplied values need no key.
 
 ## Requesting and configuring a key
 

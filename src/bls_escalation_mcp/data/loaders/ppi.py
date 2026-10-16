@@ -10,7 +10,7 @@ class PPILoader:
         self.database_path = database_path
 
     def load(self) -> int:
-        # TODO: parse real PPI bulk files and upsert to the catalogue.
+        # TODO: parse real PPI bulk files and upsert to the catalog.
         return 0
 
     def parse_metadata(self, records: list[dict]) -> list[SeriesMetadata]:

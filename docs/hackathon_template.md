@@ -17,7 +17,7 @@ the existing BLS implementation with the example server.
 | `deploy/` | Container/buildpack instructions and links to vendor kits |
 | `eval/` | Entry point to the existing planned M5 eval work |
 | `tools/`, `resources/`, `models.py`, `utils.py` | One exposed component per file with explicit package aggregators; existing model/service/repository packages retained |
-| `prompts/` | Deferred until a concrete reusable prompt is designed |
+| `prompts/` | Concrete workflow plan in [mcp_resources_prompts.md](mcp_resources_prompts.md); not implemented; one prompt per file with `register_prompts` aggregator |
 | `.agents/skills/` | Not vendored; canonical instructions remain `AGENTS.md` |
 | `LICENSE` | Owner decision remains open; template MIT license is not assigned to this project |
 | CI | Existing locked lint, format, mypy, and test task retained |

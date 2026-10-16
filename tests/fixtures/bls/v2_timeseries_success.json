@@ -1,0 +1,27 @@
+{
+  "status": "REQUEST_SUCCEEDED",
+  "message": [],
+  "Results": {
+    "series": [
+      {
+        "seriesID": "TEST_PPI_001",
+        "data": [
+          {
+            "year": "2024",
+            "period": "M01",
+            "periodName": "January",
+            "value": "100.0",
+            "footnotes": [{}]
+          },
+          {
+            "year": "2025",
+            "period": "M01",
+            "periodName": "January",
+            "value": "110.0",
+            "footnotes": [{ "code": "P", "text": "Preliminary" }]
+          }
+        ]
+      }
+    ]
+  }
+}

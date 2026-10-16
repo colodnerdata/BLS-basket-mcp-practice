@@ -18,6 +18,11 @@ source of truth. The development Python version is in `.python-version`.
 | Run the CI checks locally | `uv run --locked poe check` |
 | Launch the server | `uv run --locked poe serve` |
 | Run tests | `uv run --locked poe test` |
+| Run live BLS tests (opt-in, needs `BLS_API_KEY`; see `docs/bls_etiquette.md`) | `uv run --locked poe test-live` |
+| Coverage diagnostic (no threshold) | `uv run --locked poe test-cov` |
+| Ingest local BLS flat files (arbitrary args) | `uv run --locked poe ingest -- --dir PATH` |
+| Rebuild the local catalog from `docs/sample_data/` | `uv run --locked poe build-catalog` |
+| Verify manifest vs checked-in files vs database (offline; part of `check`) | `uv run --locked poe verify-ingest` |
 | Type check | `uv run --locked poe typecheck` |
 | Lint | `uv run --locked poe lint` |
 | Apply formatting | `uv run --locked poe format` |

@@ -64,9 +64,54 @@ class SeriesRepository:
         return [self._row_to_series(row) for row in rows]
 
     def upsert(self, series: SeriesMetadata) -> SeriesMetadata:
+        self.upsert_many([series])
+        return series
+
+    @staticmethod
+    def _to_row(series: SeriesMetadata) -> tuple[object, ...]:
         payload = json.dumps(series.model_dump(mode="json"))
+        return (
+            series.series_id,
+            series.program.value,
+            series.title,
+            series.description,
+            series.classification_system,
+            series.classification_code,
+            series.parent_code,
+            series.industry_code,
+            series.commodity_code,
+            series.occupation_code,
+            series.geography,
+            series.area_code,
+            series.periodicity.value if series.periodicity else None,
+            int(series.seasonal_adjustment)
+            if series.seasonal_adjustment is not None
+            else None,
+            series.units,
+            series.first_period.model_dump_json()
+            if series.first_period
+            else None,
+            series.latest_period.model_dump_json()
+            if series.latest_period
+            else None,
+            int(series.active) if series.active is not None else None,
+            series.source_url,
+            payload,
+        )
+
+    def list_by_program(self, program: BLSProgram) -> list[SeriesMetadata]:
         with db_connection(self.database_path) as conn:
-            conn.execute(
+            rows = conn.execute(
+                "SELECT payload FROM series WHERE program = ? ORDER BY title",
+                (program.value,),
+            ).fetchall()
+        return [self._row_to_series(row) for row in rows]
+
+    def upsert_many(self, series_list: list[SeriesMetadata]) -> None:
+        """Bulk upsert in one transaction (used by catalog ingestion)."""
+        rows = [self._to_row(series) for series in series_list]
+        with db_connection(self.database_path) as conn:
+            conn.executemany(
                 """
                 INSERT INTO series (
                     series_id, program, title, description,
@@ -99,42 +144,6 @@ class SeriesRepository:
                     source_url = excluded.source_url,
                     payload = excluded.payload
                 """,
-                (
-                    series.series_id,
-                    series.program.value,
-                    series.title,
-                    series.description,
-                    series.classification_system,
-                    series.classification_code,
-                    series.parent_code,
-                    series.industry_code,
-                    series.commodity_code,
-                    series.occupation_code,
-                    series.geography,
-                    series.area_code,
-                    series.periodicity.value if series.periodicity else None,
-                    int(series.seasonal_adjustment)
-                    if series.seasonal_adjustment is not None
-                    else None,
-                    series.units,
-                    series.first_period.model_dump_json()
-                    if series.first_period
-                    else None,
-                    series.latest_period.model_dump_json()
-                    if series.latest_period
-                    else None,
-                    int(series.active) if series.active is not None else None,
-                    series.source_url,
-                    payload,
-                ),
+                rows,
             )
             conn.commit()
-        return series
-
-    def list_by_program(self, program: BLSProgram) -> list[SeriesMetadata]:
-        with db_connection(self.database_path) as conn:
-            rows = conn.execute(
-                "SELECT payload FROM series WHERE program = ? ORDER BY title",
-                (program.value,),
-            ).fetchall()
-        return [self._row_to_series(row) for row in rows]

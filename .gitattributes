@@ -9,3 +9,9 @@ uv.lock text eol=lf
 *.jpg binary
 *.pdf binary
 *.xlsx binary
+
+# Byte-exact records: hashes and sizes of these files are recorded in
+# data/manifest.json (docs/DECISIONS.md, 2026-10-10), so line endings must
+# never be normalized on commit or checkout.
+docs/sample_data/** -text
+tests/fixtures/** -text

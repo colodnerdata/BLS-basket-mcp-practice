@@ -9,7 +9,7 @@ account, deployment, authentication, or registry publication is created here.
 docker build -t bls-escalation-mcp .
 docker volume create bls-escalation-data
 docker run --rm -p 127.0.0.1:8080:8080 --env-file .env \
-  -e BLS_DATABASE_PATH=/data/bls_catalogue.db \
+  -e BLS_DATABASE_PATH=/data/bls_catalog.db \
   -v bls-escalation-data:/data bls-escalation-mcp
 ```
 

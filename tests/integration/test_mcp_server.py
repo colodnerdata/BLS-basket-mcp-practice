@@ -5,17 +5,16 @@ from __future__ import annotations
 import json
 from collections.abc import AsyncIterator
 from pathlib import Path
+from typing import Any
 
-import httpx
 import pytest
 import pytest_asyncio
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
 
-from bls_escalation_mcp.config import Settings
 from bls_escalation_mcp.models.series import SeriesMetadata
 from bls_escalation_mcp.repositories.series import SeriesRepository
-from bls_escalation_mcp.server import create_server
+from tests.harness import CannedTransport, server_env
 
 BASE = {"year": 2024, "periodicity": "ANNUAL"}
 TARGET = {"year": 2025, "periodicity": "ANNUAL"}
@@ -47,69 +46,19 @@ def spec_arguments() -> dict:
     }
 
 
-class TrackingTransport(httpx.MockTransport):
-    """Test the real httpx request/response path and lifespan cleanup."""
-
-    def __init__(self) -> None:
-        super().__init__(self.respond)
-        self.requests: list[httpx.Request] = []
-        self.closed = False
-
-    def respond(self, request: httpx.Request) -> httpx.Response:
-        self.requests.append(request)
-        payload = json.loads(request.content)
-        assert payload["registrationkey"] == "fixture-secret"
-        assert payload["startyear"] == "2024"
-        assert payload["endyear"] == "2025"
-        return httpx.Response(
-            200,
-            json={
-                "status": "REQUEST_SUCCEEDED",
-                "Results": {
-                    "series": [
-                        {
-                            "seriesID": "TEST_PPI_001",
-                            "data": [
-                                {
-                                    "year": "2024",
-                                    "period": "M01",
-                                    "value": "100.0",
-                                    "footnotes": [{}],
-                                },
-                                {
-                                    "year": "2025",
-                                    "period": "M01",
-                                    "value": "110.0",
-                                    "footnotes": [
-                                        {"code": "P", "text": "Preliminary"}
-                                    ],
-                                },
-                            ],
-                        }
-                    ]
-                },
-            },
-        )
-
-    async def aclose(self) -> None:
-        self.closed = True
-        await super().aclose()
-
-
 @pytest_asyncio.fixture
 async def client(tmp_path: Path) -> AsyncIterator[Client]:
-    path = str(tmp_path / "nested" / "catalogue.db")
-    transport = TrackingTransport()
-    server = create_server(
-        Settings(database_path=path, bls_api_key="fixture-secret"),
-        http_transport=transport,
-    )
-    assert not Path(path).exists()  # Factory has no persistence side effects.
-    async with Client(server) as connected:
+    def check(body: dict[str, Any]) -> None:
+        assert body["registrationkey"] == "fixture-secret"
+        assert body["startyear"] == "2024"
+        assert body["endyear"] == "2025"
+
+    transport = CannedTransport(check=check)
+    async with server_env(tmp_path, transport=transport) as env:
         # Startup initializes the database before any tools are called.
-        resources = await connected.list_resources()
+        resources = await env.client.list_resources()
         assert len(resources) == 3
-        repo = SeriesRepository(path)
+        repo = SeriesRepository(str(env.db_path))
         repo.upsert(
             SeriesMetadata(
                 series_id="TEST_PPI_001",
@@ -118,8 +67,7 @@ async def client(tmp_path: Path) -> AsyncIterator[Client]:
                 active=True,
             )
         )
-        yield connected
-    assert transport.closed
+        yield env.client
 
 
 @pytest.mark.asyncio
@@ -344,20 +292,15 @@ async def test_resource_first_startup_and_cleanup_on_failure(
         initialize(path)
 
     monkeypatch.setattr(lifecycle, "initialize_database", counted_initialize)
-    path = str(tmp_path / "fresh.db")
-    transport = TrackingTransport()
-    server = create_server(
-        Settings(database_path=path), http_transport=transport
-    )
     with pytest.raises(RuntimeError, match="caller failed"):
-        async with Client(server) as connected:
+        async with server_env(tmp_path, key=None, db_name="fresh.db") as env:
             # Read an unseeded series resource first: no SQL/table error.
             with pytest.raises(Exception, match="was not found"):
-                await connected.read_resource("bls://series/unknown")
-            await connected.call_tool("search_series", {"request": {}})
-            assert starts == [path]
+                await env.client.read_resource("bls://series/unknown")
+            await env.client.call_tool("search_series", {"request": {}})
+            assert starts == [str(env.db_path)]
             raise RuntimeError("caller failed")
-    assert transport.closed
+    # server_env's teardown asserts the injected transport was closed.
 
 
 @pytest.mark.asyncio

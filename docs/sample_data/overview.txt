@@ -1,0 +1,149 @@
+
+
+ 
+			LABSTAT OVERVIEW
+
+
+The Bureau of Labor Statistics public database, called LABSTAT, provides
+current and historical data for numerous surveys and press 
+releases.  LABSTAT on the Internet is composed of individual databases 
+(in flat file format) corresponding to each of the surveys.  These survey-
+specific databases are identified by a two-character survey name 
+abbreviation, as listed below.
+
+
+			LIST OF DATABASES
+
+	AP      Average Price Data
+	BD	Business Employment Dynamics
+	BG      Collective Bargaining-State and Local Government
+	BP      Collective Bargaining-Private Sector
+	CC	Employer Costs for Employee Compensation (SIC 1986-2003)
+	CD      Occupational Injuries and Illness - Characteristics Data (SIC)
+	CE	Employment, Hours, and Earnings-National (NAICS)
+        CF	Census of Fatal Occupational Injuries (1992-2002)
+	CH	Nonfatal cases involving days away from work: selected characteristics 
+	CI      Employment Cost Index (NAICS)
+        CM	Employer Costs for Employee Compensation (NAICS)
+	CS	Occupational Injuries and Illnesses - Characteristics Data 
+	CU      Consumer Price Index-All Urban Consumers (Current Series) 
+	CW      Consumer Price Index-Urban Wage Earners and Clerical Workers (Current Series)
+	CX	Consumer Expenditure Survey 
+	EB      Employee Benefits Survey (1979 - 2006)
+	EC      Employment Cost Index (SIC 1975 - 2005)
+	EE      Employment, Hours, and Earnings-National (SIC)
+	EI      International Price Index	
+	FI	Census of Fatal Occupational Injuries
+	FM	Marital and Family Labor Force Statistics
+	FW	Census of Fatal Occupational Injuries
+	GG	Green Goods and Services
+	GP      Geographic Profile
+	HC	Occupational Injuries and Illness - Characteristics Data (NAICS)
+	HS      Occupational Injury and Illness Rates (based on 1972 SIC codes)
+	II	Occupational Injuries and Illnesses Industry Data
+	IN      International Labor Statistics
+	IP	Industry Productivity and Costs
+	JL	Job Openings and Labor Turnover Survey (SIC)
+	JT	Job Openings and Labor Turnover Survey (NAICS)
+	LA      Local Area Unemployment Statistics
+	LE	Weekly and Hourly Earnings Data from the Current Population Survey
+	LI      Department Store Inventory Price Index
+	LN	Labor Force Statistics from the Current Population Survey (NAICS)
+        LU	Union Affiliation Data from the Current Population Survey
+        ML      Mass Layoff Statistics
+        MP      Major Sector Multifactor Productivity Index
+	MU	Consumer Price Index-All Urban Consumers (Old Series) 
+	MW	Consumer Price Index-Urban Wage Earners and Clerical Workers (Old Series)
+	NB	National Compensation Survey 
+	NC	National Compensation Survey (SIC 1997-2006)
+	ND	Producer Price Index Revision-Discontinued Series (NAICS)
+	NL	National Longitudinal Survey
+	NW	National Compensation Survey (NAICS)
+	OE	Occupation Employment Statistics
+	OR	Occupational Requirements Survey 
+	PC      Producer Price Index Revision-Current Series
+	PD      Producer Price Index Revision-Discontinued Series (SIC)
+	PR      Major Sector Productivity and Costs Index
+	SA      State and Area Employment, Hours, and Earnings (SIC)
+	SH      Occupational Injury and Illness Rates (based on 1987 SIC codes)
+	SI      Occupational Injury and Illness Rates (2002 data)
+	SM	State and Area Employment, Hours, and Earnings (NAICS)
+	SU	Chained CPI-All Urban Consumers
+	WD	Producer Price Index Commodity - Discontinued Series
+	WM	Modeled Wage Estimates
+	WP      Producer Price Index - Commodities
+	WS      Work Stoppage Data
+
+
+			DIRECTORY STRUCTURE AND FILES
+
+
+	/pub is the root folder
+
+	/pub/time.series and its sub-directories contain the survey-specific
+	historical time series.  All survey-specific directories (i.e., 
+	/ap.../ws) contain:
+
+		xx.series:      Series-level data.
+
+		xx.data.0-n:    Observation-level data, which may be
+				partitioned, depending on the size of the
+				files.
+
+		xx.map:         Survey-specific mapping files, which relate
+				codes to meaningful names (i.e. xx.industry, 
+				xx.area, etc...).
+
+		xx.doc:         Documentation for individual surveys, 
+				including a survey description, the table
+				structure, information on data partitioning,
+				and definitions of data elements.
+		
+		xx.contacts:     Survey-specific contact phone number listing
+				for specific information on data files and 
+				answers to program (i.e. CPI) related 
+				questions.
+
+        /time.series
+
+               /compressed
+
+                    /bin contains file decompression tools for decompressing files
+                    located in /time.series/compressed/tape.format
+
+                    /tape.format contains a set of compressed time series data files	
+	
+			LABSTAT DATABASE DOCUMENTATION
+
+The LABSTAT database documentation is designed to be a reference tool for 
+users of the LABSTAT system.  The documentation for each database consists 
+of six sections:
+
+Survey Description:		A brief description of the survey, and the 
+				data available.
+
+Summary Data			A brief description of available data elements
+Available:			and their characteristics.
+
+Frequency of			The frequency (i.e., monthly, quarterly,
+Observation:			annually)data of a particular series are 
+				published.
+															
+Data Characteristics:		The value of the various data series available 
+				for that particular survey.
+	
+Updating Schedule:		The frequency new data are made available on 
+				LABSTAT.
+
+File Structure and Format:	List of files available and what they contain.
+
+Element Definitions:		A defined list of data elements for each 
+					survey.
+
+				CONTACTS
+
+If you have any questions or comments regarding the LABSTAT system on the
+Internet, address e-mail to labstat.helpdesk@bls.gov.  
+
+If you have any questions or comments regarding timeseries data, refer to 
+the xx.contacts files located in each timeseries sub-directory.
