@@ -1,6 +1,7 @@
 # FastMCP resources and prompts plan
 
-Status: **planned, not implemented**, 2026-10-15. This plan replaces the
+Status: **planned, not implemented**, 2026-10-15; trimmed 2026-10-16
+(see the trim section at the end and `DECISIONS.md`). This plan replaces the
 blanket deferral of reusable prompts in the 2026-10-07 shell decision.
 Existing registrations remain 11 tools, three static resources, one resource
 template, and zero prompts until implementation lands.
@@ -33,14 +34,10 @@ use text/markdown. Preserve existing URIs and MIME contracts.
 | URI | Content and source | Delivery / acceptance |
 | --- | --- | --- |
 | `guide://escalation-workflow` | Ordered stages, questions to ask, appropriate tool calls, review checkpoints, missing-input handling, and links to the remaining resources. Describe supplied-value and snapshot-backed paths separately. | MVP first tranche. A caller can discover how to proceed without API setup; no claim that planned tools already exist. |
-| `bls://catalog/coverage` | Programs, eligible value types, catalog counts versus actual observation coverage, supported periodicities, limitations, and snapshot reference. Derive from local repositories and ingestion receipts, not hard-coded counts. | MVP first tranche. Empty/unbuilt catalog is reported explicitly. No implication that metadata presence guarantees observations. |
-| `bls://snapshot` | Snapshot identity derived from a deterministic manifest digest, per-file retrieval dates/hashes, ingestion code version, and verification status with time/scope if actually verified. Link to bounded file details if the manifest grows. | MVP first tranche. Heterogeneous retrieval dates are preserved; never fabricate one common as-of date or claim latest data. Establish identity in a shared service used by M3's ledger. |
-| `bls://series/{series_id}/coverage` | Available observation periodicities, first/last stored periods, counts, and known gaps, plus a warning that endpoints do not prove every intermediate period exists. | MVP with M3. Query local observations; retain existing `bls://series/{series_id}` metadata template. Unknown series and known series without observations have distinct outcomes. Exact period availability is checked again during calculation. |
-| `basket://archetypes` | Small index of reviewed archetype IDs, descriptions, versions, and detail URIs. Begin with `vertical-construction`. | MVP first tranche. Lists only real reviewed content. |
-| `basket://archetypes/{archetype_id}` | Scope boundaries; material/labor/fixed-share decomposition; candidate search terms; verified series references with rationale and limitations; questions to ask; worked examples. | MVP first tranche. Start with vertical construction; see example rules below. Unknown ID is a resource error. |
+| `bls://snapshot` | Snapshot identity derived from a deterministic manifest digest, per-file retrieval dates/hashes, per-program catalog counts versus stored-observation coverage and supported periodicities (derived from local repositories and ingestion receipts, not hard-coded; an empty/unbuilt catalog is reported explicitly; metadata presence does not guarantee observations), ingestion code version, and verification status with time/scope if actually verified. Link to bounded file details if the manifest grows. | MVP first tranche. Heterogeneous retrieval dates are preserved; never fabricate one common as-of date or claim latest data. Establish identity in a shared service used by M3's ledger. |
+| `basket://archetypes/{archetype_id}` (start with `vertical-construction`; add an index only when a second reviewed archetype exists) | Scope boundaries; material/labor/fixed-share decomposition; candidate search terms; verified series references with rationale and limitations; questions to ask; worked examples. | MVP first tranche. Start with vertical construction; see example rules below. Unknown ID is a resource error. |
 | `methodology://composite-index` (existing) | Extend with base-period shares, weight tolerance, fixed components, index-level eligibility, exact periods, single periodicity, precision, missing values, and snapshot/ledger references. | MVP with M3; keep text/plain contract. Use shared policy definitions so prose and validation agree. |
 | `methodology://locality-adjustment` (existing) | Extend with user-supplied wage evidence requirements, reference/target geography, wage basis and year, and separation of temporal and geographic factors. Clearly state OEWS mapping is deferred. | MVP guidance; keep text/plain contract. No implied automatic city adjustment. |
-| `index://specifications/{spec_id}` | Read-only view of the saved typed specification, including assumptions, weight sources, match/proxy rationale, periods, and timestamps. Reuse the specification service and the same access boundary as `get_index_spec`. | Second tranche, after the core workflow; JSON. Unknown ID is a resource error; no new listing endpoint or cross-user disclosure. Hosted user isolation remains a prerequisite for private use. |
 | `setup://bls-api` (existing) | Retain optional live-API setup and limits; explicitly distinguish it from the no-key snapshot workflow. | Existing resource; wording update alongside entry-point guidance. |
 
 Do not add calculation-result resources yet: results and ledgers are not
@@ -78,20 +75,17 @@ not an authoritative estimate or automatic series-selection rule.
 All prompts below are **planned**. Prompt arguments are strings on the MCP
 wire. Prefer short text and saved-spec IDs rather than serialized nested
 specifications; required arguments are marked below, all optional text
-defaults to empty. Validate archetype IDs against the curated index.
+defaults to empty. Validate archetype IDs against the curated content.
 Use a bounded, deterministic output; put length limits in the eventual
 contract and test them. Do not accept arbitrary resource URLs or paths.
 
 | Prompt | Arguments | Required host behavior / output |
 | --- | --- | --- |
-| `design_escalation_basket` | Required `project_description`; optional `base_period`, `target_period`, `locality`, `archetype_id`. | Read workflow, coverage, and relevant archetype. Ask for only missing scope, dates, cost shares and evidence. Produce a draft component table with exclusions, unanswered questions, and weight sources; distinguish user inputs from illustrative assumptions. Use create/validate tools once inputs are sufficient; no automatic save. A city alone does not authorize a locality factor. |
-| `review_series_candidates` | Required `component_description`; optional `base_period`, `target_period`, `archetype_id`. | Use search, metadata and coverage to compare a small candidate set: exact ID/title, program, unit/value type, seasonal basis, periodicity, date coverage, fit, exclusions and proxy rationale. Missing metadata stays unknown. Ask the user to choose or approve a disclosed proxy; no claim of semantic certainty. Return an explicit no-match outcome when warranted. |
-| `review_index_spec` | Required `spec_id`. | Read the saved spec and relevant methodology/coverage; call validation. Present findings, cost-share evidence, series selections, unresolved proxies, period compatibility, and any locality request. Return ready/blocked with reasons; changes require an explicit revised spec through existing tools, never silent repair. |
-| `calculate_and_explain_index` | Required `spec_id`. | Re-read the current saved spec, validate and call M3's `calculate_index_from_bls`. Report periods, weights, component observations/factors/contributions, composite factor and percent change, locality separately, snapshot vintage, source references and limitations. If M3 is unavailable, explain the blocker; never imitate source-backed calculation by relaying invented values. Do not persist prompt output. |
-| `review_labor_locality` | Required `spec_id`; optional `reference_locality`, `target_locality`. | Clarify temporal versus geographic intent; request comparable wage evidence, units/basis, source and year. Use `calculate_labor_locality_factor` only with explicit supplied values and request. Explain how an explicit factor enters the supported calculation path; do not imply M3 accepts locality data until its contract actually does. If evidence or support is missing, report a blocked locality adjustment and offer a clearly identified temporal-only result. |
+| `design_escalation_basket` | Required `project_description`; optional `base_period`, `target_period`, `locality`, `archetype_id`. | Read the workflow guide, snapshot, and relevant archetype; use search/metadata tools to compare a small candidate set per component (exact ID/title, program, unit, periodicity, date coverage, fit, exclusions, proxy rationale; missing metadata stays unknown; explicit no-match allowed; the user approves any disclosed proxy). Ask for only missing scope, dates, cost shares and evidence. Produce a draft component table with exclusions, unanswered questions, and weight sources; distinguish user inputs from illustrative assumptions. Use create/validate tools once inputs are sufficient; no automatic save. A city alone does not authorize a locality factor. |
+| `calculate_and_explain_index` (**design with M3**) | Required `spec_id`. | Re-read the current saved spec, validate and call M3's `calculate_index_from_bls`. Report periods, weights, component observations/factors/contributions, composite factor and percent change, locality separately, snapshot vintage, source references and limitations. If M3 is unavailable, explain the blocker; never imitate source-backed calculation by relaying invented values. Do not persist prompt output. |
 
-The first four prompts form the MVP path; locality guidance follows in the
-second tranche and does not bring OEWS automation into scope. Existing
+Only `design_escalation_basket` precedes M3; locality guidance lives in the
+extended methodology text and does not bring OEWS automation into scope. Existing
 supplied-value tools remain available for explicitly labeled what-if
 calculations; the source-backed prompt must not silently switch to them.
 
@@ -135,16 +129,17 @@ upgrade only through the existing reviewed dependency process.
 
 ## Delivery order and completion criteria
 
-1. **M2' / M3 preparation:** add workflow, catalog coverage, snapshot and
-   archetype resources; extend methodology and optional API setup wording;
-   add `design_escalation_basket` and `review_series_candidates`.
+1. **M2' / M3 preparation:** add workflow, snapshot (with catalog coverage)
+   and archetype resources; extend methodology and optional API setup
+   wording; add `design_escalation_basket`.
    Implement the shared snapshot identity before returning provenance.
-2. **M3:** add per-series observation coverage and the spec review prompt;
-   complete source-backed calculation and its ledger, then add
+2. **M3:** complete source-backed calculation and its ledger, implement
+   `calculate_index_from_bls(spec_id)`, then add
    `calculate_and_explain_index`. Until then the prompt is not advertised
    as a working end-to-end path.
-3. **Second tranche:** saved-spec resource and locality-review prompt;
-   no expansion to automatic OEWS localization or mixed-periodicity math.
+3. **Later, only if needed:** per-series coverage, archetype index, other
+   prompts; no expansion to automatic OEWS localization or mixed-periodicity
+   math.
 4. **M4' / M5':** include resource reads and prompt retrieval in the offline
    evidence pack and document real host selection in QUICKSTART; exercise
    the journey in two real clients when those clients are available.
@@ -165,3 +160,32 @@ retain owner manual sessions and post-MVP model-backed evals for that claim.
 Update `docs/TESTING.md` whenever those tests land, and run
 `uv run --locked poe check` for implementation changes. No tests or runtime
 components are added by this planning document.
+
+
+## 2026-10-16 trim: what was removed and why
+
+The goal is to commit only to components that will not be deleted later.
+
+- **Merged:** `bls://catalog/coverage` into `bls://snapshot` (same sources and
+  audience).
+- **Dropped:** `basket://archetypes` index (one entry; non-breaking to add
+  later), `index://specifications/{spec_id}` (duplicates `get_index_spec` and
+  adds an access surface), prompts `review_index_spec` (validation tool
+  suffices) and `review_labor_locality` (OEWS deferred; covered by the locality
+  methodology and `calculate_labor_locality_factor`).
+- **Folded:** `review_series_candidates` into `design_escalation_basket`.
+- **Deferred:** `bls://series/{series_id}/coverage` until M3 shows resolver
+  errors are insufficient; likely folded into existing series metadata.
+- **Single workflow source:** the guide resource is canonical; server
+  instructions point to it and prompts are thin parameterized wrappers. Hosts
+  may not expose prompts, so nothing may live only in a prompt.
+- **Examples as fixtures:** materials-only, labor-only, fixed-share, rejected
+  mixed-periodicity and negative cases are shared eval/test fixtures; the
+  archetype resource exposes the curated decomposition and a few examples.
+- **Decided (2026-10-16): the calculation tool takes `spec_id`.** Every
+  specification carries a required `id` (`EscalationIndexSpec.id`), and the
+  tool reads the saved spec, so ID-based prompts and the tool share one
+  contract. Consequences: calculation requires a prior explicit
+  `save_index_spec` (which replaces an existing ID; disclose this), an unknown
+  ID is an explicit error, and hosted per-user isolation of saved specs
+  remains a prerequisite for private use.
