@@ -214,6 +214,7 @@ def test_calculate_composite_raises_when_weights_outside_tolerance() -> None:
                 id="b",
                 name="B",
                 component_type=ComponentType.MATERIAL,
+                # 0.6 + 0.3998 = 0.9998, so the 0.0002 deviation exceeds 1e-4.
                 weight=0.3998,
                 series_id="TEST_PPI_002",
             ),
