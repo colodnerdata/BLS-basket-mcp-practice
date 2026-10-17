@@ -1,6 +1,6 @@
 import pytest
 
-from bls_escalation_mcp.exceptions import CalculationError
+from bls_escalation_mcp.exceptions import CalculationError, InvalidWeightsError
 from bls_escalation_mcp.models.basket import EscalationComponent
 from bls_escalation_mcp.models.enums import (
     ComponentType,
@@ -187,6 +187,43 @@ def test_weighted_component_contributions_sum_to_composite_factor() -> None:
     )
     result = service.calculate_composite(spec, component_values)
     assert result.temporal_composite_factor == pytest.approx(total)
+
+
+def test_calculate_composite_requires_at_least_one_component() -> None:
+    spec = _spec()
+    with pytest.raises(InvalidWeightsError):
+        service.calculate_composite(spec, [])
+
+
+def test_calculate_composite_raises_when_weights_outside_tolerance() -> None:
+    spec = _spec()
+    component_values = [
+        service.calculate_component(
+            EscalationComponent(
+                id="a",
+                name="A",
+                component_type=ComponentType.MATERIAL,
+                weight=0.6,
+                series_id="TEST_PPI_001",
+            ),
+            100,
+            120,
+        ),
+        service.calculate_component(
+            EscalationComponent(
+                id="b",
+                name="B",
+                component_type=ComponentType.MATERIAL,
+                weight=0.3998,
+                series_id="TEST_PPI_002",
+            ),
+            100,
+            110,
+        ),
+    ]
+
+    with pytest.raises(InvalidWeightsError):
+        service.calculate_composite(spec, component_values)
 
 
 def test_zero_base_value_raises() -> None:

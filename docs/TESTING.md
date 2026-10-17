@@ -112,6 +112,8 @@ database. This is the recorded-replay layer: no network is involved.
 | `test_fixed_unindexed_component_has_temporal_factor_one` | `temporal_factor ≈ 1.0` for a `FIXED_UNINDEXED` component even with base 100 → target 200 | Fixed/unindexed components being escalated despite the methodology fixing them at 1 |
 | `test_order_of_components_does_not_change_result` | Same composite factor with components reversed | Order-dependent (non-commutative) aggregation bug |
 | `test_weighted_component_contributions_sum_to_composite_factor` | Composite equals `sum(weight * temporal_factor)` computed independently inline | Composite formula silently diverging from the documented weighted-sum methodology |
+| `test_calculate_composite_requires_at_least_one_component` | `InvalidWeightsError` for an empty component list | Returning a composite from no inputs instead of failing fast with a clear contract error |
+| `test_calculate_composite_raises_when_weights_outside_tolerance` | `InvalidWeightsError` when the component weights differ from 1 by more than tolerance (`1e-4`) | Quietly accepting materially invalid weights and producing a misleading composite |
 | `test_zero_base_value_raises` | `CalculationError` | Division by zero returning `inf`/garbage instead of an explicit domain error |
 
 ### `tests/test_locality.py` — `LocalityService`
