@@ -189,7 +189,7 @@ def test_weighted_component_contributions_sum_to_composite_factor() -> None:
     assert result.temporal_composite_factor == pytest.approx(total)
 
 
-def test_calculate_composite_requires_at_least_one_component() -> None:
+def test_calculate_composite_raises_on_empty_components() -> None:
     spec = _spec()
     with pytest.raises(InvalidWeightsError):
         service.calculate_composite(spec, [])
