@@ -88,3 +88,30 @@ def test_material_component_locality_warning() -> None:
     assert any(
         f.code == "LOCALITY_ON_MATERIAL_OR_EQUIPMENT" for f in result.findings
     )
+
+
+def test_identical_base_and_target_periods_are_invalid() -> None:
+    spec = _spec()
+    spec.target_period = spec.base_period
+    result = service.validate_spec(spec)
+    assert any(
+        f.code == "IDENTICAL_BASE_AND_TARGET" for f in result.findings
+    )
+    assert result.valid is False
+
+
+def test_target_period_before_base_adds_warning() -> None:
+    spec = _spec()
+    spec.base_period = EconomicPeriod(
+        year=2025,
+        month=1,
+        periodicity=Periodicity.MONTHLY,
+    )
+    spec.target_period = EconomicPeriod(
+        year=2024,
+        month=12,
+        periodicity=Periodicity.MONTHLY,
+    )
+    result = service.validate_spec(spec)
+    assert any(f.code == "TARGET_PRECEDES_BASE" for f in result.findings)
+    assert result.valid is True

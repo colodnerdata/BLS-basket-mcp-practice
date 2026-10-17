@@ -131,6 +131,8 @@ database. This is the recorded-replay layer: no network is involved.
 | `test_missing_series_on_indexed_component` | `MISSING_SERIES_ID` finding | An indexed component calculating with no underlying data source |
 | `test_series_on_fixed_component` | `FIXED_COMPONENT_HAS_SERIES` finding | A fixed component ambiguously wired to a series |
 | `test_material_component_locality_warning` | `LOCALITY_ON_MATERIAL_OR_EQUIPMENT` finding | Labor-locality adjustment being applied to a non-labor cost type |
+| `test_identical_base_and_target_periods_are_invalid` | `IDENTICAL_BASE_AND_TARGET` finding and `valid is False` when base and target periods match | Silent acceptance of a degenerate no-time-elapsed calculation input |
+| `test_target_period_before_base_adds_warning` | `TARGET_PRECEDES_BASE` warning while leaving `valid is True` | Regressive handling of intentional backwards-looking calculations |
 
 ### `tests/test_periods.py` — `EconomicPeriod`
 
