@@ -25,7 +25,7 @@ async def test_wrong_oracle_and_wrong_script_are_reported() -> None:
         workflow,
         checks=[Check("numeric", "deliberately wrong", lambda outputs: False)],
     )
-    result = await run_scenario(bad_oracle, tmp_path)
+    result = (await run_all([bad_oracle]))[0]
     assert not result.passed
     assert [c.label for c in result.checks if not c.passed] == [
         "deliberately wrong"
@@ -36,5 +36,5 @@ async def test_wrong_oracle_and_wrong_script_are_reported() -> None:
         steps=[dataclasses.replace(workflow.steps[0], expect_error=True)],
         checks=[],
     )
-    result = await run_scenario(flipped, tmp_path)
+    result = (await run_all([flipped]))[0]
     assert not result.passed
