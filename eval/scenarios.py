@@ -191,10 +191,6 @@ def _spec(components: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _from(step: str) -> Callable[[Outputs], Any]:
-    return lambda outputs: outputs[step].output
-
-
 def _calc(component: dict[str, Any], base: float, target: float, **kw: Any):
     return {
         "component": component,

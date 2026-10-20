@@ -12,9 +12,7 @@ from eval.scenarios import Check, Scenario, all_scenarios
 
 
 @pytest.mark.asyncio
-async def test_pack_passes_with_zero_upstream_requests(
-    tmp_path: Path,
-) -> None:
+async def test_pack_passes_with_zero_upstream_requests() -> None:
     results = await run_all(all_scenarios())
     assert failures(results) == []
     # Every scenario carries the offline invariant.
