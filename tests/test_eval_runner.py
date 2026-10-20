@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import dataclasses
-from pathlib import Path
-
 import pytest
 
 from eval.runner import failures, render_summary, run_all, run_scenario
@@ -21,9 +19,7 @@ async def test_pack_passes_with_zero_upstream_requests() -> None:
 
 
 @pytest.mark.asyncio
-async def test_wrong_oracle_and_wrong_script_are_reported(
-    tmp_path: Path,
-) -> None:
+async def test_wrong_oracle_and_wrong_script_are_reported() -> None:
     workflow: Scenario = all_scenarios()[0]
     bad_oracle = dataclasses.replace(
         workflow,
