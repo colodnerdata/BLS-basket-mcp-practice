@@ -1,5 +1,25 @@
 # Decisions
 
+## 2026-10-20 — Deterministic eval pack as Python scenarios over `fastmcp.Client`
+
+- **Status:** accepted.
+- **Decision:** `eval/scenarios.py` holds scenarios as typed Python literals
+  (steps, predicate checks, hand-derived oracles); `eval/runner.py` runs them
+  through the in-memory `Client` with `raise_on_error=False` and scores from
+  `structured_content`. A refusing HTTP transport and a placeholder key
+  enforce offline operation. `tests/test_eval_runner.py` runs the pack in
+  `poe check`; `poe eval-evidence` additionally rewrites `eval/results/`.
+- **Why:** Python literals keep oracle arithmetic beside its derivation and
+  are linted; `structured_content` is the wire contract and avoids the
+  `.data` deserialization gap for Decimal fields noted on 2026-09-30.
+  The synthetic catalog keeps the pack at seconds; full sample ingest took
+  about 50 s.
+- **Rejected:** JSON scenario files (no place for derivations); a separate
+  `eval-evidence` step inside `check` (the pytest wrapper already covers it
+  without writing files); LLM-driven scoring (deferred, 2026-10-10).
+- **Revisit when:** M3 lands (add snapshot-resolved scenarios and the stale
+  snapshot probe) or the LLM harness is built (reuse scenarios as tasks).
+
 ## 2026-10-07 — GSA hackathon project shell
 
 - **Status:** accepted.

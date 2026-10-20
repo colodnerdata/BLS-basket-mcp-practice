@@ -51,7 +51,9 @@
   14.Minerals, 80.Construction, 80i.ConstructionInputs — land with the
   owner-invoked fetch run. OEWS (`oe`) localization (mapping and
   automated wage ratios) is the deferred piece. Then M3 (observation
-  resolution over the snapshot), M4' (eval evidence pack), M5' (Code
+  resolution over the snapshot), M4' (eval evidence pack: the offline
+  scripted pack is built in `eval/` (`poe eval-evidence`); remaining work is
+  snapshot-resolved and stale-snapshot scenarios once M3 exists), M5' (Code
   Engine spike).
 - Owner inputs needed, mostly via the weekly office hours (Tuesdays from
   2026-10-13) or mcp@gsa.gov: the submission deadline; whether an existing

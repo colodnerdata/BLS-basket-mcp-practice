@@ -193,6 +193,13 @@ asserts.
 | `test_resource_first_startup_and_cleanup_on_failure` | Reading an unseeded resource before any tool call doesn't error on missing SQL state; the database initializes exactly once; the HTTP transport closes even when the caller raises after startup | Lifespan/resource-ordering bugs and HTTP client leaks on error paths |
 | `test_fixed_component_validation_and_calculation` | A `FIXED_UNINDEXED`-only spec validates and calculates to `temporal_factor`/composite `1.0` and 0% change; attaching a series to a fixed component, or omitting one from a material component, each produce the specific expected finding code | Fixed-component handling diverging between the unit-level service and the full MCP path |
 
+### `tests/test_eval_runner.py` — the eval pack itself
+
+| Test | Expected | Guards against |
+| --- | --- | --- |
+| `test_pack_passes_with_zero_upstream_requests` | Every scenario in `eval/` passes, each carries the zero-HTTP invariant, and the summary renders | Server behavior drifting from the eval oracles; a scenario that stops asserting offline operation |
+| `test_wrong_oracle_and_wrong_script_are_reported` | A deliberately false check fails alone; a step scripted to fail that succeeds is flagged | A runner that can only pass (the evals reporting green regardless) |
+
 ### `tests/test_project_shell.py` — launcher and infrastructure
 
 - Transport precedence: default stdio, explicit loopback HTTP, platform `PORT`,
@@ -215,14 +222,46 @@ aggregate discovery, schemas, annotations, invocation and resource contents.
 
 ## Evals
 
-**Status: a deterministic eval-evidence pack is in scope for the hackathon
-MVP (M4' in [ROADMAP.md](ROADMAP.md)); the LLM-backed harness is deferred to
-after the hackathon.** The M4' pack runs scripted scenarios through the real
-MCP client against a fixture-built database (oracle workflows plus negative
-probes), commits a short results summary under `eval/`, and feeds the
-hackathon evaluation document's testing-methodology and performance-metrics
-sections. The first external eval remains the hackathon judging
-itself; owner manual-eval sessions precede it (the M6 gate).
+**Status: the deterministic eval-evidence pack (M4') is implemented in
+`eval/`; the LLM-backed harness is deferred to after the hackathon.** Run it
+with `uv run --locked poe eval-evidence` (offline, a few seconds). It drives
+scripted scenarios through the real in-memory `fastmcp.Client` against a
+synthetic catalog, writes the committed summary `eval/results/summary.md`
+(git SHA, command, per-axis pass counts) and a gitignored `raw.json`, and
+exits non-zero on any failed check. `tests/test_eval_runner.py` runs the same
+pack inside `poe check`. It feeds the hackathon evaluation document's
+testing-methodology and performance-metrics sections. The first external eval
+remains the hackathon judging itself; owner manual-eval sessions precede it
+(the M6 gate).
+
+What the pack does and does not show: it grades *scripted* tool sequences, so
+the `tool_choice` axis only verifies that each scripted tool exists in the
+live registry and is accepted or refused as scripted. It says nothing about an
+LLM's choices; that needs the deferred harness. It never touches BLS: the
+server's HTTP transport refuses and counts every request, and a configured
+key (a placeholder) must never appear in any output.
+
+Scenarios (`eval/scenarios.py`; every expected number is a hand-derived
+literal with its arithmetic in a comment):
+
+| Scenario | Expected | Guards against |
+| --- | --- | --- |
+| `workflow_composite_escalation` | Weights .5/.3/.2; steel 100→120, labor 200→230 with locality 50/40, fixed overhead; temporal composite 1.145 (+14.5%), localized 1.23125 (+23.125%); spec saves and reads back | The calculation diverging from the documented formula across the MCP boundary; locality leaking into the temporal factor; a fixed component being indexed |
+| `series_choice_ambiguity` | A query matching two series returns both, each with a match reason | The server silently picking or substituting a series |
+| `weights_sum_0_9_not_normalized` | `WEIGHTS_SUM_MISMATCH` error finding; the composite call is refused and returns no value | Silent weight normalization |
+| `negative_weight_flagged` | `NEGATIVE_WEIGHT` found although weights sum to 1 | A negative weight hiding behind a unit sum |
+| `fixed_component_with_series` | `FIXED_COMPONENT_HAS_SERIES` error | A fixed component quietly carrying an index series |
+| `locality_on_material_disclosed` | `LOCALITY_ON_MATERIAL_OR_EQUIPMENT` warning; spec still valid | Locality on a material applied or dropped without disclosure |
+| `mixed_periodicity_rejected` | Monthly period without a month is refused | Defaulting a missing month |
+| `missing_target_observation_not_filled` | Omitting `target_value` is an input error with no result | Interpolating or substituting a missing observation |
+| `zero_base_value_refused` | "cannot be zero" error, no result | inf/NaN factors |
+| `missing_key_guided_setup` | Status `missing`; observation fetch fails pointing to `setup://bls-api` | Unguided failure, or a silent anonymous fallback |
+| `request_bounds_rejected_before_http` | 51 series and 21 years each refused, naming the limit, with zero HTTP requests | Spending quota on an over-limit request |
+| `registry_contract` | Exposed tool set equals the eval vocabulary | Adding or removing a tool without updating the pack |
+
+Not yet covered (needs M3 snapshot resolution): presenting a stale snapshot as
+current, and base/target values resolved from the local snapshot instead of
+supplied by hand.
 
 The suite above verifies deterministic code — given fixed inputs, is the
 output correct. It says nothing about an LLM or agent's judgment when

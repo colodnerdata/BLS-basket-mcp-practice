@@ -41,6 +41,7 @@ typecheck = "mypy src"
 ingest = "python -m bls_escalation_mcp.data.ingest"
 build-catalog = { cmd = "python -m bls_escalation_mcp.data.ingest --dir docs/sample_data --notes \"Owner-saved pre-manifest snapshot; retrieval date unknown. Last-Modified from the 2026-10-10 header probe.\"", help = "Ingest the checked-in BLS sample files into the local catalog" }
 verify-ingest = "python -m bls_escalation_mcp.data.verify"
+eval-evidence = { cmd = "python -m eval.runner --write", help = "Run the offline scripted eval pack through the FastMCP client and refresh eval/results/summary.md" }
 check = ["lint", "format-check", "typecheck", "verify-ingest", "test"]
 export-requirements = "uv export --locked --no-dev --no-emit-project --no-hashes --output-file requirements.txt"
 
