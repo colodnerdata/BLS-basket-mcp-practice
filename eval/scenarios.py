@@ -191,7 +191,9 @@ def _spec(components: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _calc(component: dict[str, Any], base: float, target: float, **kw: Any):
+def _calc(
+    component: dict[str, Any], base: float, target: float, **kw: Any
+) -> dict[str, Any]:
     return {
         "component": component,
         "base_value": base,
