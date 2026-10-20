@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import dataclasses
+
 import pytest
 
-from eval.runner import failures, render_summary, run_all, run_scenario
+from eval.runner import failures, render_summary, run_all
 from eval.scenarios import Check, Scenario, all_scenarios
 
 
