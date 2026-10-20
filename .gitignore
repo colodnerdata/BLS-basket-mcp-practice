@@ -19,3 +19,6 @@ dist/
 *.sqlite*
 .DS_Store
 Thumbs.db
+
+# Raw eval output (eval/results/summary.md is the committed record)
+eval/results/raw.json
