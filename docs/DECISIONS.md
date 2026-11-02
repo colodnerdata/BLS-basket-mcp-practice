@@ -1,5 +1,47 @@
 # Decisions
 
+## 2026-11-02 — Actual-cost normalization: per-WBS deflation, G&A by wage rate or CPI-U, fee excluded
+
+- **Status:** accepted (design only; implementation is post-M3).
+- **Context:** The server's strongest use is historical normalization:
+  restating past dollars at a common price level. The owner wants monthly
+  WBS-level earned-value data normalized with BLS indexes. Scope (owner):
+  actual cost (AC/ACWP) only; G&A normalized; fee excluded.
+- **Decision:**
+  - Deflate each month's *incremental* AC: real_t = AC_t × I_base / I_t, then
+    re-cumulate. The index is a level series with a stated base period.
+  - Map each WBS element to a reusable mix template (an existing `IndexSpec`
+    basket of PPI/ECI series) and deflate it with that template's composite.
+    The project real total is the sum of WBS real values. The implied project
+    deflator, Σnominal/Σreal, is current-weighted (Paasche-type).
+  - G&A is its own cost class. The caller names its deflator, either a wage
+    rate (an ECI compensation series) or CPI-U (e.g. CUUR0000SA0), with a
+    reason. There is no default. G&A real dollars are reported on their own
+    line and included in the project real cost total.
+  - Fee is not cost. Fee rows are excluded from normalization and from cost
+    totals and are surfaced as a structured finding, never deflated silently.
+  - Periodicity follows existing rules. Monthly AC against quarterly ECI needs
+    an explicitly named rule (e.g. step: hold the quarter's value for its
+    three months); no silent interpolation.
+- **Why:** A cumulative AC mixes price levels, so one index cannot deflate it.
+  Spending mix shifts over a project (sitework early, MEP/finishes late), so
+  a fixed-weight composite on the total is biased when the mix moves.
+  Per-WBS deflation is consistent component deflation. Reusing basket
+  templates avoids a bespoke index per element.
+- **Rejected:** deflating cumulative AC; a single composite on the project
+  total as the primary method (kept only as a labelled fallback when no WBS
+  split exists); normalizing PV/EV (out of scope); including fee in cost; a
+  silent default G&A deflator.
+- **Data scope:** The wage-rate option uses ECI, which is already ingested.
+  The CPI-U option needs a `cu` loader and one owner-invoked download under
+  `docs/bls_etiquette.md`. This extends the 2026-10-10 MVP data-scope entry
+  and does not replace it.
+- **Caveats to disclose:** procurement lag (price locked vs. cost booked);
+  preliminary PPI revisions (pin the snapshot); negative increments (credits
+  are deflated linearly and flagged); locality stays separate.
+- **Revisit when:** M3 lands (observation resolution over the snapshot), or
+  real EVM exports show a different cost-class structure.
+
 ## 2026-10-20 — Deterministic eval pack as Python scenarios over `fastmcp.Client`
 
 - **Status:** accepted.
