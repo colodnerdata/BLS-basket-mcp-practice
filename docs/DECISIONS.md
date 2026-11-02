@@ -30,7 +30,7 @@
   Per-WBS deflation is consistent component deflation. Reusing basket
   templates avoids a bespoke index per element.
 - **Rejected:** deflating cumulative AC; a single composite on the project
-  total as the primary method (kept only as a labelled fallback when no WBS
+  total as the primary method (kept only as a labeled fallback when no WBS
   split exists); normalizing PV/EV (out of scope); including fee in cost; a
   silent default G&A deflator.
 - **Data scope:** The wage-rate option uses ECI, which is already ingested.
