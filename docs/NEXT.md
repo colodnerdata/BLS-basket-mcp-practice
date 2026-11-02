@@ -63,6 +63,10 @@
   verification, and whether/when to make the repo public (required for
   build-from-Git — do the no-secrets-in-history sweep first; license is in
   place via PR #10).
+- Post-M3 candidate: normalizing actual cost (AC) from monthly WBS earned-value data
+  (per-WBS deflation; G&A by wage rate or CPI-U; fee excluded). Design is in
+  `DECISIONS.md` 2026-11-02, planned pieces in `ROADMAP.md` "After the MVP".
+  Does not change the next action above.
 - The key-based live path (client-configured `BLS_API_KEY`, `Depends`
   provider, live-API readiness) is deferred and optional; see "After the
   MVP" in `ROADMAP.md`.

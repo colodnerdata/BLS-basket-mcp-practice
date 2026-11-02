@@ -482,6 +482,17 @@ Not scheduled. Most live-API items are described in [bls_api.md](bls_api.md).
   [bulk_files.md](bulk_files.md). If the checked-in slice set ever outgrows
   comfortable size, revisit release assets or LFS per the 2026-10-10
   DECISIONS entry.
+- Actual-cost (AC) normalization of monthly WBS-level earned-value data
+  (designed in DECISIONS 2026-11-02; needs M3). Planned pieces:
+  - `models/evm.py`: WBS id, period, AC increment, cost class (direct / G&A),
+    WBS→spec mapping, G&A deflator series and reason.
+  - Pure `services/deflation.py`, reusing `EscalationCalculationService`
+    composites as deflators.
+  - One tool, `mcp/tools/normalize_actual_cost.py`, with typed row input.
+  - Optional `cu` (CPI-U) ingestion for G&A.
+  - Tests: client-contract tests plus hand-computed invariants: with a flat
+    index, real = nominal; Σ WBS real + G&A real = project real total; a
+    one-month case; G&A under each deflator option; fee rows excluded.
 - OEWS locality mapping and automated wage ratios.
 - Mixed-periodicity policies and other observation policies, each with
   explicit disclosure.
