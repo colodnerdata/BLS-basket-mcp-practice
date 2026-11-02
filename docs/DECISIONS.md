@@ -10,10 +10,11 @@
 - **Decision:**
   - Deflate each month's *incremental* AC: real_t = AC_t × I_base / I_t, then
     re-cumulate. The index is a level series with a stated base period.
-  - Map each WBS element to a reusable mix template (an existing `IndexSpec`
-    basket of PPI/ECI series) and deflate it with that template's composite.
-    The project real total is the sum of WBS real values. The implied project
-    deflator, Σnominal/Σreal, is current-weighted (Paasche-type).
+  - Map each WBS element to a reusable mix template (an existing
+    `EscalationIndexSpec` basket of PPI/ECI series) and deflate it with that
+    template's composite. The direct real subtotal is the sum of WBS real
+    values; the project real total is that subtotal plus G&A real (below).
+    The implied deflator, Σnominal/Σreal, is current-weighted (Paasche-type).
   - G&A is its own cost class. The caller names its deflator, either a wage
     rate (an ECI compensation series) or CPI-U (e.g. CUUR0000SA0), with a
     reason. There is no default. G&A real dollars are reported on their own
