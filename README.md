@@ -69,6 +69,9 @@ are implemented. Basket-relevant downloads and the source-backed calculation
 workflow remain unfinished. Existing live-API tools are still registered;
 live-API hardening is deferred.
 
+See [docs/component_list.md](docs/component_list.md) for a one-page summary of
+the MVP tools, resources, prompts, and context.
+
 ### Tools
 
 | Tool / capability | Purpose | Current status |
