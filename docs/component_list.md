@@ -104,7 +104,7 @@ MVP uses it, and related shared context, as follows.
 
 | Context item | Description | Status |
 | --- | --- | --- |
-| `ctx: Context` in handlers | Injected into every handler and hidden from client schemas. Handlers call `get_services(ctx)` (`mcp/adapters.py`), which reads `ctx.lifespan_context["services"]`. | Implemented |
+| `ctx: Context` in handlers | Injected into every handler and hidden from client schemas. Handlers call `get_services(ctx)` (`src/bls_escalation_mcp/mcp/adapters.py`), which reads `ctx.lifespan_context["services"]`. | Implemented |
 | Lifespan-owned `Services` | Built once per server run in `lifespan.py`: access, catalog, observations, specifications, calculations, locality, validation. Never module singletons; SQLite connections stay scoped to repository operations. | Implemented |
 | Snapshot-identity and observation-resolution services | Added to the lifespan for `bls://snapshot` and `calculate_index_from_bls`. | Planned (M3) |
 | Server `instructions` | Entry-point guidance in `server.py`. Currently covers only the live-API flow; must point to `guide://escalation-workflow` and the no-key snapshot flow. | Implemented; update planned |
@@ -124,8 +124,8 @@ section 6; the design decision is `DECISIONS.md` 2026-11-02.
 
 | Component | Description | Status |
 | --- | --- | --- |
-| Tool `normalize_actual_cost` | Typed AC rows, WBS→template mappings, reference period, G&A deflator, alignment rule, and method in; `ActualCostNormalizationResult` (per-row real values, per-WBS and project totals, fee exclusion, findings, ledger) out. Read-only, closed-world, sync. File `mcp/tools/normalize_actual_cost.py`. | Post-MVP (required) |
-| Resource `methodology://actual-cost-normalization` | `text/plain` static methodology: increments-then-accumulate, `R` versus `b`, per-WBS templates, G&A options with no default, fee exclusion, alignment rules, caveats. File `mcp/resources/methodology_actual_cost_resource.py`. | Post-MVP (required) |
+| Tool `normalize_actual_cost` | Typed AC rows, WBS→template mappings, reference period, G&A deflator, alignment rule, and method in; `ActualCostNormalizationResult` (per-row real values, per-WBS and project totals, fee exclusion, findings, ledger) out. Read-only, closed-world, sync. File `src/bls_escalation_mcp/mcp/tools/normalize_actual_cost.py`. | Post-MVP (required) |
+| Resource `methodology://actual-cost-normalization` | `text/plain` static methodology: increments-then-accumulate, `R` versus `b`, per-WBS templates, G&A options with no default, fee exclusion, alignment rules, caveats. File `src/bls_escalation_mcp/mcp/resources/methodology_actual_cost_resource.py`. | Post-MVP (required) |
 | Prompt `normalize_actual_cost_workflow` | Required `project_description`; optional `reference_period`, `wbs_summary`. Asks the host to read the methodology, collect WBS→template mappings and the G&A deflator, then call the tool. | Post-MVP (optional, after the tool) |
 
 ## Post-MVP: custom-index result view (FastMCP App)
@@ -178,6 +178,6 @@ Open compatibility items, to settle before either feature is built:
   surface (spec section 7).
 - **Component layout.** The template rule is one component per file with a
   package aggregator. A `FastMCPApp` groups an entry point with backend
-  tools, so its package and aggregator (for example `mcp/apps/` with
+  tools, so its package and aggregator (for example `src/bls_escalation_mcp/mcp/apps/` with
   `register_apps`) need a `DECISIONS.md` entry and a template-mapping
   update before implementation.
