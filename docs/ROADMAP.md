@@ -483,7 +483,9 @@ Not scheduled. Most live-API items are described in [bls_api.md](bls_api.md).
   comfortable size, revisit release assets or LFS per the 2026-10-10
   DECISIONS entry.
 - Actual-cost (AC) normalization of monthly WBS-level earned-value data
-  (designed in DECISIONS 2026-11-02; needs M3). Planned pieces:
+  (designed in DECISIONS 2026-11-02; needs M3; requirement list with
+  FastMCP components in [actual_cost_normalization_spec.md](actual_cost_normalization_spec.md)).
+  Planned pieces:
   - `models/evm.py`: WBS id, period, AC increment, cost class (direct / G&A),
     WBS→spec mapping, G&A deflator series and reason.
   - Pure `services/deflation.py`, reusing `EscalationCalculationService`
