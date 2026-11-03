@@ -70,7 +70,11 @@ workflow remain unfinished. Existing live-API tools are still registered;
 live-API hardening is deferred.
 
 See [docs/component_list.md](docs/component_list.md) for a one-page summary of
-the MVP tools, resources, prompts, and context.
+the MVP tools, resources, prompts, and context. It also lists the post-MVP
+components specified for actual-cost normalization
+([spec](docs/actual_cost_normalization_spec.md)) and the custom-index result
+view, a FastMCP App ([spec](custom_ppi_escalation_app_spec.md)). None of
+these are registered.
 
 ### Tools
 

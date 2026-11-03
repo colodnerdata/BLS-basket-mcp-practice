@@ -1,5 +1,30 @@
 # Decisions
 
+## 2026-11-03 — FastMCP 3.4.10 accepted; MCP Apps not adopted yet
+
+- **Status:** accepted. Supersedes the `fastmcp>=3.2.0,<3.3` bound and the
+  3.2.4 pin from 2026-09-30. The rest of that entry still applies.
+- **Context:** Dependabot PR #18 (merged 2026-10-30) moved `uv.lock` to
+  FastMCP 3.4.10 and the bound to `>=3.2.0,<3.5`, without a decision entry.
+  The post-MVP result-view spec (`custom_ppi_escalation_app_spec.md`)
+  targets a FastMCP App with Prefab.
+- **Decision:** Keep 3.4.10 and the `<3.5` bound. Do not add the
+  `fastmcp[apps]` extra (which requires `prefab-ui>=0.18.0`) until the
+  result view is implemented. Its component layout, host-capability
+  fallback, and offline rendering are open items in
+  [component_list.md](component_list.md).
+- **Verification (2026-11-03, on 3.4.10):** ruff, format check, mypy over
+  73 files, and 142 tests pass. `verify-ingest` passes against a database
+  freshly built from `docs/sample_data/`. The existing local
+  `bls_catalog.db` (2026-10-10) fails `verify-ingest` because its
+  `ingestion_log` predates the `bls_etag` column. Recreate it with
+  `poe build-catalog`. This is not a FastMCP regression.
+- **Not re-verified:** the 2026-09-30 note that the FastMCP client cannot
+  reconstruct Pydantic `Decimal` regex schemas. The decimal-string
+  convention stays until AC-MOD-10 checks it on the pin. Both post-MVP
+  specs already return decimal strings.
+- **Revisit when:** FastMCP 3.5 is released, or the result view is built.
+
 ## 2026-11-02 — Actual-cost normalization: per-WBS deflation, G&A by wage rate or CPI-U, fee excluded
 
 - **Status:** accepted (design only; implementation is post-M3).

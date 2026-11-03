@@ -93,7 +93,7 @@ the flat-file downloads this plan depends on.
 | Area | State |
 | --- | --- |
 | Baseline | `uv run --locked poe check` passes: ruff, format check, mypy (54 files), 48 tests. |
-| Server | FastMCP 3.2.4; 11 tools, 3 static resources, 1 resource template; services owned by the lifespan; unexpected errors masked, `ToolError` passes through. |
+| Server | FastMCP 3.2.4 at the probe (3.4.10 since 2026-10-30); 11 tools, 3 static resources, 1 resource template; services owned by the lifespan; unexpected errors masked, `ToolError` passes through. |
 | BLS key | `Settings` reads `BLS_API_KEY` once in `create_server()`; the lifespan hands it to `BLSAccessService` and `BLSClient`. A missing key raises an error that points to `setup://bls-api` but has no client-specific steps. Irrelevant to the snapshot MVP; matters only for the deferred live path. |
 | Calculation | Deterministic and tested, but the tools take floats and nothing links observations to a result. The service never fills `ComponentCalculation.base_period`/`target_period`, and `CalculationLedger`, `SourceProvenance`, `SeriesObservations` and the spec's `observation_policy` are not consumed by any service or tool. |
 | catalog | The PPI/ECI/OEWS loaders are deliberate stubs that return nothing, and the only fixture is two synthetic series, so `search_series` is empty on a fresh database. M2' fills this from real flat files. |
@@ -495,6 +495,12 @@ Not scheduled. Most live-API items are described in [bls_api.md](bls_api.md).
   - Tests: client-contract tests plus hand-computed invariants: with a flat
     index, real = nominal; Σ WBS real + G&A real = project real total; a
     one-month case; G&A under each deflator option; fee rows excluded.
+- Custom-index result view as a FastMCP App with Prefab
+  ([custom_ppi_escalation_app_spec.md](../custom_ppi_escalation_app_spec.md);
+  proposed components and open items in [component_list.md](component_list.md)).
+  Needs M3, base-year annual-average (`M13`) resolution, snapshot identity,
+  and a spec revision identifier. Adds the `fastmcp[apps]` extra and a
+  pinned `prefab-ui`.
 - OEWS locality mapping and automated wage ratios.
 - Mixed-periodicity policies and other observation policies, each with
   explicit disclosure.

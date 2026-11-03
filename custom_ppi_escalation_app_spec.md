@@ -1,4 +1,10 @@
+# Custom PPI escalation index: result-view app specification
+
 **Functional, Interaction, and Data Contract Specification**
+
+> Project status (2026-11-03): post-MVP, not implemented, and blocked on M3.
+> Proposed FastMCP components, dependencies, and open compatibility items
+> are in [docs/component_list.md](docs/component_list.md).
 
 | **Document item**          | **Value**                                          |
 |----------------------------|----------------------------------------------------|
