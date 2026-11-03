@@ -1,7 +1,7 @@
 # Eval evidence (deterministic, offline)
 
 - Command: `uv run --locked poe eval-evidence`
-- Git SHA: `e8b0675` (+uncommitted changes)
+- Git SHA: `cec81ec`
 - Date (UTC): 2026-11-03
 - FastMCP: 3.4.10
 - Transport: in-memory `fastmcp.Client`; every upstream HTTP request is refused and counted; no BLS key; synthetic catalog.
