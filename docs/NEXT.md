@@ -65,7 +65,8 @@
   place via PR #10).
 - Post-M3 candidate: normalizing actual cost (AC) from monthly WBS earned-value data
   (per-WBS deflation; G&A by wage rate or CPI-U; fee excluded). Design is in
-  `DECISIONS.md` 2026-11-02, planned pieces in `ROADMAP.md` "After the MVP".
+  `DECISIONS.md` 2026-11-02, planned pieces in `ROADMAP.md` "After the MVP",
+  requirement list and FastMCP components in `actual_cost_normalization_spec.md`.
   Does not change the next action above.
 - The key-based live path (client-configured `BLS_API_KEY`, `Depends`
   provider, live-API readiness) is deferred and optional; see "After the
