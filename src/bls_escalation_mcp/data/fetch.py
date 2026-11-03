@@ -41,7 +41,6 @@ from bls_escalation_mcp.data.manifest import (
     DEFAULT_MANIFEST_PATH,
     load_manifest,
 )
-from bls_escalation_mcp.db.connection import get_database_path
 from bls_escalation_mcp.db.schema import initialize_schema
 
 DEFAULT_DOWNLOAD_DIR = Path("data/download")
@@ -195,17 +194,21 @@ def fetch_many(
     """Fetch then ingest each file; shared by the CLI and tests.
 
     Returns ``(outcomes, skipped_unchanged)``. A blocked fetch raises and
-    halts before later files are attempted.
+    halts before later files are attempted. The database is
+    ``database_path`` when given, otherwise ``settings.database_path``; the
+    same ``settings`` supply the User-Agent, so a caller's settings never
+    mix with the process-wide defaults.
     """
     manifest = load_manifest(manifest_path)
     by_url = {entry.source_url: entry for entry in manifest.files}
-    ua = (settings or get_settings()).bls_user_agent
-    fetcher = FlatFileFetcher(ua or "", sleep=sleep, transport=transport)
+    resolved = settings or get_settings()
+    fetcher = FlatFileFetcher(
+        resolved.bls_user_agent or "", sleep=sleep, transport=transport
+    )
     if ingest:
-        initialize_schema(get_database_path(database_path))
-        service = IngestionService(
-            get_database_path(database_path), manifest_path
-        )
+        db_path = database_path or resolved.database_path
+        initialize_schema(db_path)
+        service = IngestionService(db_path, manifest_path)
     results: list[FetchOutcome] = []
     unchanged: list[str] = []
     try:

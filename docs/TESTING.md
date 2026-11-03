@@ -87,6 +87,7 @@ Expected values are hand-checked against the fixture slices in
 | --- | --- | --- |
 | `test_flat_file_fetcher_download_and_conditional_304` | A new file download saves the exact bytes and records the User-Agent; a follow-up conditional GET with the manifest's `ETag`/`Last-Modified` returns 304 instead of re-downloading | The fetcher silently re-fetching unchanged files or dropping the required contact-bearing `User-Agent` |
 | `test_fetch_many_uses_settings_and_manifest_validators` | `fetch_many` reads the configured `bls_user_agent` and the manifest validators for `If-None-Match`/`If-Modified-Since`, and surfaces an unchanged result without ingesting the file again | The CLI using an unset/invalid user agent, or losing conditional-GET state between the manifest and the network fetch |
+| `test_fetch_many_ingests_into_settings_database_path` | With `settings.database_path` set and no explicit `database_path`, `fetch_many` records the ingestion in that database, and no `bls_catalog.db` appears in the working directory | Ingestion falling back to the process-default `./bls_catalog.db`, which leaked test data into the repo root and made a second `poe check` fail `verify-ingest` |
 
 ### `tests/integration/test_flatfile_ingest.py` — replay of the real samples (offline)
 

@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import httpx
+import pytest
 
 from bls_escalation_mcp.config import Settings
 from bls_escalation_mcp.data.fetch import FlatFileFetcher, fetch_many
@@ -11,6 +12,9 @@ from bls_escalation_mcp.data.manifest import (
     IngestionManifest,
     ManifestFile,
     save_manifest,
+)
+from bls_escalation_mcp.repositories.ingestion_log import (
+    IngestionLogRepository,
 )
 
 
@@ -172,3 +176,45 @@ def test_fetch_many_persists_emittted_validators_into_manifest(
     saved = manifest_path.read_text("utf-8")
     assert '"bls_etag": "etag-2"' in saved
     assert '"bls_last_modified": "Wed, 02 Jan 2025 00:00:00 GMT"' in saved
+
+
+def test_fetch_many_ingests_into_settings_database_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Regression: fetch_many read the User-Agent from ``settings`` but
+    # resolved the database from process defaults, so ingestion leaked into
+    # ./bls_catalog.db and broke later ``poe verify-ingest`` runs.
+    workdir = tmp_path / "cwd"
+    workdir.mkdir()
+    monkeypatch.chdir(workdir)
+    monkeypatch.delenv("BLS_DATABASE_PATH", raising=False)
+    manifest_path = tmp_path / "manifest.json"
+    save_manifest(manifest_path, IngestionManifest())
+    body = (
+        b"series_id\tyear\tperiod\tvalue\tfootnote_codes\n"
+        b"PCU123456123456\t2025\tM01\t100.0\t\n"
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200, content=body, headers={"content-length": str(len(body))}
+        )
+
+    db_path = tmp_path / "catalog.db"
+    fetch_many(
+        ["pc.data.0.Current"],
+        tmp_path,
+        settings=Settings(
+            bls_user_agent="Example Ops <ops@example.com>",
+            database_path=str(db_path),
+        ),
+        sleep=lambda _: None,
+        transport=httpx.MockTransport(handler),
+        manifest_path=manifest_path,
+    )
+
+    assert not (workdir / "bls_catalog.db").exists()
+    logged = IngestionLogRepository(str(db_path)).list()
+    assert [entry.source_url for entry in logged] == [
+        "https://download.bls.gov/pub/time.series/pc/pc.data.0.Current"
+    ]
