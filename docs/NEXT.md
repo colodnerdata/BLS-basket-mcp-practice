@@ -14,7 +14,8 @@
   `data/manifest.json` (git) and the `ingestion_log` table (database), so
   any device can rebuild the database. Detailed format findings, cadence,
   and the fetcher/loader design live in `bulk_files.md`.
-- Working state: FastMCP 3.2.4, typed MCP contracts, lifespan-owned
+- Working state: FastMCP 3.4.10 (upgraded from 3.2.4; see `DECISIONS.md`
+  2026-11-03), typed MCP contracts, lifespan-owned
   services, client integration tests, and automated type checking are
   implemented; `poe check` passes (including `verify-ingest`). The
   template-aligned shell landed on main (one component per file,
@@ -68,6 +69,16 @@
   `DECISIONS.md` 2026-11-02, planned pieces in `ROADMAP.md` "After the MVP",
   requirement list and FastMCP components in [actual_cost_normalization_spec.md](actual_cost_normalization_spec.md).
   Does not change the next action above.
+- Post-M3 candidate: an interactive custom-index result view (FastMCP App
+  with Prefab): allocation ribbon, weighted stacked area, component detail,
+  year-to-base waterfall, table, and CSV export. The spec is
+  [custom_ppi_escalation_app_spec.md](../custom_ppi_escalation_app_spec.md).
+  Proposed components and open compatibility items (spec revision,
+  annual-average base, Prefab offline rendering, `mcp/apps/` layout) are in
+  [component_list.md](component_list.md). It shares the composite-level
+  function with AC normalization (AC-SVC-3).
+- Local housekeeping: a `bls_catalog.db` built before the `bls_etag` column
+  fails `poe check` at `verify-ingest`. Recreate it with `poe build-catalog`.
 - The key-based live path (client-configured `BLS_API_KEY`, `Depends`
   provider, live-API readiness) is deferred and optional; see "After the
   MVP" in `ROADMAP.md`.

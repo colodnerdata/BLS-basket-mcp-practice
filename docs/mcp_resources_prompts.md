@@ -97,8 +97,8 @@ invent a draft-store service just to pass prompt arguments.
 
 ## FastMCP implementation shape
 
-Use the pinned FastMCP 3.2.4 environment, existing service/lifespan
-ownership, and one exposed component per file:
+Use the FastMCP version pinned in `uv.lock` (3.4.10 since 2026-10-30),
+existing service/lifespan ownership, and one exposed component per file:
 
 - Add resource modules under `mcp/resources/`, each exposing
   `register(mcp: FastMCP) -> None`, and update `register_resources`.
@@ -110,7 +110,7 @@ ownership, and one exposed component per file:
   Keep shared reference content outside handlers; no new LLM dependency.
 - Start with prompt handlers returning `str` (a user message). Add a
   bounded multi-message example format only after exercising it with the
-  pinned client; do not assume APIs from newer docs exist in 3.2.4.
+  pinned client; do not assume APIs from newer docs exist in the pin.
 - Prompt retrieval may read local services to resolve a saved ID, but does
   not validate economically or execute the workflow. Unknown IDs fail
   explicitly. Returned text identifies user descriptions and catalog text
@@ -124,7 +124,7 @@ Official implementation references:
 [FastMCP prompts](https://gofastmcp.com/servers/prompts), and
 [client testing](https://gofastmcp.com/servers/testing).
 These explain the component model, not evidence that every current example
-works with the project's pin. Verify exact APIs in 3.2.4 before coding;
+works with the project's pin. Verify exact APIs in the pinned version before coding;
 upgrade only through the existing reviewed dependency process.
 
 ## Delivery order and completion criteria

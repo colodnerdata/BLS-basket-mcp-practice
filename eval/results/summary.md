@@ -1,9 +1,9 @@
 # Eval evidence (deterministic, offline)
 
 - Command: `uv run --locked poe eval-evidence`
-- Git SHA: `680f41b` (+uncommitted changes)
-- Date (UTC): 2026-10-20
-- FastMCP: 3.2.4
+- Git SHA: `e8b0675` (+uncommitted changes)
+- Date (UTC): 2026-11-03
+- FastMCP: 3.4.10
 - Transport: in-memory `fastmcp.Client`; every upstream HTTP request is refused and counted; no BLS key; synthetic catalog.
 
 Cells are passed/total checks per axis. This pack scores scripted tool sequences; it says nothing about LLM tool choice (see eval/README.md).

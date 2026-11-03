@@ -1,9 +1,13 @@
 # MVP FastMCP component list
 
-Status reviewed **2026-10-21**. A one-page summary of the FastMCP components
-the MVP needs: tools, resources, prompts, and context. It summarizes, and does
-not replace, [mcp_resources_prompts.md](mcp_resources_prompts.md),
-[ROADMAP.md](ROADMAP.md), and the status tables in the [README](../README.md);
+Status reviewed **2026-11-03** against FastMCP 3.4.10 (the version in
+`uv.lock`). A one-page summary of the FastMCP components the MVP needs
+(tools, resources, prompts, and context), followed by the components two
+post-MVP specifications add. It summarizes, and does not replace,
+[mcp_resources_prompts.md](mcp_resources_prompts.md),
+[ROADMAP.md](ROADMAP.md), the status tables in the [README](../README.md),
+[actual_cost_normalization_spec.md](actual_cost_normalization_spec.md), and
+[custom_ppi_escalation_app_spec.md](../custom_ppi_escalation_app_spec.md);
 those stay authoritative if they disagree.
 
 **MVP scope:** a local BLS flat-file snapshot, no user API key, deterministic
@@ -15,6 +19,9 @@ escalation index in which every number traces to a snapshot observation.
 - **Implemented**: registered, with offline MCP-client contract tests.
 - **Planned**: MVP work remains. Where a stub file exists it is not registered.
 - **Optional**: registered or designed, but not needed for the snapshot MVP.
+- **Post-MVP**: specified, blocked on M3, and not part of the MVP scope.
+  **Proposed** marks a name or shape derived here from a specification
+  that does not fix it.
 
 Currently registered: 11 tools, 3 static resources, 1 resource template, and
 0 prompts.
@@ -105,4 +112,72 @@ MVP uses it, and related shared context, as follows.
 | Archetype and example content | Reviewed, versioned local content shared by the archetype resource, the prompt, and eval fixtures. | Planned |
 
 Not used in the MVP: sampling, elicitation, subscriptions, progress reporting,
-and MCP-level authentication.
+MCP Apps (UI), and MCP-level authentication.
+
+## Post-MVP: actual-cost normalization
+
+Deflates monthly WBS-level actual cost (ACWP) to one reference-period price
+level. "Normalization" here means deflation, never weight normalization.
+Requirements are in
+[actual_cost_normalization_spec.md](actual_cost_normalization_spec.md)
+section 6; the design decision is `DECISIONS.md` 2026-11-02.
+
+| Component | Description | Status |
+| --- | --- | --- |
+| Tool `normalize_actual_cost` | Typed AC rows, WBS→template mappings, reference period, G&A deflator, alignment rule, and method in; `ActualCostNormalizationResult` (per-row real values, per-WBS and project totals, fee exclusion, findings, ledger) out. Read-only, closed-world, sync. File `mcp/tools/normalize_actual_cost.py`. | Post-MVP (required) |
+| Resource `methodology://actual-cost-normalization` | `text/plain` static methodology: increments-then-accumulate, `R` versus `b`, per-WBS templates, G&A options with no default, fee exclusion, alignment rules, caveats. File `mcp/resources/methodology_actual_cost_resource.py`. | Post-MVP (required) |
+| Prompt `normalize_actual_cost_workflow` | Required `project_description`; optional `reference_period`, `wbs_summary`. Asks the host to read the methodology, collect WBS→template mappings and the G&A deflator, then call the tool. | Post-MVP (optional, after the tool) |
+
+## Post-MVP: custom-index result view (FastMCP App)
+
+An interactive result view for a saved basket: allocation ribbon and legend,
+weighted stacked-area chart with the composite line, selected-component
+detail, a year-to-base adjustment waterfall, a data table, and CSV export.
+Requirements are in
+[custom_ppi_escalation_app_spec.md](../custom_ppi_escalation_app_spec.md).
+The spec fixes the payload boundaries, not component names, so every name
+below is **proposed**.
+
+| Component | Description | Status |
+| --- | --- | --- |
+| Tool `get_index_visualization_data` | `spec_id` and optional `source_year` in; the canonical `IndexVisualizationData` payload (spec section 8) out, with decimal strings. Model-visible and read-only. It is the authoritative contract, the fallback for hosts without MCP Apps support, and what client-contract tests exercise. | Post-MVP, proposed |
+| App entry point (`FastMCPApp` `@app.ui()`, or `@mcp.tool(app=True)`) | Renders the Prefab view from the same payload. Legend selection, detail mode, table filters, and CSV export stay client-side; the browser reshapes but never recalculates (spec NFR-004). | Post-MVP, proposed |
+| Backend app tool for the waterfall year | Needed only if choosing a source year (FR-051) fetches a new `base_year_adjustment` from the server. Not needed if the payload carries every eligible year, which allows the simpler `app=True` tool. Decide before implementation. | Post-MVP, open |
+
+No new resource or prompt is specified for the view. FastMCP serves the
+Prefab UI resource itself.
+
+## Post-MVP shared context and dependencies
+
+| Item | Description | Status |
+| --- | --- | --- |
+| Shared composite-level function | One pure function for a template's level at `t` relative to its base. `EscalationCalculationService`, `DeflationService`, and the result view all call it; existing `calculate_composite` results must not change (AC-SVC-3). | Post-MVP |
+| `DeflationService` | Lifespan-owned and added to `Services` as `deflation`. It reads templates through `SpecificationService` and observations through M3's snapshot service. | Post-MVP |
+| Result-view service | Builds `IndexVisualizationData` and checks its 14 invariants (spec section 9) before anything renders. It needs base-year **annual-average** resolution (BLS `M13`), which M3's exact-period resolution does not yet define. | Post-MVP, proposed |
+| `BLS_MAX_AC_ROWS` | Typed `Settings` field bounding the AC request size; documented in `.env.example`. | Post-MVP |
+| `fastmcp[apps]` extra and `prefab-ui` | Not installed. The FastMCP 3.4.10 `apps` extra requires `prefab-ui>=0.18.0`. Pin it explicitly, because Prefab changes often. Update `pyproject.toml`, `uv.lock`, and `requirements.txt` together. | Post-MVP, not installed |
+| Host capability check | The view needs a host that supports the MCP Apps extension. Handlers can check `ctx.client_supports_extension(...)` and fall back to the data tool. | Post-MVP |
+
+Open compatibility items, to settle before either feature is built:
+
+- **Decimal wire format.** Both specs return decimals as JSON strings.
+  That matches the 2026-09-30 convention: decimal strings with a plain
+  string output schema. That convention worked around a FastMCP **3.2.4**
+  client limit. Re-verify it on the pinned version (AC-MOD-10).
+- **Spec revision.** `IndexIdentity.spec_revision: int` has no counterpart.
+  Saved specs carry `updated_at`, and saving overwrites the same ID. Either
+  add a revision counter or use `updated_at` as the revision.
+- **Snapshot identity and methodology version.** Both come from the shared
+  snapshot-identity service planned for `bls://snapshot` (M3).
+- **Offline rendering (NFR-001).** The FastMCP Apps docs do not say whether
+  Prefab bundles its renderer or loads it from a CDN. Their custom-HTML
+  examples load from unpkg. Verify this before committing to Prefab.
+- **Charts.** The FastMCP Prefab docs list `AreaChart`, `LineChart`, and
+  `BarChart`, but not a composed stacked-area-plus-line chart or a native
+  waterfall. The spec allows a dummy composite series or one embedded chart
+  surface (spec section 7).
+- **Component layout.** The template rule is one component per file with a
+  package aggregator. A `FastMCPApp` groups an entry point with backend
+  tools, so its package and aggregator (for example `mcp/apps/` with
+  `register_apps`) need a `DECISIONS.md` entry and a template-mapping
+  update before implementation.
