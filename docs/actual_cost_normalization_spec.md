@@ -86,7 +86,7 @@ rather than reimplement it (AC-SVC-3).
 - **AC-MOD-9** All new models are strict (`extra="forbid"`) and fully typed:
   no `dict[str, Any]`, generic `object`, or JSON-in-a-string fields.
 - **AC-MOD-10** Monetary and index values are `Decimal`. Their JSON wire form
-  must be verified with the pinned FastMCP 3.2.4 client before the contract
+  must be verified with the FastMCP version pinned in `uv.lock` before the contract
   is frozen (see AC-TST-7); record the result in `DECISIONS.md`.
 
 ## 3. Calculation rules (`services/deflation.py`, pure)
