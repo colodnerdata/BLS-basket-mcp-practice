@@ -1,4 +1,4 @@
-# MVP FastMCP component list
+# FastMCP component list (MVP and specified post-MVP)
 
 Status reviewed **2026-11-03** against FastMCP 3.4.10 (the version in
 `uv.lock`). A one-page summary of the FastMCP components the MVP needs
