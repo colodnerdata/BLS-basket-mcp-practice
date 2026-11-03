@@ -1,10 +1,10 @@
 # Actual-cost normalization — specification list
 
-Status: **draft spec, not implemented** (2026-11-03). Implements the design
+Status: **draft spec, not implemented** (2026-11-03). Specifies the design
 accepted in `DECISIONS.md` 2026-11-02 and the planned pieces in
 `ROADMAP.md` "After the MVP". Blocked on M3 (observation resolution over the
-snapshot and snapshot identity). Nothing here is registered yet; the server
-keeps its current 11 tools.
+snapshot and snapshot identity). None of the components below are
+registered yet.
 
 Requirement IDs use `AC-<area>-<n>`. "Shall" is a requirement; "should" is
 a recommendation; open questions are listed at the end and are not decided
