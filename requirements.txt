@@ -18,7 +18,7 @@ attrs==26.1.0
     #   jsonschema
     #   jsonschema-path
     #   referencing
-authlib==1.9.1
+authlib==1.9.5
     # via fastmcp
 beartype==0.22.9
     # via py-key-value-aio
